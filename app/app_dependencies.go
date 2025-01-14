@@ -5,7 +5,7 @@ import (
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	nexuscore "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned"
 	"github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
-	nexusscheme "github.com/Sne
+	nexusscheme "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
 	corev1 "k8s.io/api/core/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
