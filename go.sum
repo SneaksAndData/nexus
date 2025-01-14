@@ -2,6 +2,10 @@ github.com/SneaksAndData/nexus-core v0.2.1 h1:1r18qVl/kddXSKdrWefFKi/y0jdAa/ZeKh
 github.com/SneaksAndData/nexus-core v0.2.1/go.mod h1:S2W7r6/PmugzpF86eiUjVMwM/DveR2gOhxO1wwhImTQ=
 github.com/SneaksAndData/nexus-core v0.2.2-0.20250110143805-f8756055ce19 h1:KQnlWO5iXhPdRloFugGWbys8U1GExGauVlO32axo9V0=
 github.com/SneaksAndData/nexus-core v0.2.2-0.20250110143805-f8756055ce19/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
+github.com/SneaksAndData/nexus-core v0.2.2-0.20250113214524-d5ed63448cf2 h1:SHkE7AUJ8oR3iCZlhsWM0ESfMpN/FTimlg1kP7Fkt5Q=
+github.com/SneaksAndData/nexus-core v0.2.2-0.20250113214524-d5ed63448cf2/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
+github.com/SneaksAndData/nexus-core v0.2.2-0.20250114090357-5649e364a129 h1:SoEhIahsp2zngTwVhaUANVKg2yXC/89tiCF5FnCtpuE=
+github.com/SneaksAndData/nexus-core v0.2.2-0.20250114090357-5649e364a129/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
 github.com/bytedance/sonic v1.12.7 h1:CQU8pxOy9HToxhndH0Kx/S1qU/CuS9GnKYrGioDcU1Q=
 github.com/bytedance/sonic v1.12.7/go.mod h1:tnbal4mxOMju17EGfknm2XyYcpyCnIROYOEYuemj13I=
 github.com/bytedance/sonic/loader v0.1.1/go.mod h1:ncP89zfokxS5LZrJxl5z0UJcsk4M4yY2JpfqGeCtNLU=

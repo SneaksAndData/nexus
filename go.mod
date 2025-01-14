@@ -3,7 +3,7 @@ module github.com/SneaksAndData/nexus
 go 1.23.1
 
 require (
-	github.com/SneaksAndData/nexus-core v0.2.2-0.20250110143805-f8756055ce19 // indirect
+	github.com/SneaksAndData/nexus-core v0.2.2-0.20250114090357-5649e364a129 // indirect
 	github.com/bytedance/sonic v1.12.7 // indirect
 	github.com/bytedance/sonic/loader v0.2.2 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect

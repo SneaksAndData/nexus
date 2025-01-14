@@ -1,20 +1,23 @@
 package main
 
 import (
+	"context"
+	"github.com/SneaksAndData/nexus-core/pkg/signals"
 	v1 "github.com/SneaksAndData/nexus/api/v1"
 	"github.com/SneaksAndData/nexus/app"
 	"github.com/gin-gonic/gin"
 )
 
-func setupRouter() *gin.Engine {
+func setupRouter(ctx context.Context) *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	router := gin.Default()
+	appServices := (&app.ApplicationServices{}).WithBuffer(ctx)
 
 	// version 1.2
 	apiV12 := router.Group("algorithm/v1.2")
 
-	apiV12.POST("run/:algorithmName", v1.CreateRun(app.AddBuffer()))
+	apiV12.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer()))
 
 	// TODO: Boxer auth middleware
 
@@ -73,7 +76,8 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
-	r := setupRouter()
+	ctx := signals.SetupSignalHandler()
+	r := setupRouter(ctx)
 	// Listen and Server in 0.0.0.0:8080
-	r.Run(":8080")
+	_ = r.Run(":8080")
 }
