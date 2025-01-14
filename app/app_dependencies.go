@@ -6,6 +6,7 @@ import (
 	nexuscore "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned"
 	"github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
 	nexusscheme "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
+	"github.com/SneaksAndData/nexus/services"
 	corev1 "k8s.io/api/core/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -20,18 +21,19 @@ type ApplicationServices struct {
 	kubeClient       *kubernetes.Clientset
 	nexusClient      *nexuscore.Clientset
 	recorder         record.EventRecorder
+	configCache      *services.MachineLearningAlgorithmCache
 }
 
-func (services *ApplicationServices) WithBuffer(ctx context.Context) *ApplicationServices {
-	if services.checkpointBuffer == nil {
-		services.checkpointBuffer = request.NewDefaultBuffer(ctx, nil)
+func (appServices *ApplicationServices) WithBuffer(ctx context.Context) *ApplicationServices {
+	if appServices.checkpointBuffer == nil {
+		appServices.checkpointBuffer = request.NewDefaultBuffer(ctx, nil)
 	}
 
-	return services
+	return appServices
 }
 
-func (services *ApplicationServices) WithKubeClients(ctx context.Context) *ApplicationServices {
-	if services.kubeClient == nil || services.nexusClient == nil {
+func (appServices *ApplicationServices) WithKubeClients(ctx context.Context) *ApplicationServices {
+	if appServices.kubeClient == nil || appServices.nexusClient == nil {
 		logger := klog.FromContext(ctx)
 		kubeCfg, err := clientcmd.BuildConfigFromFlags("", "")
 		if err != nil {
@@ -39,24 +41,24 @@ func (services *ApplicationServices) WithKubeClients(ctx context.Context) *Appli
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 
-		services.kubeClient, err = kubernetes.NewForConfig(kubeCfg)
+		appServices.kubeClient, err = kubernetes.NewForConfig(kubeCfg)
 		if err != nil {
 			logger.Error(err, "Error building in-cluster kubernetes clientset for the scheduler")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 
-		services.nexusClient, err = nexuscore.NewForConfig(kubeCfg)
+		appServices.nexusClient, err = nexuscore.NewForConfig(kubeCfg)
 		if err != nil {
 			logger.Error(err, "Error building in-cluster Nexus clientset for the scheduler")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 	}
 
-	return services
+	return appServices
 }
 
-func (services *ApplicationServices) WithRecorder(ctx context.Context, resourceNamespace string) *ApplicationServices {
-	if services.recorder == nil {
+func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resourceNamespace string) *ApplicationServices {
+	if appServices.recorder == nil {
 		logger := klog.FromContext(ctx)
 		// Create event broadcaster
 		// Add nexus-configuration-controller types to the default Kubernetes Scheme so Events can be
@@ -66,22 +68,46 @@ func (services *ApplicationServices) WithRecorder(ctx context.Context, resourceN
 
 		eventBroadcaster := record.NewBroadcaster(record.WithContext(ctx))
 		eventBroadcaster.StartStructuredLogging(0)
-		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: services.kubeClient.CoreV1().Events(resourceNamespace)})
+		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: appServices.kubeClient.CoreV1().Events(resourceNamespace)})
 
-		services.recorder = eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "nexus"})
+		appServices.recorder = eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "nexus"})
 	}
 
-	return services
+	return appServices
 }
 
-func (services *ApplicationServices) CheckpointBuffer() *request.DefaultBuffer {
-	return services.checkpointBuffer
+func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceNamespace string) *ApplicationServices {
+	if appServices.configCache == nil {
+		logger := klog.FromContext(ctx)
+		appServices.configCache = services.NewMachineLearningAlgorithmCache(appServices.nexusClient, resourceNamespace, logger)
+	}
+
+	return appServices
 }
 
-func (services *ApplicationServices) KubeClient() *kubernetes.Clientset {
-	return services.kubeClient
+func (appServices *ApplicationServices) CheckpointBuffer() *request.DefaultBuffer {
+	return appServices.checkpointBuffer
 }
 
-func (services *ApplicationServices) NexusClient() *nexuscore.Clientset {
-	return services.nexusClient
+func (appServices *ApplicationServices) KubeClient() *kubernetes.Clientset {
+	return appServices.kubeClient
+}
+
+func (appServices *ApplicationServices) NexusClient() *nexuscore.Clientset {
+	return appServices.nexusClient
+}
+
+func (appServices *ApplicationServices) Cache() *services.MachineLearningAlgorithmCache {
+	return appServices.configCache
+}
+
+func (appServices *ApplicationServices) Start(ctx context.Context) {
+	logger := klog.FromContext(ctx)
+	err := appServices.configCache.Init(ctx)
+	if err != nil {
+		logger.Error(err, "Error building in-cluster kubeconfig for the scheduler")
+		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+	}
+
+	//appServices.checkpointBuffer.Start()
 }

@@ -17,7 +17,7 @@ func setupRouter(ctx context.Context) *gin.Engine {
 	// version 1.2
 	apiV12 := router.Group("algorithm/v1.2")
 
-	apiV12.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer()))
+	apiV12.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache()))
 
 	// TODO: Boxer auth middleware
 
