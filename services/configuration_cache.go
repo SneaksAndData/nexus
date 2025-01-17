@@ -6,8 +6,6 @@ import (
 	v1 "github.com/SneaksAndData/nexus-core/pkg/apis/science/v1"
 	nexuscore "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned"
 	nexusinf "github.com/SneaksAndData/nexus-core/pkg/generated/informers/externalversions"
-	nexusinformers "github.com/SneaksAndData/nexus-core/pkg/generated/informers/externalversions/science/v1"
-	nexuslisters "github.com/SneaksAndData/nexus-core/pkg/generated/listers/science/v1"
 	"k8s.io/apimachinery/pkg/util/diff"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"
@@ -16,12 +14,9 @@ import (
 )
 
 type MachineLearningAlgorithmCache struct {
-	logger    klog.Logger
-	factory   nexusinf.SharedInformerFactory
-	watcher   nexusinformers.MachineLearningAlgorithmInformer
-	lister    nexuslisters.MachineLearningAlgorithmLister
-	hasSynced cache.InformerSynced
-	store     cache.Store
+	logger        klog.Logger
+	factory       nexusinf.SharedInformerFactory
+	cacheInformer cache.SharedIndexInformer
 }
 
 // NewMachineLearningAlgorithmCache creates a new cache + resource watcher for MLA resources
@@ -30,19 +25,16 @@ func NewMachineLearningAlgorithmCache(client *nexuscore.Clientset, resourceNames
 	watcher := factory.Science().V1().MachineLearningAlgorithms()
 
 	return &MachineLearningAlgorithmCache{
-		logger:    logger,
-		factory:   factory,
-		watcher:   watcher,
-		lister:    watcher.Lister(),
-		hasSynced: watcher.Informer().HasSynced,
-		store:     watcher.Informer().GetStore(),
+		logger:        logger,
+		factory:       factory,
+		cacheInformer: watcher.Informer(),
 	}
 }
 
 // Init starts informers and sync the cache
 func (c *MachineLearningAlgorithmCache) Init(ctx context.Context) error {
 	// Set up an event handler for when Machine Learning Algorithm resources change
-	_, err := c.watcher.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, err := c.cacheInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    c.onConfigurationAdded,
 		UpdateFunc: c.onConfigurationUpdated,
 		DeleteFunc: c.onConfigurationDeleted,
@@ -54,7 +46,7 @@ func (c *MachineLearningAlgorithmCache) Init(ctx context.Context) error {
 
 	c.factory.Start(ctx.Done())
 
-	if ok := cache.WaitForCacheSync(ctx.Done(), c.hasSynced); !ok {
+	if ok := cache.WaitForCacheSync(ctx.Done(), c.cacheInformer.HasSynced); !ok {
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 	c.logger.Info("Resource informers synced")
@@ -94,7 +86,7 @@ func (c *MachineLearningAlgorithmCache) onConfigurationDeleted(obj interface{}) 
 
 // GetConfiguration retrieves a cached MLA resource from informer cache
 func (c *MachineLearningAlgorithmCache) GetConfiguration(algorithmName string) (*v1.MachineLearningAlgorithm, error) {
-	config, exists, err := c.store.GetByKey(algorithmName)
+	config, exists, err := c.cacheInformer.GetStore().GetByKey(algorithmName)
 	if err != nil {
 		return nil, err
 	}
