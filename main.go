@@ -12,7 +12,11 @@ func setupRouter(ctx context.Context) *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	router := gin.Default()
-	appServices := (&app.ApplicationServices{}).WithBuffer(ctx)
+	appServices := (&app.ApplicationServices{}).
+		WithBuffer(ctx).
+		WithCache(ctx, "nexus").
+		WithRecorder(ctx, "nexus").
+		WithKubeClients(ctx)
 
 	// version 1.2
 	apiV12 := router.Group("algorithm/v1.2")

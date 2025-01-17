@@ -21,11 +21,13 @@ func CreateRun(buffer *request.DefaultBuffer, configCache *services.MachineLearn
 			return
 		}
 
-		if config, err := configCache.GetConfiguration(algorithmName); err != nil || config == nil {
+		config, cacheErr := configCache.GetConfiguration(algorithmName)
+
+		if cacheErr != nil || config == nil {
 			ctx.String(http.StatusBadRequest, `No valid configuration found for: %s. Please check that algorithm name is spelled correctly and try again. Contact an algorithm author if this problem persists.`, algorithmName)
 		}
 
-		if err := buffer.Add(requestId.String(), algorithmName, &payload, nil); err != nil {
+		if err := buffer.Add(requestId.String(), algorithmName, &payload, &config.Spec); err != nil {
 			ctx.String(http.StatusBadRequest, `Request buffering failed for: %s, error: %s`, requestId.String(), err.Error())
 			return
 		}

@@ -2,18 +2,22 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	nexuscore "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned"
 	"github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
 	nexusscheme "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
+	"github.com/SneaksAndData/nexus-core/pkg/pipeline"
 	"github.com/SneaksAndData/nexus/services"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
+	"time"
 )
 
 type ApplicationServices struct {
@@ -101,6 +105,14 @@ func (appServices *ApplicationServices) Cache() *services.MachineLearningAlgorit
 	return appServices.configCache
 }
 
+func testBuffer(output *request.BufferOutput) (types.UID, error) {
+	if output == nil {
+		return types.UID(""), fmt.Errorf("buffer is nil")
+	}
+
+	return types.UID("pass"), nil
+}
+
 func (appServices *ApplicationServices) Start(ctx context.Context) {
 	logger := klog.FromContext(ctx)
 	err := appServices.configCache.Init(ctx)
@@ -109,5 +121,13 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 
-	//appServices.checkpointBuffer.Start()
+	appServices.checkpointBuffer.Start(pipeline.NewDefaultPipelineStageActor[*request.BufferOutput, types.UID](
+		time.Second*1,
+		time.Second*5,
+		10,
+		100,
+		10,
+		testBuffer,
+		nil,
+	))
 }
