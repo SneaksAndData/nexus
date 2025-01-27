@@ -36,10 +36,10 @@ func (appServices *ApplicationServices) WithBuffer(ctx context.Context, config *
 	return appServices
 }
 
-func (appServices *ApplicationServices) WithKubeClients(ctx context.Context) *ApplicationServices {
+func (appServices *ApplicationServices) WithKubeClients(ctx context.Context, kubeConfigPath string) *ApplicationServices {
 	if appServices.kubeClient == nil || appServices.nexusClient == nil {
 		logger := klog.FromContext(ctx)
-		kubeCfg, err := clientcmd.BuildConfigFromFlags("", "")
+		kubeCfg, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 		if err != nil {
 			logger.Error(err, "Error building in-cluster kubeconfig for the scheduler")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)

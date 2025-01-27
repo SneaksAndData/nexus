@@ -18,6 +18,7 @@ type SchedulerConfig struct {
 	Buffer            request.BufferConfig
 	CqlStore          request.AstraBundleConfig
 	ResourceNamespace string
+	KubeConfigPath    string
 }
 
 func LoadConfig(ctx context.Context) SchedulerConfig {
