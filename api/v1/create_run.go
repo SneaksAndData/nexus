@@ -25,6 +25,7 @@ func CreateRun(buffer *request.DefaultBuffer, configCache *services.MachineLearn
 
 		if cacheErr != nil || config == nil {
 			ctx.String(http.StatusBadRequest, `No valid configuration found for: %s. Please check that algorithm name is spelled correctly and try again. Contact an algorithm author if this problem persists.`, algorithmName)
+			return
 		}
 
 		if err := buffer.Add(requestId.String(), algorithmName, &payload, &config.Spec); err != nil {

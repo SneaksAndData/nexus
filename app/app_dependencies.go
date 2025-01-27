@@ -28,9 +28,9 @@ type ApplicationServices struct {
 	configCache      *services.MachineLearningAlgorithmCache
 }
 
-func (appServices *ApplicationServices) WithBuffer(ctx context.Context) *ApplicationServices {
+func (appServices *ApplicationServices) WithBuffer(ctx context.Context, config *request.BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
 	if appServices.checkpointBuffer == nil {
-		appServices.checkpointBuffer = request.NewDefaultBuffer(ctx, nil)
+		appServices.checkpointBuffer = request.NewDefaultBuffer(ctx, config, bundleConfig)
 	}
 
 	return appServices

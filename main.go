@@ -8,14 +8,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	MaxBodySize = 512 * 1024 * 1024
+)
+
 func setupRouter(ctx context.Context) *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	router := gin.Default()
+	router.MaxMultipartMemory = MaxBodySize
+	router.Use(gin.Logger())
+	appConfig := app.LoadConfig(ctx)
+
 	appServices := (&app.ApplicationServices{}).
-		WithBuffer(ctx).
-		WithCache(ctx, "nexus").
-		WithRecorder(ctx, "nexus").
+		WithBuffer(ctx, &appConfig.Buffer, &appConfig.CqlStore).
+		WithCache(ctx, appConfig.ResourceNamespace).
+		WithRecorder(ctx, appConfig.ResourceNamespace).
 		WithKubeClients(ctx)
 
 	// version 1.2
@@ -82,6 +90,6 @@ func setupRouter(ctx context.Context) *gin.Engine {
 func main() {
 	ctx := signals.SetupSignalHandler()
 	r := setupRouter(ctx)
-	// Listen and Server in 0.0.0.0:8080
+	// Configure webhost
 	_ = r.Run(":8080")
 }
