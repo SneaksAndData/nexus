@@ -15,14 +15,15 @@ const (
 )
 
 type SchedulerConfig struct {
-	Buffer            request.BufferConfig
-	CqlStore          request.AstraBundleConfig
-	ResourceNamespace string
-	KubeConfigPath    string
+	Buffer            request.BufferConfig      `mapstructure:"buffer"`
+	CqlStore          request.AstraBundleConfig `mapstructure:"cql-store"`
+	ResourceNamespace string                    `mapstructure:"resource-namespace"`
+	KubeConfigPath    string                    `mapstructure:"kube-config-path"`
 }
 
 func LoadConfig(ctx context.Context) SchedulerConfig {
 	logger := klog.FromContext(ctx)
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.SetConfigFile(fmt.Sprintf("appconfig.%s.yaml", strings.ToLower(os.Getenv("APPLICATION_ENVIRONMENT"))))
 	viper.SetEnvPrefix(EnvPrefix)
 	viper.AutomaticEnv()

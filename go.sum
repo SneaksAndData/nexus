@@ -18,6 +18,8 @@ github.com/SneaksAndData/nexus-core v0.2.2-0.20250127104900-dcca66763b1c h1:oeOu
 github.com/SneaksAndData/nexus-core v0.2.2-0.20250127104900-dcca66763b1c/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
 github.com/SneaksAndData/nexus-core v0.2.2-0.20250127105259-00e5fb90c06e h1:nBM9NVeXso7fmBUBXK28TKpIdso/OiG8O4BbKrM/m7A=
 github.com/SneaksAndData/nexus-core v0.2.2-0.20250127105259-00e5fb90c06e/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
+github.com/SneaksAndData/nexus-core v0.2.2-0.20250129083717-3141d20d00bb h1:+IPSCQ3WmST92OIwxet4azUIJP9Xub3j/jU1po1efws=
+github.com/SneaksAndData/nexus-core v0.2.2-0.20250129083717-3141d20d00bb/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
 github.com/aws/aws-sdk-go-v2 v1.32.6 h1:7BokKRgRPuGmKkFMhEg/jSul+tB9VvXhcViILtfG8b4=
 github.com/aws/aws-sdk-go-v2 v1.32.6/go.mod h1:P5WJBrYqqbWVaOxgH0X/FYYD47/nooaPOZPlQdmiN2U=
 github.com/aws/aws-sdk-go-v2 v1.34.0 h1:9iyL+cjifckRGEVpRKZP3eIxVlL06Qk1Tk13vreaVQU=
