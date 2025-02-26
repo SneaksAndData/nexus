@@ -37,6 +37,8 @@ func setupRouter(ctx context.Context) *gin.Engine {
 		WithCache(ctx, appConfig.ResourceNamespace).
 		WithRecorder(ctx, appConfig.ResourceNamespace)
 
+	appServices.Start(ctx)
+
 	// version 1.2
 	apiV12 := router.Group("algorithm/v1.2")
 

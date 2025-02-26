@@ -17,6 +17,7 @@ type MachineLearningAlgorithmCache struct {
 	logger        klog.Logger
 	factory       nexusinf.SharedInformerFactory
 	cacheInformer cache.SharedIndexInformer
+	prefix        string
 }
 
 // NewMachineLearningAlgorithmCache creates a new cache + resource watcher for MLA resources
@@ -28,6 +29,7 @@ func NewMachineLearningAlgorithmCache(client *nexuscore.Clientset, resourceNames
 		logger:        logger,
 		factory:       factory,
 		cacheInformer: watcher.Informer(),
+		prefix:        resourceNamespace,
 	}
 }
 
@@ -84,9 +86,13 @@ func (c *MachineLearningAlgorithmCache) onConfigurationDeleted(obj interface{}) 
 	c.logger.V(3).Info("Configuration deleted", "algorithm", obj.(v1.MachineLearningAlgorithm).Name)
 }
 
+func (c *MachineLearningAlgorithmCache) cacheKey(algorithmName string) string {
+	return fmt.Sprintf("%s/%s", c.prefix, algorithmName)
+}
+
 // GetConfiguration retrieves a cached MLA resource from informer cache
 func (c *MachineLearningAlgorithmCache) GetConfiguration(algorithmName string) (*v1.MachineLearningAlgorithm, error) {
-	config, exists, err := c.cacheInformer.GetStore().GetByKey(algorithmName)
+	config, exists, err := c.cacheInformer.GetStore().GetByKey(c.cacheKey(algorithmName))
 	if err != nil {
 		return nil, err
 	}
