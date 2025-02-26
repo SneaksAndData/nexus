@@ -2,15 +2,26 @@ package main
 
 import (
 	"context"
+	"flag"
 	"github.com/SneaksAndData/nexus-core/pkg/signals"
+	"github.com/SneaksAndData/nexus-core/pkg/telemetry"
 	v1 "github.com/SneaksAndData/nexus/api/v1"
 	"github.com/SneaksAndData/nexus/app"
 	"github.com/gin-gonic/gin"
+	"k8s.io/klog/v2"
 )
 
 const (
 	MaxBodySize = 512 * 1024 * 1024
 )
+
+var (
+	logLevel string
+)
+
+func init() {
+	flag.StringVar(&logLevel, "log-level", "INFO", "Log level for the application.")
+}
 
 func setupRouter(ctx context.Context) *gin.Engine {
 	// Disable Console Color
@@ -89,6 +100,16 @@ func setupRouter(ctx context.Context) *gin.Engine {
 
 func main() {
 	ctx := signals.SetupSignalHandler()
+	appLogger, err := telemetry.ConfigureLogger(ctx, map[string]string{}, logLevel)
+	ctx = telemetry.WithStatsd(ctx, "nexus")
+	logger := klog.FromContext(ctx)
+
+	if err != nil {
+		logger.Error(err, "One of the logging handlers cannot be configured")
+	}
+
+	klog.SetSlogLogger(appLogger)
+
 	r := setupRouter(ctx)
 	// Configure webhost
 	_ = r.Run(":8080")

@@ -6,9 +6,9 @@ buffer:
   rate-limit-elements-per-second: 10
   rate-limit-elements-burst: 100
   workers: 10
-resource-namespace: crystal
+resource-namespace: ne  xus
 cql-store: # can be read from environment
   secure-connection-bundle-base64: base64value
   gateway-user: user
   gateway-password: password
-kube-config-path: "/tmp/nexus-test"
+kube-config-path: "/tmp/test_cube"
