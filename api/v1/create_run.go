@@ -23,7 +23,12 @@ func CreateRun(buffer *request.DefaultBuffer, configCache *services.MachineLearn
 
 		config, cacheErr := configCache.GetConfiguration(algorithmName)
 
-		if cacheErr != nil || config == nil {
+		if cacheErr != nil {
+			ctx.String(http.StatusInternalServerError, `Internal error occurred when processing your request.`, algorithmName)
+			return
+		}
+
+		if config == nil {
 			ctx.String(http.StatusBadRequest, `No valid configuration found for: %s. Please check that algorithm name is spelled correctly and try again. Contact an algorithm author if this problem persists.`, algorithmName)
 			return
 		}
@@ -36,7 +41,5 @@ func CreateRun(buffer *request.DefaultBuffer, configCache *services.MachineLearn
 		ctx.JSON(http.StatusAccepted, map[string]string{
 			"requestId": requestId.String(),
 		})
-
-		return
 	}
 }

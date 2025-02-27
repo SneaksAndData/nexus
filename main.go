@@ -37,8 +37,6 @@ func setupRouter(ctx context.Context) *gin.Engine {
 		WithCache(ctx, appConfig.ResourceNamespace).
 		WithRecorder(ctx, appConfig.ResourceNamespace)
 
-	appServices.Start(ctx)
-
 	// version 1.2
 	apiV12 := router.Group("algorithm/v1.2")
 
@@ -96,6 +94,20 @@ func setupRouter(ctx context.Context) *gin.Engine {
 	//		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	//	}
 	//})
+
+	go func() {
+		appServices.Start(ctx)
+		// handle exit
+		logger := klog.FromContext(ctx)
+		reason := ctx.Err()
+		if reason.Error() == context.Canceled.Error() {
+			logger.V(0).Info("Received SIGTERM, shutting down gracefully")
+			klog.FlushAndExit(klog.ExitFlushTimeout, 0)
+		}
+
+		logger.V(0).Error(reason, "Fatal error occurred.")
+		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+	}()
 
 	return router
 }
