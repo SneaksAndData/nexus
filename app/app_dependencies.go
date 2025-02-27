@@ -30,7 +30,7 @@ type ApplicationServices struct {
 
 func (appServices *ApplicationServices) WithBuffer(ctx context.Context, config *request.BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
 	if appServices.checkpointBuffer == nil {
-		appServices.checkpointBuffer = request.NewDefaultBuffer(ctx, config, bundleConfig)
+		appServices.checkpointBuffer = request.NewDefaultBuffer(ctx, config, bundleConfig, map[string]string{})
 	}
 
 	return appServices
@@ -120,8 +120,9 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		logger.Error(err, "Error building in-cluster kubeconfig for the scheduler")
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
-
-	appServices.checkpointBuffer.Start(pipeline.NewDefaultPipelineStageActor[*request.BufferOutput, types.UID](
+	submissionActor := pipeline.NewDefaultPipelineStageActor[*request.BufferOutput, types.UID](
+		"checkpoint_buffer",
+		map[string]string{},
 		time.Second*1,
 		time.Second*5,
 		10,
@@ -129,5 +130,8 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		10,
 		testBuffer,
 		nil,
-	))
+	)
+
+	submissionActor.Start(ctx)
+	appServices.checkpointBuffer.Start(submissionActor)
 }

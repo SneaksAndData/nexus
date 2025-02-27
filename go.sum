@@ -17,6 +17,14 @@ github.com/SneaksAndData/nexus-core v0.2.2-0.20250227125006-4ae4c4d06d71 h1:haj9
 github.com/SneaksAndData/nexus-core v0.2.2-0.20250227125006-4ae4c4d06d71/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
 github.com/SneaksAndData/nexus-core v0.3.0 h1:RC+/WyMaO/e/HZ6NyG9w/7heVGYJAQy0xh2GpjZcWP4=
 github.com/SneaksAndData/nexus-core v0.3.0/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
+github.com/SneaksAndData/nexus-core v0.3.1-0.20250227163700-97b2575e24e6 h1:AQLOgI5OfveYE962imfljMK3WTZ5qmpw9gjFJMMXFqU=
+github.com/SneaksAndData/nexus-core v0.3.1-0.20250227163700-97b2575e24e6/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
+github.com/SneaksAndData/nexus-core v0.3.1-0.20250227165021-09416ca37257 h1:Wyo5/DK4gL/95c8TvxFkXidwwY9B7ky+p4NvVaXnN0M=
+github.com/SneaksAndData/nexus-core v0.3.1-0.20250227165021-09416ca37257/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
+github.com/SneaksAndData/nexus-core v0.3.1-0.20250227170645-aca8999f389d h1:htRgiKdZMHeoDp1LaXhosnKul3wx5KUZMfNvirGP0Tg=
+github.com/SneaksAndData/nexus-core v0.3.1-0.20250227170645-aca8999f389d/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
+github.com/SneaksAndData/nexus-core v0.3.1-0.20250227172117-8ae52b136fb8 h1:KtO72ajCtentHSl1Zq7/N5Z2CANRRmP7Qdmqhy1gRIY=
+github.com/SneaksAndData/nexus-core v0.3.1-0.20250227172117-8ae52b136fb8/go.mod h1:trYFp9lm4ntCSriHYNnOYqEjx0Q6HSCPC9E6c+dXE1k=
 github.com/aws/aws-sdk-go-v2 v1.34.0 h1:9iyL+cjifckRGEVpRKZP3eIxVlL06Qk1Tk13vreaVQU=
 github.com/aws/aws-sdk-go-v2 v1.34.0/go.mod h1:JgstGg0JjWU1KpVJjD5H0y0yyAIpSdKEq556EI6yOOM=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.8 h1:zAxi9p3wsZMIaVCdoiQp2uZ9k1LsZvmAnoTBeZPXom0=
