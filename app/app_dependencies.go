@@ -132,6 +132,6 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		nil,
 	)
 
-	submissionActor.Start(ctx)
+	go submissionActor.Start(ctx)
 	appServices.checkpointBuffer.Start(submissionActor)
 }
