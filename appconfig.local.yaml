@@ -12,3 +12,7 @@ cql-store: # can be read from environment
   gateway-user: user
   gateway-password: password
 kube-config-path: "/tmp/test_cube"
+shard-kube-config-path: "/tmp/shards"
+jobs:
+  job-node-class: "kubernetes.sneaksanddata.io/service-node-group"
+  job-node-class-value: "algorithm-spot-arm"

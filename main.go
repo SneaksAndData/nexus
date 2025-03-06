@@ -35,7 +35,9 @@ func setupRouter(ctx context.Context) *gin.Engine {
 		WithKubeClients(ctx, appConfig.KubeConfigPath).
 		WithBuffer(ctx, &appConfig.Buffer, &appConfig.CqlStore).
 		WithCache(ctx, appConfig.ResourceNamespace).
-		WithRecorder(ctx, appConfig.ResourceNamespace)
+		WithRecorder(ctx, appConfig.ResourceNamespace).
+		WithShards(ctx, appConfig.ShardKubeConfigPath, appConfig.ResourceNamespace).
+		WithDefaultNamespace(appConfig.ResourceNamespace)
 
 	// version 1.2
 	apiV12 := router.Group("algorithm/v1.2")

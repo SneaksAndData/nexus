@@ -8,8 +8,11 @@ import (
 	"github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
 	nexusscheme "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
 	"github.com/SneaksAndData/nexus-core/pkg/pipeline"
+	"github.com/SneaksAndData/nexus-core/pkg/shards"
 	"github.com/SneaksAndData/nexus/services"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -22,7 +25,9 @@ import (
 
 type ApplicationServices struct {
 	checkpointBuffer *request.DefaultBuffer
+	defaultNamespace string
 	kubeClient       *kubernetes.Clientset
+	shardClients     []*shards.ShardClient
 	nexusClient      *nexuscore.Clientset
 	recorder         record.EventRecorder
 	configCache      *services.MachineLearningAlgorithmCache
@@ -58,6 +63,25 @@ func (appServices *ApplicationServices) WithKubeClients(ctx context.Context, kub
 		}
 	}
 
+	return appServices
+}
+
+func (appServices *ApplicationServices) WithShards(ctx context.Context, shardConfigPath string, namespace string) *ApplicationServices {
+	if appServices.shardClients == nil {
+		logger := klog.FromContext(ctx)
+		var shardLoaderError error
+		appServices.shardClients, shardLoaderError = shards.LoadClients(shardConfigPath, namespace, logger)
+		if shardLoaderError != nil {
+			logger.Error(shardLoaderError, "Unable to initialize shard clients")
+			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+		}
+	}
+
+	return appServices
+}
+
+func (appServices *ApplicationServices) WithDefaultNamespace(namespace string) *ApplicationServices {
+	appServices.defaultNamespace = namespace
 	return appServices
 }
 
@@ -105,12 +129,40 @@ func (appServices *ApplicationServices) Cache() *services.MachineLearningAlgorit
 	return appServices.configCache
 }
 
-func testBuffer(output *request.BufferOutput) (types.UID, error) {
+func (appServices *ApplicationServices) ShardClients() []*shards.ShardClient {
+	return appServices.shardClients
+}
+
+func (appServices *ApplicationServices) getShardByName(shardName string) *shards.ShardClient {
+	for _, shard := range appServices.shardClients {
+		if shard.Name == shardName {
+			return shard
+		}
+	}
+
+	return nil
+}
+
+func (appServices *ApplicationServices) schedule(output *request.BufferOutput) (types.UID, error) {
 	if output == nil {
 		return types.UID(""), fmt.Errorf("buffer is nil")
 	}
 
-	return types.UID("pass"), nil
+	var job = output.Checkpoint.ToV1Job()
+	var submitted *batchv1.Job
+	var submitErr error
+
+	if shard := appServices.getShardByName(output.Checkpoint.AppliedConfiguration.WorkgroupHost); shard != nil {
+		submitted, submitErr = shard.SendJob(shard.Namespace, &job)
+	} else {
+		submitted, submitErr = appServices.kubeClient.BatchV1().Jobs(appServices.defaultNamespace).Create(context.TODO(), &job, v1.CreateOptions{})
+	}
+
+	if submitErr != nil {
+		return "", submitErr
+	}
+
+	return submitted.UID, nil
 }
 
 func (appServices *ApplicationServices) Start(ctx context.Context) {
@@ -128,7 +180,7 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		10,
 		100,
 		10,
-		testBuffer,
+		appServices.schedule,
 		nil,
 	)
 
