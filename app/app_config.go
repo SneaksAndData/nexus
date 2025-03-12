@@ -15,10 +15,11 @@ const (
 )
 
 type SchedulerConfig struct {
-	Buffer            request.BufferConfig      `mapstructure:"buffer"`
-	CqlStore          request.AstraBundleConfig `mapstructure:"cql-store"`
-	ResourceNamespace string                    `mapstructure:"resource-namespace"`
-	KubeConfigPath    string                    `mapstructure:"kube-config-path"`
+	Buffer              request.BufferConfig      `mapstructure:"buffer"`
+	CqlStore            request.AstraBundleConfig `mapstructure:"cql-store"`
+	ResourceNamespace   string                    `mapstructure:"resource-namespace"`
+	KubeConfigPath      string                    `mapstructure:"kube-config-path"`
+	ShardKubeConfigPath string                    `mapstructure:"shard-kube-config-path,omitempty"`
 }
 
 func LoadConfig(ctx context.Context) SchedulerConfig {
