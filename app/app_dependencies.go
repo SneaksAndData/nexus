@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/SneaksAndData/nexus-core/pkg/buildmeta"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	nexuscore "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned"
 	"github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
@@ -148,14 +150,19 @@ func (appServices *ApplicationServices) schedule(output *request.BufferOutput) (
 		return types.UID(""), fmt.Errorf("buffer is nil")
 	}
 
-	var job = output.Checkpoint.ToV1Job()
+	var job = output.Checkpoint.ToV1Job("kubernetes.sneaksanddata.com/service-node-group", output.Checkpoint.AppliedConfiguration.Workgroup, fmt.Sprintf("%s-%s", buildmeta.AppVersion, buildmeta.BuildNumber))
 	var submitted *batchv1.Job
 	var submitErr error
+
+	// submit to controller cluster if workgroup host is not provided
+	if output.Checkpoint.AppliedConfiguration.WorkgroupHost == "" {
+		submitted, submitErr = appServices.kubeClient.BatchV1().Jobs(appServices.defaultNamespace).Create(context.TODO(), &job, v1.CreateOptions{})
+	}
 
 	if shard := appServices.getShardByName(output.Checkpoint.AppliedConfiguration.WorkgroupHost); shard != nil {
 		submitted, submitErr = shard.SendJob(shard.Namespace, &job)
 	} else {
-		submitted, submitErr = appServices.kubeClient.BatchV1().Jobs(appServices.defaultNamespace).Create(context.TODO(), &job, v1.CreateOptions{})
+		return "", errors.New(fmt.Sprintf("Shard API server %s not configured", output.Checkpoint.AppliedConfiguration.WorkgroupHost))
 	}
 
 	if submitErr != nil {
