@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func CreateRun(buffer *request.DefaultBuffer, configCache *services.MachineLearningAlgorithmCache) gin.HandlerFunc {
+func CreateRun(buffer *request.DefaultBuffer, configCache *services.NexusResourceCache) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors
 		algorithmName := ctx.Param("algorithmName")
@@ -21,7 +21,7 @@ func CreateRun(buffer *request.DefaultBuffer, configCache *services.MachineLearn
 			return
 		}
 
-		config, cacheErr := configCache.GetConfiguration(algorithmName)
+		config, cacheErr := configCache.GetAlgorithmConfiguration(algorithmName)
 
 		if cacheErr != nil {
 			ctx.String(http.StatusInternalServerError, `Internal error occurred when processing your request.`, algorithmName)
@@ -33,7 +33,19 @@ func CreateRun(buffer *request.DefaultBuffer, configCache *services.MachineLearn
 			return
 		}
 
-		if err := buffer.Add(requestId.String(), algorithmName, &payload, &config.Spec); err != nil {
+		workgroup, err := configCache.GetWorkgroupConfiguration(config.Spec.WorkgroupRef.Name)
+
+		if err != nil {
+			ctx.String(http.StatusInternalServerError, `Internal error occurred when processing your request.`, algorithmName)
+			return
+		}
+
+		if workgroup == nil {
+			ctx.String(http.StatusBadRequest, `Cannot assign requested workgroup %s to the algorithm %s. Please check the deployed configuration.`, config.Spec.WorkgroupRef.Name, algorithmName)
+			return
+		}
+
+		if err := buffer.Add(requestId.String(), algorithmName, &payload, &config.Spec, &workgroup.Spec); err != nil {
 			ctx.String(http.StatusBadRequest, `Request buffering failed for: %s, error: %s`, requestId.String(), err.Error())
 			return
 		}

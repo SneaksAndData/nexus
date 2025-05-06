@@ -14,7 +14,6 @@ import (
 	"github.com/SneaksAndData/nexus/services"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -32,7 +31,7 @@ type ApplicationServices struct {
 	shardClients     []*shards.ShardClient
 	nexusClient      *nexuscore.Clientset
 	recorder         record.EventRecorder
-	configCache      *services.MachineLearningAlgorithmCache
+	configCache      *services.NexusResourceCache
 }
 
 func (appServices *ApplicationServices) WithBuffer(ctx context.Context, config *request.BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
@@ -109,7 +108,7 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceNamespace string) *ApplicationServices {
 	if appServices.configCache == nil {
 		logger := klog.FromContext(ctx)
-		appServices.configCache = services.NewMachineLearningAlgorithmCache(appServices.nexusClient, resourceNamespace, logger)
+		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, resourceNamespace, logger)
 	}
 
 	return appServices
@@ -127,7 +126,7 @@ func (appServices *ApplicationServices) NexusClient() *nexuscore.Clientset {
 	return appServices.nexusClient
 }
 
-func (appServices *ApplicationServices) Cache() *services.MachineLearningAlgorithmCache {
+func (appServices *ApplicationServices) Cache() *services.NexusResourceCache {
 	return appServices.configCache
 }
 
@@ -147,22 +146,17 @@ func (appServices *ApplicationServices) getShardByName(shardName string) *shards
 
 func (appServices *ApplicationServices) schedule(output *request.BufferOutput) (types.UID, error) {
 	if output == nil {
-		return types.UID(""), fmt.Errorf("buffer is nil")
+		return types.UID(""), fmt.Errorf("buffer has not provided any data to schedule")
 	}
 
-	var job = output.Checkpoint.ToV1Job("kubernetes.sneaksanddata.com/service-node-group", output.Checkpoint.AppliedConfiguration.Workgroup, fmt.Sprintf("%s-%s", buildmeta.AppVersion, buildmeta.BuildNumber))
+	var job = output.Checkpoint.ToV1Job(fmt.Sprintf("%s-%s", buildmeta.AppVersion, buildmeta.BuildNumber), output.Workgroup)
 	var submitted *batchv1.Job
 	var submitErr error
 
-	// submit to controller cluster if workgroup host is not provided
-	if output.Checkpoint.AppliedConfiguration.WorkgroupHost == "" {
-		submitted, submitErr = appServices.kubeClient.BatchV1().Jobs(appServices.defaultNamespace).Create(context.TODO(), &job, v1.CreateOptions{})
-	}
-
-	if shard := appServices.getShardByName(output.Checkpoint.AppliedConfiguration.WorkgroupHost); shard != nil {
+	if shard := appServices.getShardByName(output.Workgroup.Cluster); shard != nil {
 		submitted, submitErr = shard.SendJob(shard.Namespace, &job)
 	} else {
-		return "", errors.New(fmt.Sprintf("Shard API server %s not configured", output.Checkpoint.AppliedConfiguration.WorkgroupHost))
+		return "", errors.New(fmt.Sprintf("Shard API server %s not configured", output.Workgroup.Cluster))
 	}
 
 	if submitErr != nil {

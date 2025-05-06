@@ -15,7 +15,7 @@ type RequestResult struct {
 // parseCheckpointError maps error to a standard error code
 func parseCheckpointError(request *models.CheckpointedRequest) string {
 	switch request.AlgorithmFailureCode {
-	case models.CAJ011.ErrorName(), models.CAJ000.ErrorName(), models.CAJ012.ErrorName(), models.CB000.ErrorName():
+	case models.NAE001.ErrorName(), models.NAE002.ErrorName(), models.NAE000.ErrorName():
 		return fmt.Sprintf("%s: %s", request.AlgorithmFailureCode, request.AlgorithmFailureCause)
 	default:
 		return "Fatal error during execution."
