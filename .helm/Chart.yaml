@@ -1,0 +1,8 @@
+apiVersion: v1
+appVersion: 0.0.0
+description: Cloud native proxy for AI/ML workloads
+maintainers:
+  - email: esdsupport@ecco.com
+    name: ECCO Data & AI
+name: nexus
+version: 0.0.0

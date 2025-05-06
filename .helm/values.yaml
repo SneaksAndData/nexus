@@ -1,0 +1,230 @@
+environment: "Development"
+
+image:
+  # Repository to pull the image from
+  repository: "ghcr.io/sneaksanddata/nexus"
+  
+  # Tag to pull (defaults to the chart appVersion)
+  tag: ""
+  
+  # Image pull policy
+  pullPolicy: "IfNotPresent"
+
+# Image pull secrets for private repositories
+imagePullSecrets: []
+
+# Override the application name
+nameOverride: ""
+
+# Fullname override
+fullnameOverride: ""
+
+# Service account configuration
+serviceAccount:
+  
+  # Specifies whether a service account should be created
+  create: true
+  
+  # Annotations to add to the service account
+  annotations: {}
+  
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  
+### Role Based Access Control configuration
+rbac:
+  
+  # Specifies whether RBAC resources should be created
+  clusterRole:
+        
+    # Allows Nexus to manage its custom resources in the installation namespace
+    templateEditor:
+      additionalLabels: {}
+      additionalAnnotations: {}
+      create: true
+      nameOverride: ""
+      
+    workgroupEditor:
+      additionalLabels: {}
+      additionalAnnotations: {}
+      create: true
+      nameOverride: ""      
+  
+  # This parameter determines whether role binding resources need to be created.
+  # If you have any roles in your configuration set to 'true', then this parameter for creating role binding resources
+  # should also be set to 'true'.
+  clusterRoleBindings:
+    additionalLabels: {}
+    additionalAnnotations: {}
+    create: true  
+    
+# Additional labels for the deployment and pods
+additionalLabels: {}
+# Example:
+#
+#  app.my-company.com/component: ncc
+
+# Additional labels for the deployment and pods
+additionalAnnotations: {}
+  # Example:
+  #  app.my-company.com/application: nexus
+
+# Extra environment variables to set in the deployment
+extraEnv: {}
+# Example:
+#
+#  - name: NEXUS__RESOURCE_NAMESPACE
+#    value: nexus
+
+# Extra environment variables referencing a ConfigMap or Secret
+extraEnvFrom: {}
+# Example:
+#
+#  envFrom:
+#    - configMapRef:
+#        name: custom-api-access-token
+  
+# Extra volumes to add to the deployment
+extraVolumes: {}
+  # Example:
+  # 
+  #  - name: data-volume
+  #    emptyDir:
+  #      sizeLimit: 500Mi
+    
+# Extra volumes to add to the deployment
+extraVolumeMounts: {}
+# Example:
+#
+#  - mountPath: /data
+#    name: data-volume
+
+# Resources constraints. By default, the operator does not specify any constraints to allow for easier deployment
+resources: {}
+# Example:
+#
+#  requests:
+#    cpu: 1
+#    memory: 1Gi
+#  limits:
+#    cpu: 1
+#    memory: 1Gi
+
+# Node labels for pod assignment
+tolerations: { }
+
+# Node labels for pod assignment
+affinity: { }
+
+# Security context settings for the container
+# Note that default image is distroless and runs as non-root user by default.
+securityContext: {}
+
+# Logging configuration
+logging:
+  level: INFO
+
+# Nexus Scheduler configurations
+scheduler:
+  
+  # Number of scheduler replicas. Increase to support higher request rates
+  replicas: 3
+  
+  # Disruption budget for the deployment
+  maxUnavailable: 2
+  
+  # autoscaling configuration
+  autoscaling:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 9
+    targetMemoryAvg: 80
+    targetCPUAvg: 60
+    scaleStabilizationWindowSeconds: 180
+    scalePeriodSeconds: 30
+    scaleByPercent: 10
+  
+  # path to the directory containing kubeconfigs for all shards available for scheduling
+  shardsConfigPath: "/app/config/shards"
+  
+  # path to the Secret containing shard kubeconfig files
+  # File name format should be <shard cluster name>.kubeconfig
+  shardsConfigSecretName: "nexus-shards"
+  
+  # Main resource namespace
+  namespace: "nexus"
+  
+# Input buffering configuration
+buffer:
+  # Number of workers to use when buffering inputs
+  workers: 2
+  
+  # Failure backoff base delay. Example values: 5ms, 5s
+  backOffBaseDelay: 100ms
+  
+  # Failure backoff max delay. Example values: 5s, 1m
+  backOffMaxDelay: 1s
+  
+  # Rate limit elements per second
+  rateLimitElementsPerSecond: 10
+  
+  # Rate limit burst elements
+  rateLimitElementsBurst: 100
+  
+  # S3 buffer settings
+  s3:
+    # whether buffering to S3 is enabled. Defaults to true.
+    # Supports both AWS S3 and S3-compatible services (tested with MinIO)
+    enabled: true
+    
+    # Connection secret name
+    # Secret must have the following fields in `data`
+    #    accessKeyId: "string"
+    #    secretAccessKey: "string"
+    #    region: "us-east-1"
+    #    endpoint: "https://s3.dualstack.us-east-1.amazonaws.com"
+    connectionSecretName: "secretName"
+    storagePath: s3a://bucket/prefix
+
+# Checkpoint metadata store configurations
+metastore:
+  
+  # Name for a Secret resources that contains Cassandra connection info
+  # Defaults to AstraDB for now, to be changed to generic Cassandra on release
+  # Must have the following fields:
+  # user: "string"
+  # password: "string"
+  # astraBundle: "base64 string" (optional)
+  connectionSecretName: "secret"
+  
+  # Cassandra implementations. Available options are:
+  # astradb, scylla, apache-oss
+  # defaults to 'astradb'
+  cassandraImpl: "astradb"
+    
+# Observability settings for Datadog
+datadog:
+  
+  # if enabled, will set Datadog-specific environment variables on the container 
+  enabled: false
+  
+  # Datadog endpoint to sink logs to
+  endpoint: "datadoghq.eu"
+  
+  # Name for a Secret resource that contains Datadog API Key to use for log submissions
+  apiKeySecret: "secretName"
+
+  # Key in the secret that contains datadog api key    
+  apiKeySecretKey: "secretKey"
+  
+  # Datadog Service Name parameter
+  serviceName: "nexus"
+  
+  # value to use as a DogStatsd server url
+  # Examples: udp://127.0.0.1:8125 or unix:///path/to/dsd.socket
+  # https://github.com/DataDog/datadog-go?tab=readme-ov-file#unix-domain-sockets-client
+  statsdUrl: unix:///var/run/datadog/dsd.socket
+  
+  # enables metric origin detection by setting DD_ENTITY_ID
+  enableOriginDetection: true

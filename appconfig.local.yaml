@@ -1,6 +1,6 @@
 buffer:
   payload-storage-path: s3://bucket/nexus/payloads
-  payload-valid-for: 24h
+  payload-valid-for: 24h # TODO: make overridable from request
   failure-rate-base-delay: 100ms
   failure-rate-max-delay: 1s
   rate-limit-elements-per-second: 10
