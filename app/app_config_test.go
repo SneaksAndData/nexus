@@ -21,7 +21,7 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 				RateLimitElementsBurst:     100,
 				Workers:                    10,
 			},
-			AccessKeyID:     "test",
+			AccessKeyID:     "test-key-id",
 			SecretAccessKey: "test",
 			Endpoint:        "http://127.0.0.1:9000",
 			Region:          "us-east-1",
@@ -46,7 +46,8 @@ func Test_LoadConfig(t *testing.T) {
 }
 
 func Test_LoadConfigFromEnv(t *testing.T) {
-	_ = os.Setenv("NEXUS__BUFFER.PAYLOAD_STORAGE_PATH", "s3://bucket-2/nexus/payloads")
+	_ = os.Setenv("NEXUS__BUFFER.BUFFER_CONFIG.PAYLOAD_STORAGE_PATH", "s3://bucket-2/nexus/payloads")
+	_ = os.Setenv("NEXUS__BUFFER.ACCESS_KEY_ID", "test-key-id1")
 	var expected = getExpectedConfig("s3://bucket-2/nexus/payloads")
 
 	var result = LoadConfig(context.TODO())

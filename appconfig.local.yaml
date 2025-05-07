@@ -7,6 +7,10 @@ buffer:
     rate-limit-elements-per-second: 10
     rate-limit-elements-burst: 100
     workers: 10
+  access-key-id: "test"
+  secret-access-key: "test"
+  region: us-east-1
+  endpoint: http://127.0.0.1:9000    
 resource-namespace: nexus
 cql-store: # can be read from environment
   secure-connection-bundle-base64: base64value
