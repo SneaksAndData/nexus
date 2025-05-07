@@ -15,7 +15,7 @@ const (
 )
 
 type SchedulerConfig struct {
-	Buffer              request.BufferConfig      `mapstructure:"buffer"`
+	Buffer              request.S3BufferConfig    `mapstructure:"buffer"`
 	CqlStore            request.AstraBundleConfig `mapstructure:"cql-store"`
 	ResourceNamespace   string                    `mapstructure:"resource-namespace"`
 	KubeConfigPath      string                    `mapstructure:"kube-config-path"`

@@ -1,11 +1,12 @@
 buffer:
-  payload-storage-path: s3://bucket/nexus/payloads
-  payload-valid-for: 24h # TODO: make overridable from request
-  failure-rate-base-delay: 100ms
-  failure-rate-max-delay: 1s
-  rate-limit-elements-per-second: 10
-  rate-limit-elements-burst: 100
-  workers: 10
+  buffer-config:
+    payload-storage-path: s3a://bucket/nexus/payloads
+    payload-valid-for: 24h
+    failure-rate-base-delay: 100ms
+    failure-rate-max-delay: 1s
+    rate-limit-elements-per-second: 10
+    rate-limit-elements-burst: 100
+    workers: 10
 resource-namespace: nexus
 cql-store: # can be read from environment
   secure-connection-bundle-base64: base64value

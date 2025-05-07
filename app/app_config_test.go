@@ -11,14 +11,20 @@ import (
 
 func getExpectedConfig(storagePath string) *SchedulerConfig {
 	return &SchedulerConfig{
-		Buffer: request.BufferConfig{
-			PayloadStoragePath:         storagePath,
-			PayloadValidFor:            time.Hour * 24,
-			FailureRateMaxDelay:        time.Second * 1,
-			FailureRateBaseDelay:       time.Millisecond * 100,
-			RateLimitElementsPerSecond: 10,
-			RateLimitElementsBurst:     100,
-			Workers:                    10,
+		Buffer: request.S3BufferConfig{
+			BufferConfig: &request.BufferConfig{
+				PayloadStoragePath:         storagePath,
+				PayloadValidFor:            time.Hour * 24,
+				FailureRateMaxDelay:        time.Second * 1,
+				FailureRateBaseDelay:       time.Millisecond * 100,
+				RateLimitElementsPerSecond: 10,
+				RateLimitElementsBurst:     100,
+				Workers:                    10,
+			},
+			AccessKeyID:     "test",
+			SecretAccessKey: "test",
+			Endpoint:        "http://127.0.0.1:9000",
+			Region:          "us-east-1",
 		},
 		CqlStore: request.AstraBundleConfig{
 			SecureConnectionBundleBase64: "base64value",
