@@ -13,17 +13,17 @@ data:
     buffer:
       buffer-config:
         payload-storage-path: ""
-        payload-valid-for: 24h
-        failure-rate-base-delay: 100ms
-        failure-rate-max-delay: 1s
-        rate-limit-elements-per-second: 10
-        rate-limit-elements-burst: 100
-        workers: 10
+        payload-valid-for: {{ .Values.buffer.payloadValidForDefault }}
+        failure-rate-base-delay: {{ .Values.buffer.backOffBaseDelay }}
+        failure-rate-max-delay: {{ .Values.buffer.backOffMaxDelay }}
+        rate-limit-elements-per-second: {{ .Values.buffer.rateLimitElementsPerSecond }}
+        rate-limit-elements-burst: {{ .Values.buffer.rateLimitElementsBurst }}
+        workers: {{ .Values.buffer.workers }}
       access-key-id: ""
       secret-access-key: ""
       region: ""
       endpoint: ""
-    resource-namespace: nexus
+    resource-namespace: {{ .Values.scheduler.namespace }}
     cql-store:
       secure-connection-bundle-base64: ""
       gateway-user: ""

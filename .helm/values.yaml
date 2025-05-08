@@ -172,6 +172,9 @@ buffer:
   # Rate limit burst elements
   rateLimitElementsBurst: 100
   
+  # Default payload presigned URL lifetime duration
+  payloadValidForDefault: 24h
+  
   # S3 buffer settings
   s3:
     # whether buffering to S3 is enabled. Defaults to true.
