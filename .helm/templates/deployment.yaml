@@ -97,7 +97,7 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.metastore.connectionSecretName }}
                   key: user
-            {{- if .Values.metastore.cassandraImpl eq "astradb" }}
+            {{- if eq "astradb" .Values.metastore.cassandraImpl }}
             - name: NEXUS__CQL_STORE.SECURE_CONNECTION_BUNDLE_BASE64
               valueFrom:
                 secretKeyRef:
