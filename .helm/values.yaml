@@ -188,6 +188,8 @@ buffer:
     #    region: "us-east-1"
     #    endpoint: "https://s3.dualstack.us-east-1.amazonaws.com"
     connectionSecretName: "secretName"
+    
+    # storage path for buffered payloads
     storagePath: s3a://bucket/prefix
 
 # Checkpoint metadata store configurations

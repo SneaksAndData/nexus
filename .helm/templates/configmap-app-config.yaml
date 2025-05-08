@@ -9,7 +9,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 data:
-  appconfig.{{ lower(.Values.environment) }}.yaml: |
+  appconfig.{{ .Values.environment | lower }}.yaml: |
     buffer:
       buffer-config:
         payload-storage-path: ""

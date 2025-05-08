@@ -148,8 +148,8 @@ spec:
             mountPath: /var/run/datadog
             readOnly: false
           - name: app-config
-            mountPath: /app/appconfig.{{ lower(.Values.environment) }}.yaml
-            subPath: appconfig.{{ lower(.Values.environment) }}.yaml
+            mountPath: /app/appconfig.{{ .Values.environment | lower }}.yaml
+            subPath: appconfig.{{ .Values.environment | lower }}.yaml
             readOnly: true
         {{- end }}
           {{- with .Values.extraVolumeMounts }}
