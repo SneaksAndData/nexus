@@ -54,15 +54,15 @@ spec:
             - name: NEXUS__RESOURCE_NAMESPACE
               value: {{ .Values.scheduler.namespace }}
             - name: NEXUS__BUFFER.WORKERS
-              value: {{ .Values.buffer.workers }}
+              value: {{ .Values.buffer.workers | quote }}
             - name: NEXUS__BUFFER.FAILURE_RATE_BASE_DELAY
               value: {{ .Values.buffer.backOffBaseDelay }}
             - name: NEXUS__BUFFER.FAILURE_RATE_MAX_DELAY
               value: {{ .Values.buffer.backOffMaxDelay }}
             - name: NEXUS__BUFFER.RATE_LIMIT_ELEMENTS_PER_SECOND
-              value: {{ .Values.buffer.rateLimitElementsPerSecond }}
+              value: {{ .Values.buffer.rateLimitElementsPerSecond | quote }}
             - name: NEXUS__BUFFER.RATE_LIMIT_ELEMENTS_BURST
-              value: {{ .Values.buffer.rateLimitElementsBurst }}
+              value: {{ .Values.buffer.rateLimitElementsBurst | quote }}
           {{- if .Values.buffer.s3.enabled }}
             - name: NEXUS__BUFFER.BUFFER_CONFIG.PAYLOAD_STORAGE_PATH
               value: {{ .Values.buffer.s3.storagePath }}
