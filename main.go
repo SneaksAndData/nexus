@@ -28,6 +28,11 @@ func setupRouter(ctx context.Context) *gin.Engine {
 	router := gin.Default()
 	router.MaxMultipartMemory = MaxBodySize
 	router.Use(gin.Logger())
+	// disable trusted proxies check
+	_ = router.SetTrustedProxies(nil)
+	// set runtime mode
+	gin.SetMode(app.GetGinMode())
+
 	appConfig := app.LoadConfig(ctx)
 
 	appServices := (&app.ApplicationServices{}).

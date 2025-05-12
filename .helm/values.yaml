@@ -186,7 +186,7 @@ buffer:
     #    accessKeyId: "string"
     #    secretAccessKey: "string"
     #    region: "us-east-1"
-    #    endpoint: "https://s3.dualstack.us-east-1.amazonaws.com"
+    #    endpointUrl: "https://s3.dualstack.us-east-1.amazonaws.com"
     connectionSecretName: "secretName"
     
     # storage path for buffered payloads
@@ -200,7 +200,7 @@ metastore:
   # Must have the following fields:
   # user: "string"
   # password: "string"
-  # astraBundle: "base64 string" (optional)
+  # bundle: "base64 string" (optional)
   connectionSecretName: "secret"
   
   # Cassandra implementations. Available options are:
