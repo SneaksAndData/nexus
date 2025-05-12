@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
-	"github.com/SneaksAndData/nexus-core/pkg/util"
-	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"k8s.io/klog/v2"
 	"os"
@@ -45,12 +43,4 @@ func LoadConfig(ctx context.Context) SchedulerConfig {
 	}
 
 	return appConfig
-}
-
-func GetGinMode() string {
-	return map[string]string{
-		"development": gin.DebugMode,
-		"test":        gin.TestMode,
-		"production":  gin.ReleaseMode,
-	}[util.CoalesceString(os.Getenv("APPLICATION_ENVIRONMENT"), "development")]
 }

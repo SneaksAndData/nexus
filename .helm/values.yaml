@@ -146,6 +146,8 @@ scheduler:
     scaleByPercent: 10
   
   # path to the directory containing kubeconfigs for all shards available for scheduling
+  # Note that the user specified in the config must have Batch API and Nexus CRD permissions to both controller and shard clusters
+  # in case of EKS you must assign appropriate permissions to the IAM role or user, since token will be fetched by aws-cli on-demand
   shardsConfigPath: "/app/config/shards"
   
   # path to the Secret containing shard kubeconfig files
@@ -233,3 +235,4 @@ datadog:
   
   # enables metric origin detection by setting DD_ENTITY_ID
   enableOriginDetection: true
+  
