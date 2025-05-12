@@ -1,7 +1,7 @@
 FROM --platform=$BUILDPLATFORM golang:1.23-bookworm AS build-stage
 
-ARG TARGETOS 
-ARG TARGETARCH
+ARG APPVERSION
+ARG BUILDNUMBER
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY . ./
 
 RUN go mod verify && go mod vendor
 
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /app -v ./... 
+RUN CGO_ENABLED=0 go build -ldflags "-X github.com/SneaksAndData/nexus-core/pkg/buildmeta.AppVersion=$APPVERSION -X github.com/SneaksAndData/nexus-core/pkg/buildmeta.BuildNumber=$BUILDNUMBER" -o /app -v ./...
 
 FROM --platform=$BUILDPLATFORM public.ecr.aws/amazonlinux/amazonlinux:2 AS aws-cli-stage
 RUN yum update -y && yum install -y unzip curl \

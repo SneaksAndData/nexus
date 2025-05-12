@@ -31,6 +31,13 @@ jobs:
         uses: SneaksAndData/github-actions/generate_version@v0.1.9
         id: version
 
+      - name: Get build number
+        shell: bash
+        id: buildnumber
+        run: |
+          dt=$(date +'%Y%m%d%H%M%S')
+          echo "result=$dt" >> "$GITHUB_OUTPUT"
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -51,6 +58,9 @@ jobs:
         uses: docker/build-push-action@v6.15.0
         with:
           context: .
+          build-args: |
+            APPVERSION=${{ steps.version.outputs.version }}
+            BUILDNUMBER=${{ steps.buildnumber.outputs.result }}
           file: .container/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
