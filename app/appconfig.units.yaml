@@ -1,4 +1,4 @@
-buffer:
+s3-buffer:
   buffer-config:
     payload-storage-path: s3://bucket/nexus/payloads
     payload-valid-for: 24h
@@ -11,9 +11,10 @@ buffer:
   secret-access-key: "test"
   region: us-east-1
   endpoint: http://127.0.0.1:9000
-resource-namespace: crystal
+resource-namespace: nexus
 cql-store: # can be read from environment
   secure-connection-bundle-base64: base64value
   gateway-user: user
   gateway-password: password
 kube-config-path: "/tmp/nexus-test"
+shard-kube-config-path: "/tmp/shards"

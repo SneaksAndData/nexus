@@ -15,10 +15,10 @@ const (
 )
 
 type SchedulerConfig struct {
-	Buffer              request.S3BufferConfig    `mapstructure:"buffer"`
-	CqlStore            request.AstraBundleConfig `mapstructure:"cql-store"`
-	ResourceNamespace   string                    `mapstructure:"resource-namespace"`
-	KubeConfigPath      string                    `mapstructure:"kube-config-path"`
+	S3Buffer            request.S3BufferConfig    `mapstructure:"s3-buffer,omitempty"`
+	CqlStore            request.AstraBundleConfig `mapstructure:"cql-store,omitempty"`
+	ResourceNamespace   string                    `mapstructure:"resource-namespace,omitempty"`
+	KubeConfigPath      string                    `mapstructure:"kube-config-path,omitempty"`
 	ShardKubeConfigPath string                    `mapstructure:"shard-kube-config-path,omitempty"`
 }
 
@@ -27,6 +27,7 @@ func LoadConfig(ctx context.Context) SchedulerConfig {
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.SetConfigFile(fmt.Sprintf("appconfig.%s.yaml", strings.ToLower(os.Getenv("APPLICATION_ENVIRONMENT"))))
 	viper.SetEnvPrefix(EnvPrefix)
+	viper.AllowEmptyEnv(true)
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {

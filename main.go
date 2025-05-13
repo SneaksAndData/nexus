@@ -47,7 +47,7 @@ func setupRouter(ctx context.Context) *gin.Engine {
 
 	appServices := (&app.ApplicationServices{}).
 		WithKubeClients(ctx, appConfig.KubeConfigPath).
-		WithBuffer(ctx, &appConfig.Buffer, &appConfig.CqlStore).
+		WithBuffer(ctx, &appConfig.S3Buffer, &appConfig.CqlStore).
 		WithCache(ctx, appConfig.ResourceNamespace).
 		WithRecorder(ctx, appConfig.ResourceNamespace).
 		WithShards(ctx, appConfig.ShardKubeConfigPath, appConfig.ResourceNamespace).

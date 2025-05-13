@@ -1,4 +1,4 @@
-buffer:
+s3-buffer:
   buffer-config:
     payload-storage-path: s3a://bucket/nexus/payloads
     payload-valid-for: 24h

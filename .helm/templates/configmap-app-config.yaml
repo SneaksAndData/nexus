@@ -1,3 +1,4 @@
+{{- if .Values.scheduler.config.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,23 +11,5 @@ metadata:
   {{- end }}
 data:
   appconfig.{{ .Values.environment | lower }}.yaml: |
-    buffer:
-      buffer-config:
-        payload-storage-path: ""
-        payload-valid-for: {{ .Values.buffer.payloadValidForDefault }}
-        failure-rate-base-delay: {{ .Values.buffer.backOffBaseDelay }}
-        failure-rate-max-delay: {{ .Values.buffer.backOffMaxDelay }}
-        rate-limit-elements-per-second: {{ .Values.buffer.rateLimitElementsPerSecond }}
-        rate-limit-elements-burst: {{ .Values.buffer.rateLimitElementsBurst }}
-        workers: {{ .Values.buffer.workers }}
-      access-key-id: ""
-      secret-access-key: ""
-      region: ""
-      endpoint: ""
-    resource-namespace: {{ .Values.scheduler.namespace }}
-    cql-store:
-      secure-connection-bundle-base64: ""
-      gateway-user: ""
-      gateway-password: ""
-    kube-config-path: ""
-    shard-kube-config-path: {{ .Values.scheduler.shardsConfigPath }}
+    {{ .Values.scheduler.config.app }}
+{{- end }}

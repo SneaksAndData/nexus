@@ -11,7 +11,7 @@ import (
 
 func getExpectedConfig(storagePath string) *SchedulerConfig {
 	return &SchedulerConfig{
-		Buffer: request.S3BufferConfig{
+		S3Buffer: request.S3BufferConfig{
 			BufferConfig: &request.BufferConfig{
 				PayloadStoragePath:         storagePath,
 				PayloadValidFor:            time.Hour * 24,
@@ -31,8 +31,9 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 			GatewayUser:                  "user",
 			GatewayPassword:              "password",
 		},
-		ResourceNamespace: "crystal",
-		KubeConfigPath:    "/tmp/nexus-test",
+		ResourceNamespace:   "nexus",
+		KubeConfigPath:      "/tmp/nexus-test",
+		ShardKubeConfigPath: "/tmp/shards",
 	}
 }
 
@@ -46,8 +47,8 @@ func Test_LoadConfig(t *testing.T) {
 }
 
 func Test_LoadConfigFromEnv(t *testing.T) {
-	_ = os.Setenv("NEXUS__BUFFER.BUFFER_CONFIG.PAYLOAD_STORAGE_PATH", "s3://bucket-2/nexus/payloads")
-	_ = os.Setenv("NEXUS__BUFFER.ACCESS_KEY_ID", "test-key-id1")
+	_ = os.Setenv("NEXUS__S3_BUFFER.BUFFER_CONFIG.PAYLOAD_STORAGE_PATH", "s3://bucket-2/nexus/payloads")
+	_ = os.Setenv("NEXUS__S3_BUFFER.ACCESS_KEY_ID", "test-key-id")
 	var expected = getExpectedConfig("s3://bucket-2/nexus/payloads")
 
 	var result = LoadConfig(context.TODO())

@@ -174,7 +174,7 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 	submissionActor := pipeline.NewDefaultPipelineStageActor[*request.BufferOutput, types.UID](
-		"checkpoint_buffer",
+		"kubernetes_job_submission",
 		map[string]string{},
 		time.Second*1,
 		time.Second*5,

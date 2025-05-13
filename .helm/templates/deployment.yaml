@@ -51,59 +51,6 @@ spec:
               value: "{{ (default (printf "v%s" .Chart.AppVersion) .Values.image.tag) }}"
             - name: APPLICATION_ENVIRONMENT
               value: "{{ lower .Values.environment }}"
-            - name: NEXUS__RESOURCE_NAMESPACE
-              value: {{ .Values.scheduler.namespace }}
-            - name: NEXUS__BUFFER.WORKERS
-              value: {{ .Values.buffer.workers | quote }}
-            - name: NEXUS__BUFFER.FAILURE_RATE_BASE_DELAY
-              value: {{ .Values.buffer.backOffBaseDelay }}
-            - name: NEXUS__BUFFER.FAILURE_RATE_MAX_DELAY
-              value: {{ .Values.buffer.backOffMaxDelay }}
-            - name: NEXUS__BUFFER.RATE_LIMIT_ELEMENTS_PER_SECOND
-              value: {{ .Values.buffer.rateLimitElementsPerSecond | quote }}
-            - name: NEXUS__BUFFER.RATE_LIMIT_ELEMENTS_BURST
-              value: {{ .Values.buffer.rateLimitElementsBurst | quote }}
-          {{- if .Values.buffer.s3.enabled }}
-            - name: NEXUS__BUFFER.BUFFER_CONFIG.PAYLOAD_STORAGE_PATH
-              value: {{ .Values.buffer.s3.storagePath }}
-            - name: NEXUS__BUFFER.ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.buffer.s3.connectionSecretName }}
-                  key: accessKeyId
-            - name: NEXUS__BUFFER.SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.buffer.s3.connectionSecretName }}
-                  key: secretAccessKey
-            - name: NEXUS__BUFFER.ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.buffer.s3.connectionSecretName }}
-                  key: endpointUrl
-            - name: NEXUS__BUFFER.REGION
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.buffer.s3.connectionSecretName }}
-                  key: region
-          {{- end }}
-            - name: NEXUS__CQL_STORE.GATEWAY_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.metastore.connectionSecretName }}
-                  key: password
-            - name: NEXUS__CQL_STORE.GATEWAY_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.metastore.connectionSecretName }}
-                  key: user
-            {{- if eq "astradb" .Values.metastore.cassandraImpl }}
-            - name: NEXUS__CQL_STORE.SECURE_CONNECTION_BUNDLE_BASE64
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.metastore.connectionSecretName }}
-                  key: bundle
-            {{- end }}
           {{- if .Values.datadog.enabled }}
             - name: DATADOG__API_KEY
               valueFrom:
@@ -140,17 +87,21 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         {{- end }}
+        {{- if .Values.scheduler.config.enabled }}  
           volumeMounts:
           - name: shards-kube-config
-            mountPath: {{ .Values.scheduler.shardsConfigPath }}
+            mountPath: /app/config/shards
+        {{- end }}
         {{- if .Values.datadog.enabled }}
           - name: dsdsocket
             mountPath: /var/run/datadog
             readOnly: false
+        {{- end }}
+        {{- if .Values.scheduler.config.enabled }}
           - name: app-config
             mountPath: /app/appconfig.{{ .Values.environment | lower }}.yaml
             subPath: appconfig.{{ .Values.environment | lower }}.yaml
-            readOnly: true
+            readOnly: true            
         {{- end }}
           {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -163,9 +114,11 @@ spec:
         - name: shards-kube-config
           secret:
             secretName: {{ .Values.scheduler.shardsConfigSecretName }}
+       {{- if .Values.scheduler.config.enabled }}
         - name: app-config
           configMap:
             name: {{ include "app.name" . }}
+       {{- end }}
        {{- if .Values.datadog.enabled }}
         - name: dsdsocket
           hostPath:

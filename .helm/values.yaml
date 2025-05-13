@@ -144,71 +144,93 @@ scheduler:
     scaleStabilizationWindowSeconds: 180
     scalePeriodSeconds: 30
     scaleByPercent: 10
-  
-  # path to the directory containing kubeconfigs for all shards available for scheduling
-  # Note that the user specified in the config must have Batch API and Nexus CRD permissions to both controller and shard clusters
-  # in case of EKS you must assign appropriate permissions to the IAM role or user, since token will be fetched by aws-cli on-demand
-  shardsConfigPath: "/app/config/shards"
-  
+    
   # path to the Secret containing shard kubeconfig files
   # File name format should be <shard cluster name>.kubeconfig
   shardsConfigSecretName: "nexus-shards"
-  
-  # Main resource namespace
-  namespace: "nexus"
-  
-# Input buffering configuration
-buffer:
-  # Number of workers to use when buffering inputs
-  workers: 2
-  
-  # Failure backoff base delay. Example values: 5ms, 5s
-  backOffBaseDelay: 100ms
-  
-  # Failure backoff max delay. Example values: 5s, 1m
-  backOffMaxDelay: 1s
-  
-  # Rate limit elements per second
-  rateLimitElementsPerSecond: 10
-  
-  # Rate limit burst elements
-  rateLimitElementsBurst: 100
-  
-  # Default payload presigned URL lifetime duration
-  payloadValidForDefault: 24h
-  
-  # S3 buffer settings
-  s3:
-    # whether buffering to S3 is enabled. Defaults to true.
-    # Supports both AWS S3 and S3-compatible services (tested with MinIO)
+         
+  config:   
+    # Automount configmap containing application configuration. NOT RECOMMENDED for production - use this for debugging and dev environments only.
+    # Create your own secret following the structure of appconfig.yaml and mount it via extraVolumes and extraVolumeMounts
     enabled: true
     
-    # Connection secret name
-    # Secret must have the following fields in `data`
-    #    accessKeyId: "string"
-    #    secretAccessKey: "string"
-    #    region: "us-east-1"
-    #    endpointUrl: "https://s3.dualstack.us-east-1.amazonaws.com"
-    connectionSecretName: "secretName"
-    
-    # storage path for buffered payloads
-    storagePath: s3a://bucket/prefix
-
-# Checkpoint metadata store configurations
-metastore:
+    app: |
+      # Main resource namespace
+      # Override with: NEXUS__RESOURCE_NAMESPACE
+      resource-namespace: "nexus"
+        
+      # Input buffering configuration
+      s3-buffer:
+        buffer-config:
+          
+          # Prefix to store payloads under
+          # Override with: NEXUS__S3_BUFFER.BUFFER_CONFIG.PAYLOAD_STORAGE_PATH
+          payload-storage-path: s3a://bucket/prefix
+          
+          # Default payload's presigned URL lifetime duration
+          # Override with: NEXUS__S3_BUFFER.BUFFER_CONFIG.PAYLOAD_VALID_FOR
+          payload-valid-for: 24h
+          
+          # Failure backoff base delay. Example values: 5ms, 5s
+          # Override with: NEXUS__S3_BUFFER.BUFFER_CONFIG.FAILURE_RATE_BASE_DELAY
+          failure-rate-base-delay: 100ms
+          
+          # Failure backoff max delay. Example values: 5s, 1m
+          # Override with: NEXUS__S3_BUFFER.BUFFER_CONFIG.FAILURE_RATE_MAX_DELAY      
+          failure-rate-max-delay: 1s
+          
+          # Rate limit elements per second
+          # Override with: NEXUS__S3_BUFFER.BUFFER_CONFIG.RATE_LIMIT_ELEMENTS_PER_SECOND      
+          rate-limit-elements-per-second: 10
+          
+          # Rate limit burst elements
+          # Override with: NEXUS__S3_BUFFER.BUFFER_CONFIG.RATE_LIMIT_ELEMENTS_BURST      
+          rate-limit-elements-burst: 100
+          
+          # Number of workers to use when buffering inputs
+          # Override with: NEXUS__S3_BUFFER.BUFFER_CONFIG.WORKERS      
+          workers: 2
+        
+        # AWS or S3-compatible IAM user access key id
+        # Override with: NEXUS__S3_BUFFER.ACCESS_KEY_ID      
+        access-key-id: ""
+        
+        # AWS or S3-compatible IAM user access key secret
+        # Override with: NEXUS__S3_BUFFER.SECRET_ACCESS_KEY      
+        secret-access-key: ""
+        
+        # AWS or S3-compatible region
+        # Override with: NEXUS__S3_BUFFER.REGION      
+        region: ""
+        
+        # AWS or S3-compatible endpoint. AWS endpoint example: https://s3.dualstack.us-east-1.amazonaws.com
+        # Override with: NEXUS__S3_BUFFER.ENDPOINT      
+        endpoint: ""
+      
+      cql-store:
+        # AstraDB specific setting, contains base64-encoded bundle zip. Leave empty for other Cassandra installations
+        # Support for Scylla and Apache OSS (generic Cassandra) is coming in the production release
+        # Override with: NEXUS__S3_BUFFER.CQL_STORE.SECURE_CONNECTION_BUNDLE_BASE64
+        secure-connection-bundle-base64: ""
+        
+        # Override with: NEXUS__S3_BUFFER.CQL_STORE.GATEWAY_USER      
+        gateway-user: ""
+      
+        # Override with: NEXUS__S3_BUFFER.CQL_STORE.GATEWAY_PASSWORD        
+        gateway-password: ""
+        
+      # optional path to kubeconfig for the controller cluster
+      # defaults to in-cluster config
+      # in the majority of cases you should leave this blank
+      # Override with: NEXUS__S3_BUFFER.KUBE_CONFIG_PATH      
+      kube-config-path: ""
   
-  # Name for a Secret resources that contains Cassandra connection info
-  # Defaults to AstraDB for now, to be changed to generic Cassandra on release
-  # Must have the following fields:
-  # user: "string"
-  # password: "string"
-  # bundle: "base64 string" (optional)
-  connectionSecretName: "secret"
-  
-  # Cassandra implementations. Available options are:
-  # astradb, scylla, apache-oss
-  # defaults to 'astradb'
-  cassandraImpl: "astradb"
+      # path to the directory containing kubeconfigs for all shards available for scheduling (mounted from `shardsConfigSecretName` secret)
+      # Note that the user specified in the config must have Batch API and Nexus CRD permissions to both controller and shard clusters
+      # in case of EKS you must assign appropriate permissions to the IAM role or user, since token will be fetched by aws-cli on-demand
+      # You will need to specify a volumeMount for Shards yourself if you provide your own appconfig.yaml
+      # Override with: NEXUS__S3_BUFFER.SHARD_KUBE_CONFIG_PATH
+      shard-kube-config-path: "/app/config/shards"
     
 # Observability settings for Datadog
 datadog:
