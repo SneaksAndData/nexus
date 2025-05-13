@@ -5,7 +5,6 @@ import (
 	"flag"
 	"github.com/SneaksAndData/nexus-core/pkg/signals"
 	"github.com/SneaksAndData/nexus-core/pkg/telemetry"
-	"github.com/SneaksAndData/nexus-core/pkg/util"
 	v1 "github.com/SneaksAndData/nexus/api/v1"
 	"github.com/SneaksAndData/nexus/app"
 	"github.com/gin-gonic/gin"
@@ -25,15 +24,6 @@ func init() {
 	flag.StringVar(&logLevel, "log-level", "INFO", "Log level for the application.")
 }
 
-func getGinMode() string {
-	return map[string]string{
-		"dev":         gin.DebugMode,
-		"development": gin.DebugMode,
-		"test":        gin.TestMode,
-		"production":  gin.ReleaseMode,
-	}[util.CoalesceString(os.Getenv("APPLICATION_ENVIRONMENT"), "development")]
-}
-
 func setupRouter(ctx context.Context) *gin.Engine {
 	gin.DisableConsoleColor()
 	router := gin.Default()
@@ -42,7 +32,7 @@ func setupRouter(ctx context.Context) *gin.Engine {
 	// disable trusted proxies check
 	_ = router.SetTrustedProxies(nil)
 	// set runtime mode
-	gin.SetMode(getGinMode())
+	gin.SetMode(os.Getenv("GIN_MODE"))
 
 	appConfig := app.LoadConfig(ctx)
 

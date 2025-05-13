@@ -34,7 +34,9 @@ WORKDIR /app
 COPY --from=build-stage /app /app
 
 COPY --from=aws-cli-stage /usr/local/aws-cli/ /usr/local/aws-cli/
-COPY --from=aws-cli-stage /aws-cli-bin/ /usr/local/bin/ 
+COPY --from=aws-cli-stage /aws-cli-bin/ /usr/local/bin/
+ 
+COPY ./appconfig.yaml /app/appconfig.yaml
 
 USER nonroot:nonroot
 

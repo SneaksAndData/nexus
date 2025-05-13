@@ -1,5 +1,3 @@
-environment: "Development"
-
 image:
   # Repository to pull the image from
   repository: "ghcr.io/sneaksanddata/nexus"

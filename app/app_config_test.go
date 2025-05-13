@@ -49,8 +49,8 @@ func Test_LoadConfig(t *testing.T) {
 func Test_LoadConfigFromEnv(t *testing.T) {
 	storagePath := "s3://bucket-2/nexus/payloads"
 	keyId := "test-key-id"
-	_ = os.Setenv("NEXUS__S3_BUFFER.BUFFER_CONFIG.PAYLOAD_STORAGE_PATH", storagePath)
-	_ = os.Setenv("NEXUS__S3_BUFFER.ACCESS_KEY_ID", keyId)
+	_ = os.Setenv("NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH", storagePath)
+	_ = os.Setenv("NEXUS__S3_BUFFER__ACCESS_KEY_ID", keyId)
 
 	var expected = getExpectedConfig(storagePath)
 	expected.S3Buffer.AccessKeyID = keyId

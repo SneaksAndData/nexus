@@ -49,8 +49,6 @@ spec:
           env:
             - name: APPLICATION_VERSION
               value: "{{ (default (printf "v%s" .Chart.AppVersion) .Values.image.tag) }}"
-            - name: APPLICATION_ENVIRONMENT
-              value: "{{ lower .Values.environment }}"
           {{- if .Values.datadog.enabled }}
             - name: DATADOG__API_KEY
               valueFrom:
@@ -87,21 +85,13 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         {{- end }}
-        {{- if .Values.scheduler.config.enabled }}  
           volumeMounts:
           - name: shards-kube-config
             mountPath: /app/config/shards
-        {{- end }}
         {{- if .Values.datadog.enabled }}
           - name: dsdsocket
             mountPath: /var/run/datadog
             readOnly: false
-        {{- end }}
-        {{- if .Values.scheduler.config.enabled }}
-          - name: app-config
-            mountPath: /app/appconfig.{{ .Values.environment | lower }}.yaml
-            subPath: appconfig.{{ .Values.environment | lower }}.yaml
-            readOnly: true            
         {{- end }}
           {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -114,11 +104,6 @@ spec:
         - name: shards-kube-config
           secret:
             secretName: {{ .Values.scheduler.shardsConfigSecretName }}
-       {{- if .Values.scheduler.config.enabled }}
-        - name: app-config
-          configMap:
-            name: {{ include "app.name" . }}
-       {{- end }}
        {{- if .Values.datadog.enabled }}
         - name: dsdsocket
           hostPath:

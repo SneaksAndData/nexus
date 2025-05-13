@@ -1,0 +1,20 @@
+s3-buffer:
+  buffer-config:
+    payload-storage-path: ""
+    payload-valid-for: 24h
+    failure-rate-base-delay: 100ms
+    failure-rate-max-delay: 1s
+    rate-limit-elements-per-second: 10
+    rate-limit-elements-burst: 100
+    workers: 10
+  access-key-id: ""
+  secret-access-key: ""
+  region: ""
+  endpoint: ""    
+resource-namespace: nexus
+cql-store: # can be read from environment
+  secure-connection-bundle-base64: ""
+  gateway-user: ""
+  gateway-password: ""
+kube-config-path: ""
+shard-kube-config-path: ""
