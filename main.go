@@ -27,6 +27,7 @@ func init() {
 
 func getGinMode() string {
 	return map[string]string{
+		"dev":         gin.DebugMode,
 		"development": gin.DebugMode,
 		"test":        gin.TestMode,
 		"production":  gin.ReleaseMode,
