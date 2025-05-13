@@ -65,11 +65,11 @@ func setupRouter(ctx context.Context) *gin.Engine {
 		logger := klog.FromContext(ctx)
 		reason := ctx.Err()
 		if reason.Error() == context.Canceled.Error() {
-			logger.V(0).Info("Received SIGTERM, shutting down gracefully")
+			logger.V(0).Info("received SIGTERM, shutting down gracefully")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 0)
 		}
 
-		logger.V(0).Error(reason, "Fatal error occurred.")
+		logger.V(0).Error(reason, "fatal error occurred.")
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}()
 
@@ -83,7 +83,7 @@ func main() {
 	logger := klog.FromContext(ctx)
 
 	if err != nil {
-		logger.Error(err, "One of the logging handlers cannot be configured")
+		logger.Error(err, "one of the logging handlers cannot be configured")
 	}
 
 	klog.SetSlogLogger(appLogger)

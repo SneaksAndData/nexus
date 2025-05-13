@@ -31,7 +31,7 @@ func LoadConfig(ctx context.Context) SchedulerConfig {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		logger.Error(err, "Error loading application config from appconfig.yaml")
+		logger.Error(err, "error loading application config from appconfig.yaml")
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 
@@ -39,7 +39,7 @@ func LoadConfig(ctx context.Context) SchedulerConfig {
 	err := viper.Unmarshal(&appConfig)
 
 	if err != nil {
-		logger.Error(err, "Error loading application config from appconfig.yaml")
+		logger.Error(err, "error loading application config from appconfig.yaml")
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 

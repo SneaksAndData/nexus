@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/SneaksAndData/nexus-core/pkg/buildmeta"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
@@ -47,19 +46,19 @@ func (appServices *ApplicationServices) WithKubeClients(ctx context.Context, kub
 		logger := klog.FromContext(ctx)
 		kubeCfg, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 		if err != nil {
-			logger.Error(err, "Error building in-cluster kubeconfig for the scheduler")
+			logger.Error(err, "error building in-cluster kubeconfig for the scheduler")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 
 		appServices.kubeClient, err = kubernetes.NewForConfig(kubeCfg)
 		if err != nil {
-			logger.Error(err, "Error building in-cluster kubernetes clientset for the scheduler")
+			logger.Error(err, "error building in-cluster kubernetes clientset for the scheduler")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 
 		appServices.nexusClient, err = nexuscore.NewForConfig(kubeCfg)
 		if err != nil {
-			logger.Error(err, "Error building in-cluster Nexus clientset for the scheduler")
+			logger.Error(err, "error building in-cluster Nexus clientset for the scheduler")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 	}
@@ -73,7 +72,7 @@ func (appServices *ApplicationServices) WithShards(ctx context.Context, shardCon
 		var shardLoaderError error
 		appServices.shardClients, shardLoaderError = shards.LoadClients(shardConfigPath, namespace, logger)
 		if shardLoaderError != nil {
-			logger.Error(shardLoaderError, "Unable to initialize shard clients")
+			logger.Error(shardLoaderError, "unable to initialize shard clients")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 	}
@@ -93,7 +92,7 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 		// Add nexus-configuration-controller types to the default Kubernetes Scheme so Events can be
 		// logged for nexus-configuration-controller types.
 		utilruntime.Must(nexusscheme.AddToScheme(scheme.Scheme))
-		logger.V(4).Info("Creating event broadcaster")
+		logger.V(4).Info("creating event broadcaster")
 
 		eventBroadcaster := record.NewBroadcaster(record.WithContext(ctx))
 		eventBroadcaster.StartStructuredLogging(0)
@@ -156,7 +155,7 @@ func (appServices *ApplicationServices) schedule(output *request.BufferOutput) (
 	if shard := appServices.getShardByName(output.Workgroup.Cluster); shard != nil {
 		submitted, submitErr = shard.SendJob(shard.Namespace, &job)
 	} else {
-		return "", errors.New(fmt.Sprintf("Shard API server %s not configured", output.Workgroup.Cluster))
+		return "", fmt.Errorf("shard API server %s not configured", output.Workgroup.Cluster)
 	}
 
 	if submitErr != nil {
@@ -170,7 +169,7 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 	logger := klog.FromContext(ctx)
 	err := appServices.configCache.Init(ctx)
 	if err != nil {
-		logger.Error(err, "Error building in-cluster kubeconfig for the scheduler")
+		logger.Error(err, "error building in-cluster kubeconfig for the scheduler")
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 	submissionActor := pipeline.NewDefaultPipelineStageActor[*request.BufferOutput, types.UID](

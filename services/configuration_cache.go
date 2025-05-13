@@ -77,7 +77,7 @@ func (c *NexusResourceCache) onConfigurationAdded(obj interface{}) {
 		return
 	}
 
-	c.logger.V(3).Info("New Nexus resource loaded", "algorithm", objectRef.Name)
+	c.logger.V(3).Info("resource loaded", "algorithm", objectRef.Name)
 }
 
 func (c *NexusResourceCache) onConfigurationUpdated(old, new interface{}) {
@@ -94,10 +94,10 @@ func (c *NexusResourceCache) onConfigurationUpdated(old, new interface{}) {
 		return
 	}
 
-	c.logger.V(3).Info("Nexus resource updated", "resource", newRef.Name, "diff", diff.ObjectGoPrintSideBySide(old, new))
+	c.logger.V(3).Info("resource updated", "resource", newRef.Name, "diff", diff.ObjectGoPrintSideBySide(old, new))
 }
 func (c *NexusResourceCache) onConfigurationDeleted(obj interface{}) {
-	c.logger.V(3).Info("Nexus resource deleted", "resource", obj.(v1.NexusAlgorithmTemplate).Name)
+	c.logger.V(3).Info("resource deleted", "resource", obj.(v1.NexusAlgorithmTemplate).Name)
 }
 
 func (c *NexusResourceCache) cacheKey(resourceName string) string {
