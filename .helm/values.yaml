@@ -1,0 +1,273 @@
+image:
+  # Repository to pull the image from
+  repository: "ghcr.io/sneaksanddata/nexus"
+  
+  # Tag to pull (defaults to the chart appVersion)
+  tag: ""
+  
+  # Image pull policy
+  pullPolicy: "IfNotPresent"
+
+# Image pull secrets for private repositories
+imagePullSecrets: []
+
+# Override the application name
+nameOverride: ""
+
+# Fullname override
+fullnameOverride: ""
+
+# Service account configuration
+serviceAccount:
+  
+  # Specifies whether a service account should be created
+  create: true
+  
+  # Annotations to add to the service account
+  annotations: {}
+  
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  
+### Role Based Access Control configuration
+rbac:
+  
+  # Specifies whether RBAC resources should be created
+  clusterRole:
+        
+    # Allows Nexus to manage its custom resources in the installation namespace
+    templateEditor:
+      additionalLabels: {}
+      additionalAnnotations: {}
+      create: true
+      nameOverride: ""
+      
+    workgroupEditor:
+      additionalLabels: {}
+      additionalAnnotations: {}
+      create: true
+      nameOverride: ""      
+  
+  # This parameter determines whether role binding resources need to be created.
+  # If you have any roles in your configuration set to 'true', then this parameter for creating role binding resources
+  # should also be set to 'true'.
+  clusterRoleBindings:
+    additionalLabels: {}
+    additionalAnnotations: {}
+    create: true  
+    
+# Additional labels for the deployment and pods
+additionalLabels: {}
+# Example:
+#
+#  app.my-company.com/component: ncc
+
+# Additional labels for the deployment and pods
+additionalAnnotations: {}
+  # Example:
+  #  app.my-company.com/application: nexus
+
+# Extra environment variables to set in the deployment
+extraEnv: {}
+# Example:
+#
+#  - name: NEXUS__RESOURCE_NAMESPACE
+#    value: nexus
+
+# Extra environment variables referencing a ConfigMap or Secret
+extraEnvFrom: {}
+# Example:
+#
+#  envFrom:
+#    - configMapRef:
+#        name: custom-api-access-token
+  
+# Extra volumes to add to the deployment
+extraVolumes: {}
+  # Example:
+  # 
+  #  - name: data-volume
+  #    emptyDir:
+  #      sizeLimit: 500Mi
+    
+# Extra volumes to add to the deployment
+extraVolumeMounts: {}
+# Example:
+#
+#  - mountPath: /data
+#    name: data-volume
+
+# Resources constraints. By default, the operator does not specify any constraints to allow for easier deployment
+resources: {}
+# Example:
+#
+#  requests:
+#    cpu: 1
+#    memory: 1Gi
+#  limits:
+#    cpu: 1
+#    memory: 1Gi
+
+# Node labels for pod assignment
+tolerations: { }
+
+# Node labels for pod assignment
+affinity: { }
+
+# Security context settings for the container
+# Note that default image is distroless and runs as non-root user by default.
+securityContext: {}
+
+# Logging configuration
+logging:
+  level: INFO
+  
+# Run mode for Gin. Set to `release` for production deployments
+# Available values: debug, test, release
+ginMode: debug
+
+# Nexus Scheduler configurations
+scheduler:
+  
+  # Number of scheduler replicas. Increase to support higher request rates
+  replicas: 3
+  
+  # Disruption budget for the deployment
+  maxUnavailable: 2
+  
+  # autoscaling configuration
+  autoscaling:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 9
+    targetMemoryAvg: 80
+    targetCPUAvg: 60
+    scaleStabilizationWindowSeconds: 180
+    scalePeriodSeconds: 30
+    scaleByPercent: 10
+    
+  # path to the Secret containing shard kubeconfig files
+  # File name format should be <shard cluster name>.kubeconfig
+  shardsConfigSecretName: "nexus-shards"
+         
+  # Scheduler configuration
+  # Individual settings can be overridden using environment variables
+  # Whole config can also be overridden by setting config.enabled=false and mounting a new appconfig.yaml to /app path in the container
+  config:   
+    enabled: true
+    # Main resource namespace
+    # Override with: NEXUS__RESOURCE_NAMESPACE
+    resourceNamespace: "nexus"
+        
+    # Input buffering configuration
+    s3Buffer:
+      processing:
+          
+        # Prefix to store payloads under
+        # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH
+        payloadStoragePath: s3a://bucket/prefix
+          
+        # Default payload's presigned URL lifetime duration
+        # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_VALID_FOR
+        payloadValidFor: 24h
+          
+        # Failure backoff base delay. Example values: 5ms, 5s
+        # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_BASE_DELAY
+        failureRateBaseDelay: 100ms
+          
+        # Failure backoff max delay. Example values: 5s, 1m
+        # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_MAX_DELAY      
+        failureRateMaxDelay: 1s
+          
+        # Rate limit elements per second
+        # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__RATE_LIMIT_ELEMENTS_PER_SECOND      
+        rateLimitElementsPerSecond: 10
+        
+        # Rate limit burst elements
+        # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__RATE_LIMIT_ELEMENTS_BURST      
+        rateLimitElementsBurst: 100
+        
+        # Number of workers to use when buffering inputs
+        # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__WORKERS      
+        workers: 2
+          
+      s3Credentials:
+        # Enable mounting S3 credentials from a secret
+        secretRefEnabled: true
+        
+        # Name of a secret containing credentials for the S3 storage
+        # Example content:
+        #   apiVersion: v1
+        #   kind: Secret
+        #   metadata:
+        #     name: s3-credentials
+        #     namespace: nexus
+        #   data:
+        #     NEXUS__S3_BUFFER__ACCESS_KEY_ID: test
+        #     NEXUS__S3_BUFFER__SECRET_ACCESS_KEY: test
+        #     NEXUS__S3_BUFFER__ENDPOINT: https://s3.dualstack.us-east-1.amazonaws.com
+        #     NEXUS__S3_BUFFER__REGION: us-east-1
+        #   type: Opaque
+        secretName: ""
+    
+    cqlStore:
+      # Enable mounting Cassandra credentials from a secret
+      secretRefEnabled: true
+      
+      # Name of a secret containing Cassandra credentials
+      # Example content:
+      #  apiVersion: v1
+      #  kind: Secret
+      #  metadata:
+      #    name: cassandra-credentials
+      #    namespace: nexus
+      #  data:
+      #    AstraDB specific setting, contains base64-encoded bundle zip. Leave empty for other Cassandra installations
+      #    Support for Scylla and Apache OSS (generic Cassandra) is coming in the production release
+      #    NEXUS__CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64: base64value
+      #    NEXUS__CQL_STORE__GATEWAY_USER: user
+      #    NEXUS__CQL_STORE__GATEWAY_PASSWORD: password
+      #  type: Opaque
+      
+      secretName: ""
+      
+    # optional path to kubeconfig for the controller cluster
+    # defaults to in-cluster config
+    # in the majority of cases you should leave this blank
+    # Override with: NEXUS__KUBE_CONFIG_PATH      
+    kubeConfigPath: ""
+
+    # path to the directory containing kubeconfigs for all shards available for scheduling (mounted from `shardsConfigSecretName` secret)
+    # Note that the user specified in the config must have Batch API and Nexus CRD permissions to both controller and shard clusters
+    # in case of EKS you must assign appropriate permissions to the IAM role or user, since token will be fetched by aws-cli on-demand
+    # You will need to specify a volumeMount for Shards yourself if you provide your own appconfig.yaml
+    # Override with: NEXUS__SHARD_KUBE_CONFIG_PATH
+    shardKubeConfigPath: "/app/config/shards"
+    
+# Observability settings for Datadog
+datadog:
+  
+  # if enabled, will set Datadog-specific environment variables on the container 
+  enabled: false
+  
+  # Datadog endpoint to sink logs to
+  endpoint: "datadoghq.eu"
+  
+  # Name for a Secret resource that contains Datadog API Key to use for log submissions
+  apiKeySecret: "secretName"
+
+  # Key in the secret that contains datadog api key    
+  apiKeySecretKey: "secretKey"
+  
+  # Datadog Service Name parameter
+  serviceName: "nexus"
+  
+  # value to use as a DogStatsd server url
+  # Examples: udp://127.0.0.1:8125 or unix:///path/to/dsd.socket
+  # https://github.com/DataDog/datadog-go?tab=readme-ov-file#unix-domain-sockets-client
+  statsdUrl: unix:///var/run/datadog/dsd.socket
+  
+  # enables metric origin detection by setting DD_ENTITY_ID
+  enableOriginDetection: true
+  

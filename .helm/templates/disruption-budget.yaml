@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "app.name" . }}
+spec:
+  maxUnavailable: {{ .Values.scheduler.maxUnavailable }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "app.name" . }}

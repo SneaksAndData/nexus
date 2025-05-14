@@ -1,0 +1,33 @@
+{{- if .Values.rbac.clusterRole.workgroupEditor.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "app.clusteRole.workgroupEditor" . }}
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"    
+    {{- include "app.labels" $ | nindent 4 }}
+    {{- with .Values.rbac.clusterRole.workgroupEditor.additionalLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.rbac.clusterRole.workgroupEditor.additionalAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+rules:
+  - verbs:
+      - create
+      - update
+      - patch
+      - delete
+      - list
+      - watch
+      - get 
+    apiGroups:
+      - "science.sneaksanddata.com"
+    resources:
+      - events
+      - nexusalgorithmworkgroups
+      - nexusalgorithmworkgroups/status
+      - nexusalgorithmworkgroup
+      - nexusalgorithmworkgroup/status
+{{- end }}

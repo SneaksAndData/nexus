@@ -13,30 +13,33 @@ import (
 	"time"
 )
 
-type MachineLearningAlgorithmCache struct {
-	logger        klog.Logger
-	factory       nexusinf.SharedInformerFactory
-	cacheInformer cache.SharedIndexInformer
-	prefix        string
+type NexusResourceCache struct {
+	logger            klog.Logger
+	factory           nexusinf.SharedInformerFactory
+	templateInformer  cache.SharedIndexInformer
+	workgroupInformer cache.SharedIndexInformer
+	prefix            string
 }
 
-// NewMachineLearningAlgorithmCache creates a new cache + resource watcher for MLA resources
-func NewMachineLearningAlgorithmCache(client *nexuscore.Clientset, resourceNamespace string, logger klog.Logger) *MachineLearningAlgorithmCache {
+// NewNexusResourceCache creates a new cache + resource watcher for MLA resources
+func NewNexusResourceCache(client *nexuscore.Clientset, resourceNamespace string, logger klog.Logger) *NexusResourceCache {
 	factory := nexusinf.NewSharedInformerFactoryWithOptions(client, time.Second*30, nexusinf.WithNamespace(resourceNamespace))
-	watcher := factory.Science().V1().MachineLearningAlgorithms()
+	watcher := factory.Science().V1().NexusAlgorithmTemplates()
+	workgroupWatcher := factory.Science().V1().NexusAlgorithmWorkgroups()
 
-	return &MachineLearningAlgorithmCache{
-		logger:        logger,
-		factory:       factory,
-		cacheInformer: watcher.Informer(),
-		prefix:        resourceNamespace,
+	return &NexusResourceCache{
+		logger:            logger,
+		factory:           factory,
+		templateInformer:  watcher.Informer(),
+		workgroupInformer: workgroupWatcher.Informer(),
+		prefix:            resourceNamespace,
 	}
 }
 
 // Init starts informers and sync the cache
-func (c *MachineLearningAlgorithmCache) Init(ctx context.Context) error {
+func (c *NexusResourceCache) Init(ctx context.Context) error {
 	// Set up an event handler for when Machine Learning Algorithm resources change
-	_, err := c.cacheInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, err := c.templateInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    c.onConfigurationAdded,
 		UpdateFunc: c.onConfigurationUpdated,
 		DeleteFunc: c.onConfigurationDeleted,
@@ -46,27 +49,38 @@ func (c *MachineLearningAlgorithmCache) Init(ctx context.Context) error {
 		return err
 	}
 
+	_, werr := c.workgroupInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    c.onConfigurationAdded,
+		UpdateFunc: c.onConfigurationUpdated,
+		DeleteFunc: c.onConfigurationDeleted,
+	})
+
+	if werr != nil {
+		return werr
+	}
+
 	c.factory.Start(ctx.Done())
 
-	if ok := cache.WaitForCacheSync(ctx.Done(), c.cacheInformer.HasSynced); !ok {
-		return fmt.Errorf("failed to wait for caches to sync")
+	if ok := cache.WaitForCacheSync(ctx.Done(), c.templateInformer.HasSynced, c.workgroupInformer.HasSynced); !ok {
+		return fmt.Errorf("failed to wait for informer caches to sync")
 	}
-	c.logger.Info("Resource informers synced")
+
+	c.logger.Info("resource informers synced")
 
 	return nil
 }
 
-func (c *MachineLearningAlgorithmCache) onConfigurationAdded(obj interface{}) {
+func (c *NexusResourceCache) onConfigurationAdded(obj interface{}) {
 	objectRef, err := cache.ObjectToName(obj)
 	if err != nil {
 		utilruntime.HandleError(err)
 		return
 	}
 
-	c.logger.V(3).Info("New configuration loaded", "algorithm", objectRef.Name)
+	c.logger.V(3).Info("resource loaded", "algorithm", objectRef.Name)
 }
 
-func (c *MachineLearningAlgorithmCache) onConfigurationUpdated(old, new interface{}) {
+func (c *NexusResourceCache) onConfigurationUpdated(old, new interface{}) {
 	_, oldErr := cache.ObjectToName(old)
 	newRef, newErr := cache.ObjectToName(new)
 
@@ -80,19 +94,19 @@ func (c *MachineLearningAlgorithmCache) onConfigurationUpdated(old, new interfac
 		return
 	}
 
-	c.logger.V(3).Info("Configuration updated", "algorithm", newRef.Name, "diff", diff.ObjectGoPrintSideBySide(old, new))
+	c.logger.V(3).Info("resource updated", "resource", newRef.Name, "diff", diff.ObjectGoPrintSideBySide(old, new))
 }
-func (c *MachineLearningAlgorithmCache) onConfigurationDeleted(obj interface{}) {
-	c.logger.V(3).Info("Configuration deleted", "algorithm", obj.(v1.MachineLearningAlgorithm).Name)
-}
-
-func (c *MachineLearningAlgorithmCache) cacheKey(algorithmName string) string {
-	return fmt.Sprintf("%s/%s", c.prefix, algorithmName)
+func (c *NexusResourceCache) onConfigurationDeleted(obj interface{}) {
+	c.logger.V(3).Info("resource deleted", "resource", obj.(v1.NexusAlgorithmTemplate).Name)
 }
 
-// GetConfiguration retrieves a cached MLA resource from informer cache
-func (c *MachineLearningAlgorithmCache) GetConfiguration(algorithmName string) (*v1.MachineLearningAlgorithm, error) {
-	config, exists, err := c.cacheInformer.GetStore().GetByKey(c.cacheKey(algorithmName))
+func (c *NexusResourceCache) cacheKey(resourceName string) string {
+	return fmt.Sprintf("%s/%s", c.prefix, resourceName)
+}
+
+// GetAlgorithmConfiguration retrieves a cached NexusAlgorithmTemplate resource from informer cache
+func (c *NexusResourceCache) GetAlgorithmConfiguration(algorithmName string) (*v1.NexusAlgorithmTemplate, error) {
+	config, exists, err := c.templateInformer.GetStore().GetByKey(c.cacheKey(algorithmName))
 	if err != nil {
 		return nil, err
 	}
@@ -101,5 +115,19 @@ func (c *MachineLearningAlgorithmCache) GetConfiguration(algorithmName string) (
 		return nil, nil
 	}
 
-	return config.(*v1.MachineLearningAlgorithm), nil
+	return config.(*v1.NexusAlgorithmTemplate), nil
+}
+
+// GetWorkgroupConfiguration retrieves a cached NexusAlgorithmTemplate resource from informer cache
+func (c *NexusResourceCache) GetWorkgroupConfiguration(workgroupName string) (*v1.NexusAlgorithmWorkgroup, error) {
+	config, exists, err := c.workgroupInformer.GetStore().GetByKey(c.cacheKey(workgroupName))
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, nil
+	}
+
+	return config.(*v1.NexusAlgorithmWorkgroup), nil
 }

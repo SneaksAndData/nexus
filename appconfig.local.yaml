@@ -1,11 +1,16 @@
-buffer:
-  payload-storage-path: s3://bucket/nexus/payloads
-  payload-valid-for: 24h
-  failure-rate-base-delay: 100ms
-  failure-rate-max-delay: 1s
-  rate-limit-elements-per-second: 10
-  rate-limit-elements-burst: 100
-  workers: 10
+s3-buffer:
+  buffer-config:
+    payload-storage-path: s3a://bucket/nexus/payloads
+    payload-valid-for: 24h
+    failure-rate-base-delay: 100ms
+    failure-rate-max-delay: 1s
+    rate-limit-elements-per-second: 10
+    rate-limit-elements-burst: 100
+    workers: 10
+  access-key-id: "test"
+  secret-access-key: "test"
+  region: us-east-1
+  endpoint: http://127.0.0.1:9000    
 resource-namespace: nexus
 cql-store: # can be read from environment
   secure-connection-bundle-base64: base64value

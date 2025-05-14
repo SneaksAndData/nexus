@@ -9,6 +9,7 @@ import (
 	"github.com/SneaksAndData/nexus/app"
 	"github.com/gin-gonic/gin"
 	"k8s.io/klog/v2"
+	"os"
 )
 
 const (
@@ -24,16 +25,20 @@ func init() {
 }
 
 func setupRouter(ctx context.Context) *gin.Engine {
-	// Disable Console Color
-	// gin.DisableConsoleColor()
+	gin.DisableConsoleColor()
 	router := gin.Default()
 	router.MaxMultipartMemory = MaxBodySize
 	router.Use(gin.Logger())
+	// disable trusted proxies check
+	_ = router.SetTrustedProxies(nil)
+	// set runtime mode
+	gin.SetMode(os.Getenv("GIN_MODE"))
+
 	appConfig := app.LoadConfig(ctx)
 
 	appServices := (&app.ApplicationServices{}).
 		WithKubeClients(ctx, appConfig.KubeConfigPath).
-		WithBuffer(ctx, &appConfig.Buffer, &appConfig.CqlStore).
+		WithBuffer(ctx, &appConfig.S3Buffer, &appConfig.CqlStore).
 		WithCache(ctx, appConfig.ResourceNamespace).
 		WithRecorder(ctx, appConfig.ResourceNamespace).
 		WithShards(ctx, appConfig.ShardKubeConfigPath, appConfig.ResourceNamespace).
@@ -45,24 +50,17 @@ func setupRouter(ctx context.Context) *gin.Engine {
 	apiV12.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache()))
 	apiV12.GET("results/:algorithmName/requests/:requestId", v1.GetRunResult(appServices.CheckpointBuffer()))
 
-	// TODO: Boxer auth middleware
-
-	//// Ping test
-	//r.GET("/ping", func(c *gin.Context) {
-	//	c.String(http.StatusOK, "pong")
-	//})
-
 	go func() {
 		appServices.Start(ctx)
 		// handle exit
 		logger := klog.FromContext(ctx)
 		reason := ctx.Err()
 		if reason.Error() == context.Canceled.Error() {
-			logger.V(0).Info("Received SIGTERM, shutting down gracefully")
+			logger.V(0).Info("received SIGTERM, shutting down gracefully")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 0)
 		}
 
-		logger.V(0).Error(reason, "Fatal error occurred.")
+		logger.V(0).Error(reason, "fatal error occurred.")
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}()
 
@@ -76,7 +74,7 @@ func main() {
 	logger := klog.FromContext(ctx)
 
 	if err != nil {
-		logger.Error(err, "One of the logging handlers cannot be configured")
+		logger.Error(err, "one of the logging handlers cannot be configured")
 	}
 
 	klog.SetSlogLogger(appLogger)

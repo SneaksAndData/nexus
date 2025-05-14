@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/SneaksAndData/nexus-core/pkg/buildmeta"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
@@ -14,7 +13,6 @@ import (
 	"github.com/SneaksAndData/nexus/services"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -32,10 +30,10 @@ type ApplicationServices struct {
 	shardClients     []*shards.ShardClient
 	nexusClient      *nexuscore.Clientset
 	recorder         record.EventRecorder
-	configCache      *services.MachineLearningAlgorithmCache
+	configCache      *services.NexusResourceCache
 }
 
-func (appServices *ApplicationServices) WithBuffer(ctx context.Context, config *request.BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
+func (appServices *ApplicationServices) WithBuffer(ctx context.Context, config *request.S3BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
 	if appServices.checkpointBuffer == nil {
 		appServices.checkpointBuffer = request.NewDefaultBuffer(ctx, config, bundleConfig, map[string]string{})
 	}
@@ -48,19 +46,19 @@ func (appServices *ApplicationServices) WithKubeClients(ctx context.Context, kub
 		logger := klog.FromContext(ctx)
 		kubeCfg, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 		if err != nil {
-			logger.Error(err, "Error building in-cluster kubeconfig for the scheduler")
+			logger.Error(err, "error building in-cluster kubeconfig for the scheduler")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 
 		appServices.kubeClient, err = kubernetes.NewForConfig(kubeCfg)
 		if err != nil {
-			logger.Error(err, "Error building in-cluster kubernetes clientset for the scheduler")
+			logger.Error(err, "error building in-cluster kubernetes clientset for the scheduler")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 
 		appServices.nexusClient, err = nexuscore.NewForConfig(kubeCfg)
 		if err != nil {
-			logger.Error(err, "Error building in-cluster Nexus clientset for the scheduler")
+			logger.Error(err, "error building in-cluster Nexus clientset for the scheduler")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 	}
@@ -74,7 +72,7 @@ func (appServices *ApplicationServices) WithShards(ctx context.Context, shardCon
 		var shardLoaderError error
 		appServices.shardClients, shardLoaderError = shards.LoadClients(shardConfigPath, namespace, logger)
 		if shardLoaderError != nil {
-			logger.Error(shardLoaderError, "Unable to initialize shard clients")
+			logger.Error(shardLoaderError, "unable to initialize shard clients")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 		}
 	}
@@ -94,7 +92,7 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 		// Add nexus-configuration-controller types to the default Kubernetes Scheme so Events can be
 		// logged for nexus-configuration-controller types.
 		utilruntime.Must(nexusscheme.AddToScheme(scheme.Scheme))
-		logger.V(4).Info("Creating event broadcaster")
+		logger.V(4).Info("creating event broadcaster")
 
 		eventBroadcaster := record.NewBroadcaster(record.WithContext(ctx))
 		eventBroadcaster.StartStructuredLogging(0)
@@ -109,7 +107,7 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceNamespace string) *ApplicationServices {
 	if appServices.configCache == nil {
 		logger := klog.FromContext(ctx)
-		appServices.configCache = services.NewMachineLearningAlgorithmCache(appServices.nexusClient, resourceNamespace, logger)
+		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, resourceNamespace, logger)
 	}
 
 	return appServices
@@ -127,7 +125,7 @@ func (appServices *ApplicationServices) NexusClient() *nexuscore.Clientset {
 	return appServices.nexusClient
 }
 
-func (appServices *ApplicationServices) Cache() *services.MachineLearningAlgorithmCache {
+func (appServices *ApplicationServices) Cache() *services.NexusResourceCache {
 	return appServices.configCache
 }
 
@@ -147,22 +145,17 @@ func (appServices *ApplicationServices) getShardByName(shardName string) *shards
 
 func (appServices *ApplicationServices) schedule(output *request.BufferOutput) (types.UID, error) {
 	if output == nil {
-		return types.UID(""), fmt.Errorf("buffer is nil")
+		return types.UID(""), fmt.Errorf("buffer has not provided any data to schedule")
 	}
 
-	var job = output.Checkpoint.ToV1Job("kubernetes.sneaksanddata.com/service-node-group", output.Checkpoint.AppliedConfiguration.Workgroup, fmt.Sprintf("%s-%s", buildmeta.AppVersion, buildmeta.BuildNumber))
+	var job = output.Checkpoint.ToV1Job(fmt.Sprintf("%s-%s", buildmeta.AppVersion, buildmeta.BuildNumber), output.Workgroup)
 	var submitted *batchv1.Job
 	var submitErr error
 
-	// submit to controller cluster if workgroup host is not provided
-	if output.Checkpoint.AppliedConfiguration.WorkgroupHost == "" {
-		submitted, submitErr = appServices.kubeClient.BatchV1().Jobs(appServices.defaultNamespace).Create(context.TODO(), &job, v1.CreateOptions{})
-	}
-
-	if shard := appServices.getShardByName(output.Checkpoint.AppliedConfiguration.WorkgroupHost); shard != nil {
+	if shard := appServices.getShardByName(output.Workgroup.Cluster); shard != nil {
 		submitted, submitErr = shard.SendJob(shard.Namespace, &job)
 	} else {
-		return "", errors.New(fmt.Sprintf("Shard API server %s not configured", output.Checkpoint.AppliedConfiguration.WorkgroupHost))
+		return "", fmt.Errorf("shard API server %s not configured", output.Workgroup.Cluster)
 	}
 
 	if submitErr != nil {
@@ -176,11 +169,11 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 	logger := klog.FromContext(ctx)
 	err := appServices.configCache.Init(ctx)
 	if err != nil {
-		logger.Error(err, "Error building in-cluster kubeconfig for the scheduler")
+		logger.Error(err, "error building in-cluster kubeconfig for the scheduler")
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 	submissionActor := pipeline.NewDefaultPipelineStageActor[*request.BufferOutput, types.UID](
-		"checkpoint_buffer",
+		"kubernetes_job_submission",
 		map[string]string{},
 		time.Second*1,
 		time.Second*5,

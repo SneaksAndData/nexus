@@ -11,22 +11,29 @@ import (
 
 func getExpectedConfig(storagePath string) *SchedulerConfig {
 	return &SchedulerConfig{
-		Buffer: request.BufferConfig{
-			PayloadStoragePath:         storagePath,
-			PayloadValidFor:            time.Hour * 24,
-			FailureRateMaxDelay:        time.Second * 1,
-			FailureRateBaseDelay:       time.Millisecond * 100,
-			RateLimitElementsPerSecond: 10,
-			RateLimitElementsBurst:     100,
-			Workers:                    10,
+		S3Buffer: request.S3BufferConfig{
+			BufferConfig: &request.BufferConfig{
+				PayloadStoragePath:         storagePath,
+				PayloadValidFor:            time.Hour * 24,
+				FailureRateMaxDelay:        time.Second * 1,
+				FailureRateBaseDelay:       time.Millisecond * 100,
+				RateLimitElementsPerSecond: 10,
+				RateLimitElementsBurst:     100,
+				Workers:                    10,
+			},
+			AccessKeyID:     "test",
+			SecretAccessKey: "test",
+			Endpoint:        "http://127.0.0.1:9000",
+			Region:          "us-east-1",
 		},
 		CqlStore: request.AstraBundleConfig{
 			SecureConnectionBundleBase64: "base64value",
 			GatewayUser:                  "user",
 			GatewayPassword:              "password",
 		},
-		ResourceNamespace: "crystal",
-		KubeConfigPath:    "/tmp/nexus-test",
+		ResourceNamespace:   "nexus",
+		KubeConfigPath:      "/tmp/nexus-test",
+		ShardKubeConfigPath: "/tmp/shards",
 	}
 }
 
@@ -40,8 +47,13 @@ func Test_LoadConfig(t *testing.T) {
 }
 
 func Test_LoadConfigFromEnv(t *testing.T) {
-	_ = os.Setenv("NEXUS__BUFFER.PAYLOAD_STORAGE_PATH", "s3://bucket-2/nexus/payloads")
-	var expected = getExpectedConfig("s3://bucket-2/nexus/payloads")
+	storagePath := "s3://bucket-2/nexus/payloads"
+	keyId := "test-key-id"
+	_ = os.Setenv("NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH", storagePath)
+	_ = os.Setenv("NEXUS__S3_BUFFER__ACCESS_KEY_ID", keyId)
+
+	var expected = getExpectedConfig(storagePath)
+	expected.S3Buffer.AccessKeyID = keyId
 
 	var result = LoadConfig(context.TODO())
 	if !reflect.DeepEqual(*expected, result) {

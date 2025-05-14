@@ -1,0 +1,154 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.name" . }}
+  labels:
+    {{- include "app.labels" $ | nindent 4 }}
+  {{- with .Values.additionalAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" $ | nindent 6 }}
+  replicas: {{ .Values.scheduler.replicas | default 1 }}
+  # The deployment strategy is hardcoded as well until NCC supports HA mode
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        {{- include "app.labels" $ | nindent 8 }}
+      {{- with .Values.additionalAnnotations }}
+      annotations:
+        deployment/date: {{ now }} # Force redeployment
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "app.serviceAccountName" . }}
+      {{- with .Values.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nexus
+          args:
+            - "log-level"
+            - {{ .Values.logging.level }}
+        {{- with .Values.securityContext }}
+          securityContext:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+          image: "{{ include "app.image" . }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          env:
+            - name: APPLICATION_VERSION
+              value: "{{ (default (printf "v%s" .Chart.AppVersion) .Values.image.tag) }}"
+            - name: GIN_MODE
+              value: {{ .Values.ginMode }}
+          {{- if .Values.scheduler.config.enabled }}
+            - name: NEXUS__RESOURCE_NAMESPACE              
+              value: {{ .Values.scheduler.config.resourceNamespace }}
+            - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH
+              value: {{ .Values.scheduler.config.s3Buffer.processing.payloadStoragePath }}
+            - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_VALID_FOR
+              value: {{ .Values.scheduler.config.s3Buffer.processing.payloadValidFor }}
+            - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_BASE_DELAY
+              value: {{ .Values.scheduler.config.s3Buffer.processing.failureRateBaseDelay }}
+            - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_MAX_DELAY
+              value: {{ .Values.scheduler.config.s3Buffer.processing.failureRateMaxDelay }}
+            - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__RATE_LIMIT_ELEMENTS_PER_SECOND
+              value: {{ .Values.scheduler.config.s3Buffer.processing.rateLimitElementsPerSecond | quote }}
+            - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__RATE_LIMIT_ELEMENTS_BURST
+              value: {{ .Values.scheduler.config.s3Buffer.processing.rateLimitElementsBurst | quote }}
+            - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__WORKERS
+              value: {{ .Values.scheduler.config.s3Buffer.processing.workers | quote }}
+            - name: NEXUS__KUBE_CONFIG_PATH
+              value: {{ .Values.scheduler.config.kubeConfigPath }}
+            - name: NEXUS__SHARD_KUBE_CONFIG_PATH
+              value: {{ .Values.scheduler.config.shardKubeConfigPath }}              
+          {{- end }}
+          {{- if .Values.datadog.enabled }}
+            - name: DATADOG__API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.datadog.apiKeySecret | quote }}
+                  key: {{ .Values.datadog.apiKeySecretKey | quote }}
+            - name: DATADOG__ENDPOINT
+              value: {{ .Values.datadog.endpoint | quote }}
+            - name: DATADOG__APPLICATION_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          {{- if .Values.datadog.enableOriginDetection }}
+            - name: DD_ENTITY_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+          {{- end }}
+            - name: DATADOG__SERVICE_NAME
+              value: {{ .Values.datadog.serviceName }}
+            - name: DD_SERVICE
+              value: {{ .Values.datadog.serviceName }}
+            - name: DD_VERSION
+              value: "{{ (default (printf "v%s" .Chart.AppVersion) .Values.image.tag) }}"
+            - name: DD_DOGSTATSD_URL
+              value: {{ .Values.datadog.statsdUrl | quote }}              
+          {{- end }}
+          {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- if .Values.extraEnvFrom }}
+          envFrom:
+          {{- if .Values.scheduler.config.s3Buffer.s3Credentials.secretRefEnabled }}
+            - secretRef:
+                name: {{ .Values.scheduler.config.s3Buffer.s3Credentials.secretName }}
+          {{- end }}            
+          {{- if .Values.scheduler.config.cqlStore.secretRefEnabled }}
+            - secretRef:
+                name: {{ .Values.scheduler.config.cqlStore.secretName }}
+          {{- end }}
+          {{- with .Values.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
+          volumeMounts:
+          - name: shards-kube-config
+            mountPath: {{ .Values.scheduler.config.shardKubeConfigPath }}
+        {{- if .Values.datadog.enabled }}
+          - name: dsdsocket
+            mountPath: /var/run/datadog
+            readOnly: false
+        {{- end }}
+          {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- with .Values.resources }}
+          resources:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+      volumes:
+        - name: shards-kube-config
+          secret:
+            secretName: {{ .Values.scheduler.shardsConfigSecretName }}
+       {{- if .Values.datadog.enabled }}
+        - name: dsdsocket
+          hostPath:
+            path: /var/run/datadog/
+       {{- end }}
+          {{- with .Values.extraVolumes }}
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

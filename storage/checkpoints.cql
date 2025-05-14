@@ -13,13 +13,13 @@ create table nexus.checkpoints
     sent_at                   timestamp,
     applied_configuration     text,
     configuration_overrides   text,
-    monitoring_metadata       map<text,text>,
     content_hash              text,
     last_modified             timestamp,
     tag                       text,
     api_version               text,
     job_uid                   text,
     parent_job                text,
+    payload_valid_for         text,
     PRIMARY KEY ((algorithm, id)
         )
 );
@@ -32,12 +32,3 @@ create
     using 'StorageAttachedIndex'
     with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
 
-create
-    custom index submission_lifecycle ON nexus.checkpoints (lifecycle_stage)
-    using 'StorageAttachedIndex'
-    with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
-
-create
-    custom index received_by_host ON nexus.checkpoints (received_by_host)
-    using 'StorageAttachedIndex'
-    with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
