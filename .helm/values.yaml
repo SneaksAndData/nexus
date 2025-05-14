@@ -225,9 +225,9 @@ scheduler:
       #  data:
       #    AstraDB specific setting, contains base64-encoded bundle zip. Leave empty for other Cassandra installations
       #    Support for Scylla and Apache OSS (generic Cassandra) is coming in the production release
-      #    NEXUS__S3_BUFFER__CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64: base64value
-      #    NEXUS__S3_BUFFER__CQL_STORE__GATEWAY_USER: user
-      #    NEXUS__S3_BUFFER__CQL_STORE__GATEWAY_PASSWORD: password
+      #    NEXUS__CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64: base64value
+      #    NEXUS__CQL_STORE__GATEWAY_USER: user
+      #    NEXUS__CQL_STORE__GATEWAY_PASSWORD: password
       #  type: Opaque
       
       secretName: ""
@@ -235,14 +235,14 @@ scheduler:
     # optional path to kubeconfig for the controller cluster
     # defaults to in-cluster config
     # in the majority of cases you should leave this blank
-    # Override with: NEXUS__S3_BUFFER__KUBE_CONFIG_PATH      
+    # Override with: NEXUS__KUBE_CONFIG_PATH      
     kubeConfigPath: ""
 
     # path to the directory containing kubeconfigs for all shards available for scheduling (mounted from `shardsConfigSecretName` secret)
     # Note that the user specified in the config must have Batch API and Nexus CRD permissions to both controller and shard clusters
     # in case of EKS you must assign appropriate permissions to the IAM role or user, since token will be fetched by aws-cli on-demand
     # You will need to specify a volumeMount for Shards yourself if you provide your own appconfig.yaml
-    # Override with: NEXUS__S3_BUFFER__SHARD_KUBE_CONFIG_PATH
+    # Override with: NEXUS__SHARD_KUBE_CONFIG_PATH
     shardKubeConfigPath: "/app/config/shards"
     
 # Observability settings for Datadog

@@ -68,9 +68,9 @@ spec:
               value: {{ .Values.scheduler.config.s3Buffer.processing.rateLimitElementsBurst | quote }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__WORKERS
               value: {{ .Values.scheduler.config.s3Buffer.processing.workers | quote }}
-            - name: NEXUS__S3_BUFFER__KUBE_CONFIG_PATH
+            - name: NEXUS__KUBE_CONFIG_PATH
               value: {{ .Values.scheduler.config.kubeConfigPath }}
-            - name: NEXUS__S3_BUFFER__SHARD_KUBE_CONFIG_PATH
+            - name: NEXUS__SHARD_KUBE_CONFIG_PATH
               value: {{ .Values.scheduler.config.shardKubeConfigPath }}              
           {{- end }}
           {{- if .Values.datadog.enabled }}
