@@ -63,11 +63,11 @@ spec:
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_MAX_DELAY
               value: {{ .Values.scheduler.config.s3Buffer.processing.failureRateMaxDelay }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__RATE_LIMIT_ELEMENTS_PER_SECOND
-              value: {{ .Values.scheduler.config.s3Buffer.processing.rateLimitElementsPerSecond }}
+              value: {{ .Values.scheduler.config.s3Buffer.processing.rateLimitElementsPerSecond | quote }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__RATE_LIMIT_ELEMENTS_BURST
-              value: {{ .Values.scheduler.config.s3Buffer.processing.rateLimitElementsBurst }}
+              value: {{ .Values.scheduler.config.s3Buffer.processing.rateLimitElementsBurst | quote }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__WORKERS
-              value: {{ .Values.scheduler.config.s3Buffer.processing.workers }}
+              value: {{ .Values.scheduler.config.s3Buffer.processing.workers | quote }}
             - name: NEXUS__S3_BUFFER__CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64
               value: {{ .Values.scheduler.config.cqlStore.secureConnectionBundleBase64 }}
             - name: NEXUS__S3_BUFFER__CQL_STORE__GATEWAY_USER
