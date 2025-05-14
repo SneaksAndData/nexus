@@ -155,9 +155,7 @@ scheduler:
   # Individual settings can be overridden using environment variables
   # Whole config can also be overridden by setting config.enabled=false and mounting a new appconfig.yaml to /app path in the container
   config:   
-    
-    # Enables full config override via env vars. Disable this to provide you own config via extraVolumeMount (mountPath=/app/appconfig.yaml)
-    envOverrideEnabled: true
+    enabled: true
     # Main resource namespace
     # Override with: NEXUS__RESOURCE_NAMESPACE
     resourceNamespace: "nexus"
@@ -193,34 +191,46 @@ scheduler:
         # Number of workers to use when buffering inputs
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__WORKERS      
         workers: 2
+          
+      s3Credentials:
+        # Enable mounting S3 credentials from a secret
+        secretRefEnabled: true
         
-      # AWS or S3-compatible IAM user access key id
-      # Override with: NEXUS__S3_BUFFER__ACCESS_KEY_ID      
-      accessKeyId: ""
-      
-      # AWS or S3-compatible IAM user access key secret
-      # Override with: NEXUS__S3_BUFFER__SECRET_ACCESS_KEY      
-      secretAccessKey: ""
-      
-      # AWS or S3-compatible region
-      # Override with: NEXUS__S3_BUFFER__REGION      
-      region: ""
-      
-      # AWS or S3-compatible endpoint. AWS endpoint example: https://s3.dualstack.us-east-1.amazonaws.com
-      # Override with: NEXUS__S3_BUFFER__ENDPOINT      
-      endpoint: ""
+        # Name of a secret containing credentials for the S3 storage
+        # Example content:
+        #   apiVersion: v1
+        #   kind: Secret
+        #   metadata:
+        #     name: s3-credentials
+        #     namespace: nexus
+        #   data:
+        #     NEXUS__S3_BUFFER__ACCESS_KEY_ID: test
+        #     NEXUS__S3_BUFFER__SECRET_ACCESS_KEY: test
+        #     NEXUS__S3_BUFFER__ENDPOINT: https://s3.dualstack.us-east-1.amazonaws.com
+        #     NEXUS__S3_BUFFER__REGION: us-east-1
+        #   type: Opaque
+        secretName: ""
     
     cqlStore:
-      # AstraDB specific setting, contains base64-encoded bundle zip. Leave empty for other Cassandra installations
-      # Support for Scylla and Apache OSS (generic Cassandra) is coming in the production release
-      # Override with: NEXUS__S3_BUFFER__CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64
-      secureConnectionBundleBase64: ""
+      # Enable mounting Cassandra credentials from a secret
+      secretRefEnabled: true
       
-      # Override with: NEXUS__S3_BUFFER__CQL_STORE__GATEWAY_USER      
-      gatewayUser: ""
-    
-      # Override with: NEXUS__S3_BUFFER__CQL_STORE__GATEWAY_PASSWORD        
-      gatewayPassword: ""
+      # Name of a secret containing Cassandra credentials
+      # Example content:
+      #  apiVersion: v1
+      #  kind: Secret
+      #  metadata:
+      #    name: cassandra-credentials
+      #    namespace: nexus
+      #  data:
+      #    AstraDB specific setting, contains base64-encoded bundle zip. Leave empty for other Cassandra installations
+      #    Support for Scylla and Apache OSS (generic Cassandra) is coming in the production release
+      #    NEXUS__S3_BUFFER__CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64: base64value
+      #    NEXUS__S3_BUFFER__CQL_STORE__GATEWAY_USER: user
+      #    NEXUS__S3_BUFFER__CQL_STORE__GATEWAY_PASSWORD: password
+      #  type: Opaque
+      
+      secretName: ""
       
     # optional path to kubeconfig for the controller cluster
     # defaults to in-cluster config

@@ -51,7 +51,7 @@ spec:
               value: "{{ (default (printf "v%s" .Chart.AppVersion) .Values.image.tag) }}"
             - name: GIN_MODE
               value: {{ .Values.ginMode }}
-          {{- if .Values.scheduler.config.envOverrideEnabled }}
+          {{- if .Values.scheduler.config.enabled }}
             - name: NEXUS__RESOURCE_NAMESPACE              
               value: {{ .Values.scheduler.config.resourceNamespace }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH
@@ -68,14 +68,6 @@ spec:
               value: {{ .Values.scheduler.config.s3Buffer.processing.rateLimitElementsBurst }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__WORKERS
               value: {{ .Values.scheduler.config.s3Buffer.processing.workers }}
-            - name: NEXUS__S3_BUFFER__ACCESS_KEY_ID
-              value: {{ .Values.scheduler.config.s3Buffer.accessKeyId }}
-            - name: NEXUS__S3_BUFFER__SECRET_ACCESS_KEY
-              value: {{ .Values.scheduler.config.s3Buffer.secretAccessKey }}
-            - name: NEXUS__S3_BUFFER__REGION
-              value: {{ .Values.scheduler.config.s3Buffer.region }}
-            - name: NEXUS__S3_BUFFER__ENDPOINT
-              value: {{ .Values.scheduler.config.s3Buffer.endpoint }}
             - name: NEXUS__S3_BUFFER__CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64
               value: {{ .Values.scheduler.config.cqlStore.secureConnectionBundleBase64 }}
             - name: NEXUS__S3_BUFFER__CQL_STORE__GATEWAY_USER
@@ -119,6 +111,14 @@ spec:
           {{- end }}
         {{- if .Values.extraEnvFrom }}
           envFrom:
+          {{- if .Values.scheduler.config.s3Buffer.s3Credentials.secretRefEnabled }}
+            - secretRef:
+                name: {{ .Values.scheduler.config.s3Buffer.s3Credentials.secretName }}
+          {{- end }}            
+          {{- if .Values.scheduler.config.cqlStore.secretRefEnabled }}
+            - secretRef:
+                name: {{ .Values.scheduler.config.cqlStore.secretName }}
+          {{- end }}
           {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
