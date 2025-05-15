@@ -23,6 +23,24 @@ import (
 	"time"
 )
 
+type PipelineWorkerConfig struct {
+	FailureRateBaseDelay       time.Duration
+	FailureRateMaxDelay        time.Duration
+	RateLimitElementsPerSecond int
+	RateLimitElementsBurst     int
+	Workers                    int
+}
+
+func FromBufferConfig(bufferConfig *request.BufferConfig) *PipelineWorkerConfig {
+	return &PipelineWorkerConfig{
+		FailureRateBaseDelay:       bufferConfig.FailureRateBaseDelay,
+		FailureRateMaxDelay:        bufferConfig.FailureRateMaxDelay,
+		RateLimitElementsPerSecond: bufferConfig.RateLimitElementsPerSecond,
+		RateLimitElementsBurst:     bufferConfig.RateLimitElementsBurst,
+		Workers:                    bufferConfig.Workers,
+	}
+}
+
 type ApplicationServices struct {
 	checkpointBuffer *request.DefaultBuffer
 	defaultNamespace string
@@ -31,11 +49,13 @@ type ApplicationServices struct {
 	nexusClient      *nexuscore.Clientset
 	recorder         record.EventRecorder
 	configCache      *services.NexusResourceCache
+	workerConfig     *PipelineWorkerConfig
 }
 
 func (appServices *ApplicationServices) WithBuffer(ctx context.Context, config *request.S3BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
 	if appServices.checkpointBuffer == nil {
 		appServices.checkpointBuffer = request.NewDefaultBuffer(ctx, config, bundleConfig, map[string]string{})
+		appServices.workerConfig = FromBufferConfig(config.BufferConfig)
 	}
 
 	return appServices
@@ -175,11 +195,11 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 	submissionActor := pipeline.NewDefaultPipelineStageActor[*request.BufferOutput, types.UID](
 		"kubernetes_job_submission",
 		map[string]string{},
-		time.Second*1,
-		time.Second*5,
-		10,
-		100,
-		10,
+		appServices.workerConfig.FailureRateBaseDelay,
+		appServices.workerConfig.FailureRateMaxDelay,
+		appServices.workerConfig.RateLimitElementsPerSecond,
+		appServices.workerConfig.RateLimitElementsBurst,
+		appServices.workerConfig.Workers,
 		appServices.schedule,
 		nil,
 	)
