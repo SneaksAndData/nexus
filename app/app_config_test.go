@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
+	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 	"os"
 	"reflect"
 	"testing"
@@ -40,7 +41,7 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 func Test_LoadConfig(t *testing.T) {
 	var expected = getExpectedConfig("s3://bucket/nexus/payloads")
 
-	var result = LoadConfig(context.TODO())
+	var result = nexusconf.LoadConfig[SchedulerConfig](context.TODO())
 	if !reflect.DeepEqual(*expected, result) {
 		t.Errorf("LoadConfig failed, expected %v, got %v", *expected, result)
 	}
@@ -55,7 +56,7 @@ func Test_LoadConfigFromEnv(t *testing.T) {
 	var expected = getExpectedConfig(storagePath)
 	expected.S3Buffer.AccessKeyID = keyId
 
-	var result = LoadConfig(context.TODO())
+	var result = nexusconf.LoadConfig[SchedulerConfig](context.TODO())
 	if !reflect.DeepEqual(*expected, result) {
 		t.Errorf("LoadConfig failed, expected %v, got %v", *expected, result)
 	}

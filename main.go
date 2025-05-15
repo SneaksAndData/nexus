@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 	"github.com/SneaksAndData/nexus-core/pkg/signals"
 	"github.com/SneaksAndData/nexus-core/pkg/telemetry"
 	v1 "github.com/SneaksAndData/nexus/api/v1"
@@ -34,7 +35,7 @@ func setupRouter(ctx context.Context) *gin.Engine {
 	// set runtime mode
 	gin.SetMode(os.Getenv("GIN_MODE"))
 
-	appConfig := app.LoadConfig(ctx)
+	appConfig := nexusconf.LoadConfig[app.SchedulerConfig](ctx)
 
 	appServices := (&app.ApplicationServices{}).
 		WithKubeClients(ctx, appConfig.KubeConfigPath).
