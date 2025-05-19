@@ -31,6 +31,12 @@ type PipelineWorkerConfig struct {
 	Workers                    int
 }
 
+type CommittedRun struct {
+	JobUID    types.UID
+	Algorithm string
+	RequestId string
+}
+
 func FromBufferConfig(bufferConfig *request.BufferConfig) *PipelineWorkerConfig {
 	return &PipelineWorkerConfig{
 		FailureRateBaseDelay:       bufferConfig.FailureRateBaseDelay,
@@ -184,6 +190,11 @@ func (appServices *ApplicationServices) schedule(output *request.BufferOutput) (
 
 	return submitted.UID, nil
 }
+
+// TODO: commit job UID to the database
+//func (appServices *ApplicationServices) commitJob(job *batchv1.Job) {
+//	appServices.
+//}
 
 func (appServices *ApplicationServices) Start(ctx context.Context) {
 	logger := klog.FromContext(ctx)
