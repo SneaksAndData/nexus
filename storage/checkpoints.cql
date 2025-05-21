@@ -35,4 +35,3 @@ create
     custom index job_uid ON nexus.checkpoints (job_uid)
     using 'StorageAttachedIndex'
     with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
-
