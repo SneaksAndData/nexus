@@ -119,10 +119,6 @@ affinity: { }
 # Note that default image is distroless and runs as non-root user by default.
 securityContext: {}
 
-# Logging configuration
-logging:
-  level: INFO
-  
 # Run mode for Gin. Set to `release` for production deployments
 # Available values: debug, test, release
 ginMode: debug
@@ -244,6 +240,10 @@ scheduler:
     # You will need to specify a volumeMount for Shards yourself if you provide your own appconfig.yaml
     # Override with: NEXUS__SHARD_KUBE_CONFIG_PATH
     shardKubeConfigPath: "/app/config/shards"
+    
+    # Logging level
+    # Override with: NEXUS__LOG_LEVEL
+    logLevel: INFO
     
 # Observability settings for Datadog
 datadog:

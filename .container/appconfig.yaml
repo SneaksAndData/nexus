@@ -18,3 +18,5 @@ cql-store: # can be read from environment
   gateway-password: ""
 kube-config-path: ""
 shard-kube-config-path: ""
+max-payload-size: ""
+log-level: ""
