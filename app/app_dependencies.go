@@ -2,50 +2,21 @@ package app
 
 import (
 	"context"
-	"fmt"
-	"github.com/SneaksAndData/nexus-core/pkg/buildmeta"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	nexuscore "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned"
 	"github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
 	nexusscheme "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
-	"github.com/SneaksAndData/nexus-core/pkg/pipeline"
 	"github.com/SneaksAndData/nexus-core/pkg/shards"
 	"github.com/SneaksAndData/nexus/services"
-	batchv1 "k8s.io/api/batch/v1"
+	"github.com/SneaksAndData/nexus/services/models"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
-	"time"
 )
-
-type PipelineWorkerConfig struct {
-	FailureRateBaseDelay       time.Duration
-	FailureRateMaxDelay        time.Duration
-	RateLimitElementsPerSecond int
-	RateLimitElementsBurst     int
-	Workers                    int
-}
-
-type CommittedRun struct {
-	JobUID    types.UID
-	Algorithm string
-	RequestId string
-}
-
-func FromBufferConfig(bufferConfig *request.BufferConfig) *PipelineWorkerConfig {
-	return &PipelineWorkerConfig{
-		FailureRateBaseDelay:       bufferConfig.FailureRateBaseDelay,
-		FailureRateMaxDelay:        bufferConfig.FailureRateMaxDelay,
-		RateLimitElementsPerSecond: bufferConfig.RateLimitElementsPerSecond,
-		RateLimitElementsBurst:     bufferConfig.RateLimitElementsBurst,
-		Workers:                    bufferConfig.Workers,
-	}
-}
 
 type ApplicationServices struct {
 	checkpointBuffer *request.DefaultBuffer
@@ -55,13 +26,14 @@ type ApplicationServices struct {
 	nexusClient      *nexuscore.Clientset
 	recorder         record.EventRecorder
 	configCache      *services.NexusResourceCache
-	workerConfig     *PipelineWorkerConfig
+	scheduler        *services.RequestScheduler
+	workerConfig     *models.PipelineWorkerConfig
 }
 
 func (appServices *ApplicationServices) WithBuffer(ctx context.Context, config *request.S3BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
 	if appServices.checkpointBuffer == nil {
 		appServices.checkpointBuffer = request.NewDefaultBuffer(ctx, config, bundleConfig, map[string]string{})
-		appServices.workerConfig = FromBufferConfig(config.BufferConfig)
+		appServices.workerConfig = models.FromBufferConfig(config.BufferConfig)
 	}
 
 	return appServices
@@ -139,6 +111,16 @@ func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceN
 	return appServices
 }
 
+func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *ApplicationServices {
+	logger := klog.FromContext(ctx)
+
+	appServices.scheduler = services.
+		NewRequestScheduler(appServices.workerConfig, appServices.shardClients, appServices.checkpointBuffer, logger).
+		Init()
+
+	return appServices
+}
+
 func (appServices *ApplicationServices) CheckpointBuffer() *request.DefaultBuffer {
 	return appServices.checkpointBuffer
 }
@@ -159,43 +141,6 @@ func (appServices *ApplicationServices) ShardClients() []*shards.ShardClient {
 	return appServices.shardClients
 }
 
-func (appServices *ApplicationServices) getShardByName(shardName string) *shards.ShardClient {
-	for _, shard := range appServices.shardClients {
-		if shard.Name == shardName {
-			return shard
-		}
-	}
-
-	return nil
-}
-
-func (appServices *ApplicationServices) schedule(output *request.BufferOutput) (types.UID, error) {
-	if output == nil {
-		return types.UID(""), fmt.Errorf("buffer has not provided any data to schedule")
-	}
-
-	var job = output.Checkpoint.ToV1Job(fmt.Sprintf("%s-%s", buildmeta.AppVersion, buildmeta.BuildNumber), output.Workgroup)
-	var submitted *batchv1.Job
-	var submitErr error
-
-	if shard := appServices.getShardByName(output.Workgroup.Cluster); shard != nil {
-		submitted, submitErr = shard.SendJob(shard.Namespace, &job)
-	} else {
-		return "", fmt.Errorf("shard API server %s not configured", output.Workgroup.Cluster)
-	}
-
-	if submitErr != nil {
-		return "", submitErr
-	}
-
-	return submitted.UID, nil
-}
-
-// TODO: commit job UID to the database
-//func (appServices *ApplicationServices) commitJob(job *batchv1.Job) {
-//	appServices.
-//}
-
 func (appServices *ApplicationServices) Start(ctx context.Context) {
 	logger := klog.FromContext(ctx)
 	err := appServices.configCache.Init(ctx)
@@ -203,18 +148,8 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		logger.Error(err, "error building in-cluster kubeconfig for the scheduler")
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
-	submissionActor := pipeline.NewDefaultPipelineStageActor[*request.BufferOutput, types.UID](
-		"kubernetes_job_submission",
-		map[string]string{},
-		appServices.workerConfig.FailureRateBaseDelay,
-		appServices.workerConfig.FailureRateMaxDelay,
-		appServices.workerConfig.RateLimitElementsPerSecond,
-		appServices.workerConfig.RateLimitElementsBurst,
-		appServices.workerConfig.Workers,
-		appServices.schedule,
-		nil,
-	)
 
-	go submissionActor.Start(ctx)
-	appServices.checkpointBuffer.Start(submissionActor)
+	go appServices.scheduler.CommitActor.Start(ctx)
+	go appServices.scheduler.SchedulerActor.Start(ctx)
+	appServices.checkpointBuffer.Start(appServices.scheduler.SchedulerActor)
 }

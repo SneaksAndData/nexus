@@ -28,7 +28,8 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 		WithCache(ctx, appConfig.ResourceNamespace).
 		WithRecorder(ctx, appConfig.ResourceNamespace).
 		WithShards(ctx, appConfig.ShardKubeConfigPath, appConfig.ResourceNamespace).
-		WithDefaultNamespace(appConfig.ResourceNamespace)
+		WithDefaultNamespace(appConfig.ResourceNamespace).
+		BuildScheduler(ctx)
 
 	// version 1.2
 	apiV12 := router.Group("algorithm/v1.2")
