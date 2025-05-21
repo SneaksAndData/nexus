@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/models"
 )
 
@@ -12,33 +11,23 @@ type RequestResult struct {
 	RunErrorMessage string `json:"runErrorMessage"`
 }
 
-// parseCheckpointError maps error to a standard error code
-func parseCheckpointError(request *models.CheckpointedRequest) string {
-	switch request.AlgorithmFailureCode {
-	case models.NAE001.ErrorName(), models.NAE002.ErrorName(), models.NAE000.ErrorName():
-		return fmt.Sprintf("%s: %s", request.AlgorithmFailureCode, request.AlgorithmFailureCause)
-	default:
-		return "Fatal error during execution."
-	}
-}
-
 // FromCheckpointedRequest converts CheckpointedRequest to a simplified result model
 func FromCheckpointedRequest(request *models.CheckpointedRequest) *RequestResult {
 	if request == nil {
 		return nil
 	}
 	switch request.LifecycleStage {
-	case models.LifecyclestageCompleted:
+	case models.LifecycleStageCompleted:
 		return &RequestResult{
 			RequestId: request.Id,
 			Status:    request.LifecycleStage,
 			ResultUri: request.ResultUri,
 		}
-	case models.LifecyclestageFailed, models.LifecyclestageCancelled:
+	case models.LifecycleStageFailed, models.LifecycleStageCancelled, models.LifecycleStageSchedulingFailed, models.LifecycleStageDeadlineExceeded:
 		return &RequestResult{
 			RequestId:       request.Id,
 			Status:          request.LifecycleStage,
-			RunErrorMessage: parseCheckpointError(request),
+			RunErrorMessage: request.AlgorithmFailureCause,
 		}
 	default:
 		return &RequestResult{

@@ -5,7 +5,6 @@ create table nexus.checkpoints
     lifecycle_stage           text,
     payload_uri               text,
     result_uri                text,
-    algorithm_failure_code    text,
     algorithm_failure_cause   text,
     algorithm_failure_details text,
     received_by_host          text,
