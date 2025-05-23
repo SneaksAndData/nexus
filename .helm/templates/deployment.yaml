@@ -71,6 +71,8 @@ spec:
               value: {{ .Values.scheduler.config.shardKubeConfigPath }}           
             - name: NEXUS__LOG_LEVEL
               value: {{ .Values.scheduler.config.logLevel }}
+            - name: NEXUS__MAX_PAYLOAD_SIZE
+              value: {{ .Values.scheduler.config.maxPayloadSize }}              
           {{- end }}
           {{- if .Values.datadog.enabled }}
             - name: DATADOG__API_KEY
