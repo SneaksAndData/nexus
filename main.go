@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 	"github.com/SneaksAndData/nexus-core/pkg/signals"
 	"github.com/SneaksAndData/nexus-core/pkg/telemetry"
@@ -13,29 +12,15 @@ import (
 	"os"
 )
 
-const (
-	MaxBodySize = 512 * 1024 * 1024
-)
-
-var (
-	logLevel string
-)
-
-func init() {
-	flag.StringVar(&logLevel, "log-level", "INFO", "Log level for the application.")
-}
-
-func setupRouter(ctx context.Context) *gin.Engine {
+func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engine {
 	gin.DisableConsoleColor()
 	router := gin.Default()
-	router.MaxMultipartMemory = MaxBodySize
+	router.MaxMultipartMemory = appConfig.MaxPayloadSizeBytes()
 	router.Use(gin.Logger())
 	// disable trusted proxies check
 	_ = router.SetTrustedProxies(nil)
 	// set runtime mode
 	gin.SetMode(os.Getenv("GIN_MODE"))
-
-	appConfig := nexusconf.LoadConfig[app.SchedulerConfig](ctx)
 
 	appServices := (&app.ApplicationServices{}).
 		WithKubeClients(ctx, appConfig.KubeConfigPath).
@@ -43,13 +28,16 @@ func setupRouter(ctx context.Context) *gin.Engine {
 		WithCache(ctx, appConfig.ResourceNamespace).
 		WithRecorder(ctx, appConfig.ResourceNamespace).
 		WithShards(ctx, appConfig.ShardKubeConfigPath, appConfig.ResourceNamespace).
-		WithDefaultNamespace(appConfig.ResourceNamespace)
+		WithDefaultNamespace(appConfig.ResourceNamespace).
+		BuildScheduler(ctx)
 
 	// version 1.2
 	apiV12 := router.Group("algorithm/v1.2")
 
 	apiV12.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache()))
 	apiV12.GET("results/:algorithmName/requests/:requestId", v1.GetRunResult(appServices.CheckpointBuffer()))
+	apiV12.GET("metadata/:algorithmName/requests/:requestId", v1.GetRunMetadata(appServices.CheckpointBuffer()))
+	apiV12.GET("payload/:algorithmName/requests/:requestId", v1.GetRunPayload(appServices.CheckpointBuffer()))
 
 	go func() {
 		appServices.Start(ctx)
@@ -70,7 +58,8 @@ func setupRouter(ctx context.Context) *gin.Engine {
 
 func main() {
 	ctx := signals.SetupSignalHandler()
-	appLogger, err := telemetry.ConfigureLogger(ctx, map[string]string{}, logLevel)
+	appConfig := nexusconf.LoadConfig[app.SchedulerConfig](ctx)
+	appLogger, err := telemetry.ConfigureLogger(ctx, map[string]string{}, appConfig.LogLevel)
 	ctx = telemetry.WithStatsd(ctx, "nexus")
 	logger := klog.FromContext(ctx)
 
@@ -80,7 +69,7 @@ func main() {
 
 	klog.SetSlogLogger(appLogger)
 
-	r := setupRouter(ctx)
+	r := setupRouter(ctx, &appConfig)
 	// Configure webhost
 	_ = r.Run(":8080")
 }

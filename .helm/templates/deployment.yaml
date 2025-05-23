@@ -37,9 +37,6 @@ spec:
       {{- end }}
       containers:
         - name: nexus
-          args:
-            - "log-level"
-            - {{ .Values.logging.level }}
         {{- with .Values.securityContext }}
           securityContext:
           {{- toYaml . | nindent 12 }}
@@ -71,7 +68,11 @@ spec:
             - name: NEXUS__KUBE_CONFIG_PATH
               value: {{ .Values.scheduler.config.kubeConfigPath }}
             - name: NEXUS__SHARD_KUBE_CONFIG_PATH
-              value: {{ .Values.scheduler.config.shardKubeConfigPath }}              
+              value: {{ .Values.scheduler.config.shardKubeConfigPath }}           
+            - name: NEXUS__LOG_LEVEL
+              value: {{ .Values.scheduler.config.logLevel }}
+            - name: NEXUS__MAX_PAYLOAD_SIZE
+              value: {{ .Values.scheduler.config.maxPayloadSize }}              
           {{- end }}
           {{- if .Values.datadog.enabled }}
             - name: DATADOG__API_KEY

@@ -18,3 +18,5 @@ cql-store: # can be read from environment
   gateway-password: password
 kube-config-path: "/tmp/nexus-test"
 shard-kube-config-path: "/tmp/shards"
+max-payload-size: 500Mi
+log-level: debug

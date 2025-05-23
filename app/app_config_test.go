@@ -35,6 +35,8 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 		ResourceNamespace:   "nexus",
 		KubeConfigPath:      "/tmp/nexus-test",
 		ShardKubeConfigPath: "/tmp/shards",
+		MaxPayloadSize:      "500Mi",
+		LogLevel:            "debug",
 	}
 }
 
