@@ -5,7 +5,6 @@ create table nexus.checkpoints
     lifecycle_stage           text,
     payload_uri               text,
     result_uri                text,
-    algorithm_failure_code    text,
     algorithm_failure_cause   text,
     algorithm_failure_details text,
     received_by_host          text,
@@ -32,3 +31,7 @@ create
     using 'StorageAttachedIndex'
     with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
 
+create
+    custom index job_uid ON nexus.checkpoints (job_uid)
+    using 'StorageAttachedIndex'
+    with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};

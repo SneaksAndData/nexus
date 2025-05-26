@@ -9,7 +9,7 @@ image:
   pullPolicy: "IfNotPresent"
 
 # Image pull secrets for private repositories
-imagePullSecrets: []
+imagePullSecrets: [ ]
 
 # Override the application name
 nameOverride: ""
@@ -24,82 +24,82 @@ serviceAccount:
   create: true
   
   # Annotations to add to the service account
-  annotations: {}
+  annotations: { }
   
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-  
+
 ### Role Based Access Control configuration
 rbac:
   
   # Specifies whether RBAC resources should be created
   clusterRole:
-        
+    
     # Allows Nexus to manage its custom resources in the installation namespace
     templateEditor:
-      additionalLabels: {}
-      additionalAnnotations: {}
+      additionalLabels: { }
+      additionalAnnotations: { }
       create: true
       nameOverride: ""
-      
+    
     workgroupEditor:
-      additionalLabels: {}
-      additionalAnnotations: {}
+      additionalLabels: { }
+      additionalAnnotations: { }
       create: true
-      nameOverride: ""      
+      nameOverride: ""
   
   # This parameter determines whether role binding resources need to be created.
   # If you have any roles in your configuration set to 'true', then this parameter for creating role binding resources
   # should also be set to 'true'.
   clusterRoleBindings:
-    additionalLabels: {}
-    additionalAnnotations: {}
-    create: true  
-    
+    additionalLabels: { }
+    additionalAnnotations: { }
+    create: true
+
 # Additional labels for the deployment and pods
-additionalLabels: {}
+additionalLabels: { }
 # Example:
 #
 #  app.my-company.com/component: ncc
 
 # Additional labels for the deployment and pods
-additionalAnnotations: {}
+additionalAnnotations: { }
   # Example:
-  #  app.my-company.com/application: nexus
+#  app.my-company.com/application: nexus
 
 # Extra environment variables to set in the deployment
-extraEnv: {}
+extraEnv: { }
 # Example:
 #
 #  - name: NEXUS__RESOURCE_NAMESPACE
 #    value: nexus
 
 # Extra environment variables referencing a ConfigMap or Secret
-extraEnvFrom: {}
-# Example:
-#
-#  envFrom:
-#    - configMapRef:
-#        name: custom-api-access-token
-  
+extraEnvFrom: { }
+  # Example:
+  #
+  #  envFrom:
+  #    - configMapRef:
+  #        name: custom-api-access-token
+
 # Extra volumes to add to the deployment
-extraVolumes: {}
+extraVolumes: { }
   # Example:
   # 
   #  - name: data-volume
   #    emptyDir:
   #      sizeLimit: 500Mi
-    
+
 # Extra volumes to add to the deployment
-extraVolumeMounts: {}
+extraVolumeMounts: { }
 # Example:
 #
 #  - mountPath: /data
 #    name: data-volume
 
 # Resources constraints. By default, the operator does not specify any constraints to allow for easier deployment
-resources: {}
+resources: { }
 # Example:
 #
 #  requests:
@@ -117,12 +117,8 @@ affinity: { }
 
 # Security context settings for the container
 # Note that default image is distroless and runs as non-root user by default.
-securityContext: {}
+securityContext: { }
 
-# Logging configuration
-logging:
-  level: INFO
-  
 # Run mode for Gin. Set to `release` for production deployments
 # Available values: debug, test, release
 ginMode: debug
@@ -146,40 +142,44 @@ scheduler:
     scaleStabilizationWindowSeconds: 180
     scalePeriodSeconds: 30
     scaleByPercent: 10
-    
+  
   # path to the Secret containing shard kubeconfig files
   # File name format should be <shard cluster name>.kubeconfig
   shardsConfigSecretName: "nexus-shards"
-         
+  
   # Scheduler configuration
   # Individual settings can be overridden using environment variables
   # Whole config can also be overridden by setting config.enabled=false and mounting a new appconfig.yaml to /app path in the container
-  config:   
+  config:
     enabled: true
     # Main resource namespace
     # Override with: NEXUS__RESOURCE_NAMESPACE
     resourceNamespace: "nexus"
-        
+    
+    # maximum size of a payload submitted to the scheduler
+    # Override with: NEXUS__MAX_PAYLOAD_SIZE 
+    maxPayloadSize: 500Mi
+    
     # Input buffering configuration
     s3Buffer:
       processing:
-          
+        
         # Prefix to store payloads under
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH
         payloadStoragePath: s3a://bucket/prefix
-          
+        
         # Default payload's presigned URL lifetime duration
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_VALID_FOR
         payloadValidFor: 24h
-          
+        
         # Failure backoff base delay. Example values: 5ms, 5s
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_BASE_DELAY
         failureRateBaseDelay: 100ms
-          
+        
         # Failure backoff max delay. Example values: 5s, 1m
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_MAX_DELAY      
         failureRateMaxDelay: 1s
-          
+        
         # Rate limit elements per second
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__RATE_LIMIT_ELEMENTS_PER_SECOND      
         rateLimitElementsPerSecond: 10
@@ -191,7 +191,7 @@ scheduler:
         # Number of workers to use when buffering inputs
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__WORKERS      
         workers: 2
-          
+      
       s3Credentials:
         # Enable mounting S3 credentials from a secret
         secretRefEnabled: true
@@ -231,7 +231,7 @@ scheduler:
       #  type: Opaque
       
       secretName: ""
-      
+    
     # optional path to kubeconfig for the controller cluster
     # defaults to in-cluster config
     # in the majority of cases you should leave this blank
@@ -245,6 +245,10 @@ scheduler:
     # Override with: NEXUS__SHARD_KUBE_CONFIG_PATH
     shardKubeConfigPath: "/app/config/shards"
     
+    # Logging level
+    # Override with: NEXUS__LOG_LEVEL
+    logLevel: INFO
+
 # Observability settings for Datadog
 datadog:
   

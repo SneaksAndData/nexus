@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 type SchedulerConfig struct {
@@ -10,4 +11,11 @@ type SchedulerConfig struct {
 	ResourceNamespace   string                    `mapstructure:"resource-namespace,omitempty"`
 	KubeConfigPath      string                    `mapstructure:"kube-config-path,omitempty"`
 	ShardKubeConfigPath string                    `mapstructure:"shard-kube-config-path,omitempty"`
+	LogLevel            string                    `mapstructure:"log-level,omitempty"`
+	MaxPayloadSize      string                    `mapstructure:"max-payload-size,omitempty"`
+}
+
+func (c *SchedulerConfig) MaxPayloadSizeBytes() int64 {
+	var quantity = resource.MustParse(c.MaxPayloadSize)
+	return quantity.Value()
 }

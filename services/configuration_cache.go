@@ -6,6 +6,7 @@ import (
 	v1 "github.com/SneaksAndData/nexus-core/pkg/apis/science/v1"
 	nexuscore "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned"
 	nexusinf "github.com/SneaksAndData/nexus-core/pkg/generated/informers/externalversions"
+	resolvers "github.com/SneaksAndData/nexus-core/pkg/resolvers"
 	"k8s.io/apimachinery/pkg/util/diff"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"
@@ -100,34 +101,12 @@ func (c *NexusResourceCache) onConfigurationDeleted(obj interface{}) {
 	c.logger.V(3).Info("resource deleted", "resource", obj.(v1.NexusAlgorithmTemplate).Name)
 }
 
-func (c *NexusResourceCache) cacheKey(resourceName string) string {
-	return fmt.Sprintf("%s/%s", c.prefix, resourceName)
-}
-
 // GetAlgorithmConfiguration retrieves a cached NexusAlgorithmTemplate resource from informer cache
 func (c *NexusResourceCache) GetAlgorithmConfiguration(algorithmName string) (*v1.NexusAlgorithmTemplate, error) {
-	config, exists, err := c.templateInformer.GetStore().GetByKey(c.cacheKey(algorithmName))
-	if err != nil {
-		return nil, err
-	}
-
-	if !exists {
-		return nil, nil
-	}
-
-	return config.(*v1.NexusAlgorithmTemplate), nil
+	return resolvers.GetCachedObject[v1.NexusAlgorithmTemplate](algorithmName, c.prefix, c.templateInformer)
 }
 
 // GetWorkgroupConfiguration retrieves a cached NexusAlgorithmTemplate resource from informer cache
 func (c *NexusResourceCache) GetWorkgroupConfiguration(workgroupName string) (*v1.NexusAlgorithmWorkgroup, error) {
-	config, exists, err := c.workgroupInformer.GetStore().GetByKey(c.cacheKey(workgroupName))
-	if err != nil {
-		return nil, err
-	}
-
-	if !exists {
-		return nil, nil
-	}
-
-	return config.(*v1.NexusAlgorithmWorkgroup), nil
+	return resolvers.GetCachedObject[v1.NexusAlgorithmWorkgroup](workgroupName, c.prefix, c.workgroupInformer)
 }
