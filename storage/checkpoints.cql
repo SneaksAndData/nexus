@@ -32,6 +32,6 @@ create
     with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
 
 create
-    custom index job_uid ON nexus.checkpoints (job_uid)
+    custom index host_lifecycle ON nexus.checkpoints (received_by_host, lifecycle_stage)
     using 'StorageAttachedIndex'
     with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
