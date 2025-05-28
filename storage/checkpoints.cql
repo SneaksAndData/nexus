@@ -32,6 +32,11 @@ create
     with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
 
 create
-    custom index host_lifecycle ON nexus.checkpoints (received_by_host, lifecycle_stage)
+    custom index host ON nexus.checkpoints (received_by_host)
+    using 'StorageAttachedIndex'
+    with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
+
+create
+    custom index lifecycle_stage ON nexus.checkpoints (lifecycle_stage)
     using 'StorageAttachedIndex'
     with options = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};
