@@ -113,10 +113,16 @@ func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceN
 
 func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *ApplicationServices {
 	logger := klog.FromContext(ctx)
+	var err error
 
-	appServices.scheduler = services.
-		NewRequestScheduler(appServices.workerConfig, appServices.shardClients, appServices.checkpointBuffer, logger).
-		Init()
+	appServices.scheduler, err = services.
+		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.defaultNamespace, logger).
+		Init(ctx)
+
+	if err != nil {
+		logger.Error(err, "unable to request scheduler")
+		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+	}
 
 	return appServices
 }
