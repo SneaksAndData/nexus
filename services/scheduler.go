@@ -133,6 +133,11 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 		return
 	}
 
+	// skip pods that no longer exist in informer cache
+	if pod == nil {
+		return
+	}
+
 	// check if pod is a Nexus scheduler instance
 	if pod.Labels["app.kubernetes.io/instance"] != "nexus" {
 		return
