@@ -70,7 +70,7 @@ func (scheduler *RequestScheduler) Init(ctx context.Context) (*RequestScheduler,
 		return nil, fmt.Errorf("failed to wait for pod self-informer caches to sync")
 	}
 
-	scheduler.logger.Info("resource informers synced")
+	scheduler.logger.Info("pod and event informers synced")
 
 	scheduler.CommitActor = pipeline.NewDefaultPipelineStageActor[*coremodels.CheckpointedRequest, string](
 		"commit",
