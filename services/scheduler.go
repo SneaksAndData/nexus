@@ -183,15 +183,15 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 }
 
 func (scheduler *RequestScheduler) commit(output *coremodels.CheckpointedRequest) (string, error) {
-	toCommit := output.DeepCopy()
-	toCommit.LifecycleStage = coremodels.LifecycleStageRunning
-	err := scheduler.buffer.Update(toCommit)
+	output.LifecycleStage = coremodels.LifecycleStageRunning
+	output.SentAt = time.Now()
+	err := scheduler.buffer.Update(output)
 
 	if err != nil {
-		return toCommit.Id, err
+		return output.Id, err
 	}
 
-	return toCommit.Id, nil
+	return output.Id, nil
 }
 
 func (scheduler *RequestScheduler) getShardByName(shardName string) *shards.ShardClient {
