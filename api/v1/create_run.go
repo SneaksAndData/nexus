@@ -9,6 +9,19 @@ import (
 	"net/http"
 )
 
+// CreateRun godoc
+//
+//	@Summary		Create a new algorithm run
+//	@Description	Accepts an algorithm payload and places it into a scheduling queue
+//	@Tags			run
+//	@Accept			json
+//	@Produce		json
+//	@Param			algorithmName	path		string	true	"Algorithm name"
+//	@Param			payload	body		models.AlgorithmRequest	true	"Run configuration"
+//	@Success		202	{object}	map[string]string
+//	@Failure		400	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/run/{algorithmName} [post]
 func CreateRun(buffer *request.DefaultBuffer, configCache *services.NexusResourceCache) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors
