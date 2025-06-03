@@ -36,6 +36,7 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 
 	apiV12.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache()))
 	apiV12.GET("results/:algorithmName/requests/:requestId", v1.GetRunResult(appServices.CheckpointBuffer()))
+	apiV12.GET("results/tags/:requestTag", v1.GetRunResultsByTag(appServices.CheckpointBuffer()))
 	apiV12.GET("metadata/:algorithmName/requests/:requestId", v1.GetRunMetadata(appServices.CheckpointBuffer()))
 	apiV12.GET("payload/:algorithmName/requests/:requestId", v1.GetRunPayload(appServices.CheckpointBuffer()))
 

@@ -66,7 +66,7 @@ func (c *NexusResourceCache) Init(ctx context.Context) error {
 		return fmt.Errorf("failed to wait for informer caches to sync")
 	}
 
-	c.logger.Info("resource informers synced")
+	c.logger.Info("custom resource informers synced")
 
 	return nil
 }
@@ -98,7 +98,7 @@ func (c *NexusResourceCache) onConfigurationUpdated(old, new interface{}) {
 	c.logger.V(3).Info("resource updated", "resource", newRef.Name, "diff", diff.ObjectGoPrintSideBySide(old, new))
 }
 func (c *NexusResourceCache) onConfigurationDeleted(obj interface{}) {
-	c.logger.V(3).Info("resource deleted", "resource", obj.(v1.NexusAlgorithmTemplate).Name)
+	c.logger.V(3).Info("resource deleted", "resource", obj.(*v1.NexusAlgorithmTemplate).Name)
 }
 
 // GetAlgorithmConfiguration retrieves a cached NexusAlgorithmTemplate resource from informer cache

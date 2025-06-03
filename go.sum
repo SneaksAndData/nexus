@@ -7,8 +7,8 @@ github.com/DataDog/zstd v1.5.6/go.mod h1:g4AWEaM3yOg3HYfnJ3YIawPnVdXJh9QME85blwS
 github.com/Microsoft/go-winio v0.5.0/go.mod h1:JPGBdM1cNvN/6ISo+n8V5iA4v8pBzdOpzfwIujj1a84=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
-github.com/SneaksAndData/nexus-core v1.0.1-0.20250521155216-af533a714602 h1:8WhBTg8POttieDiwOjAyx8DUNbBju7rxFewQRiQus7M=
-github.com/SneaksAndData/nexus-core v1.0.1-0.20250521155216-af533a714602/go.mod h1:CjfkB+qy0MI7qzdJ3fPlYDNF8MH0880980tWwjcLIVM=
+github.com/SneaksAndData/nexus-core v1.0.1-0.20250603114033-17aabba12290 h1:RnnjuXGu9Kw51qNkX2/XyF/Oj5uhzQI9kCKgUTXC5Ws=
+github.com/SneaksAndData/nexus-core v1.0.1-0.20250603114033-17aabba12290/go.mod h1:CjfkB+qy0MI7qzdJ3fPlYDNF8MH0880980tWwjcLIVM=
 github.com/aws/aws-sdk-go-v2 v1.34.0 h1:9iyL+cjifckRGEVpRKZP3eIxVlL06Qk1Tk13vreaVQU=
 github.com/aws/aws-sdk-go-v2 v1.34.0/go.mod h1:JgstGg0JjWU1KpVJjD5H0y0yyAIpSdKEq556EI6yOOM=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.8 h1:zAxi9p3wsZMIaVCdoiQp2uZ9k1LsZvmAnoTBeZPXom0=
