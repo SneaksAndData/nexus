@@ -3,7 +3,7 @@ module github.com/SneaksAndData/nexus
 go 1.23.1
 
 require (
-	github.com/SneaksAndData/nexus-core v1.0.1-0.20250602164948-6d1c9184113e
+	github.com/SneaksAndData/nexus-core v1.0.1-0.20250603084841-0d34b1577568
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
 	k8s.io/api v0.32.1

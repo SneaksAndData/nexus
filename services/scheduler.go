@@ -148,8 +148,8 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 		return
 	}
 
-	// check that not active
-	if pod.Status.Phase == corev1.PodRunning {
+	// check that not active or pending
+	if pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodPending {
 		return
 	}
 
