@@ -21,6 +21,11 @@ import (
 	"time"
 )
 
+const (
+	ComponentName = "scheduler"
+	ComponentKey  = "app.kubernetes.io/component"
+)
+
 type LateSubmission struct {
 	Checkpoint    *coremodels.CheckpointedRequest
 	BufferedEntry *coremodels.SubmissionBufferEntry
@@ -139,7 +144,7 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 	}
 
 	// check if pod is a Nexus scheduler instance
-	if pod.Labels["app.kubernetes.io/instance"] != "nexus" {
+	if pod.Labels[ComponentKey] != ComponentName {
 		return
 	}
 
