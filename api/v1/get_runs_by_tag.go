@@ -13,11 +13,12 @@ import (
 //	@Description	Read results of all runs with a matching tag
 //	@Tags			results
 //	@Produce		json
-//	@Param			tag	path		string	true	"Request tag assigned by a client"
-//	@Success		200	{object}    []models.TaggedRequestResult
-//	@Failure		400	{object}	string
-//	@Failure		404	{object}	string
-//	@Router			/results/tags/{tag} [get]
+//	@Produce		plain
+//	@Param			requestTag	path		string	true	"Request tag assigned by a client"
+//	@Success		200	{array}    models.TaggedRequestResult
+//	@Failure		400	{string}	string
+//	@Failure		404	{string}	string
+//	@Router			/algorithm/v1.2/results/tags/{requestTag} [get]
 func GetRunResultsByTag(buffer *request.DefaultBuffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors

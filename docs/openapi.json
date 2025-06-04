@@ -19,7 +19,7 @@
     }
   ],
   "paths": {
-    "/metadata/{algorithmName}/requests/{requestId}": {
+    "/algorithm/v1.2/metadata/{algorithmName}/requests/{requestId}": {
       "get": {
         "tags": [
           "metadata"
@@ -54,6 +54,11 @@
                 "schema": {
                   "$ref": "#/components/schemas/models.CheckpointedRequest"
                 }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.CheckpointedRequest"
+                }
               }
             }
           },
@@ -61,6 +66,11 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -74,13 +84,18 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           }
         }
       }
     },
-    "/payload/{algorithmName}/requests/{requestId}": {
+    "/algorithm/v1.2/payload/{algorithmName}/requests/{requestId}": {
       "get": {
         "tags": [
           "payload"
@@ -111,7 +126,7 @@
           "302": {
             "description": "Found",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -121,7 +136,7 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -131,7 +146,7 @@
           "404": {
             "description": "Not Found",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -141,7 +156,7 @@
         }
       }
     },
-    "/results/tags/{tag}": {
+    "/algorithm/v1.2/results/tags/{requestTag}": {
       "get": {
         "tags": [
           "results"
@@ -150,7 +165,7 @@
         "description": "Read results of all runs with a matching tag",
         "parameters": [
           {
-            "name": "tag",
+            "name": "requestTag",
             "in": "path",
             "description": "Request tag assigned by a client",
             "required": true,
@@ -170,6 +185,14 @@
                     "$ref": "#/components/schemas/models.TaggedRequestResult"
                   }
                 }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/models.TaggedRequestResult"
+                  }
+                }
               }
             }
           },
@@ -177,6 +200,11 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -190,13 +218,18 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           }
         }
       }
     },
-    "/results/{algorithmName}/requests/{requestId}": {
+    "/algorithm/v1.2/results/{algorithmName}/requests/{requestId}": {
       "get": {
         "tags": [
           "results"
@@ -231,6 +264,11 @@
                 "schema": {
                   "$ref": "#/components/schemas/models.RequestResult"
                 }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.RequestResult"
+                }
               }
             }
           },
@@ -238,6 +276,11 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -251,13 +294,18 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           }
         }
       }
     },
-    "/run/{algorithmName}": {
+    "/algorithm/v1.2/run/{algorithmName}": {
       "post": {
         "tags": [
           "run"
@@ -297,6 +345,14 @@
                     "type": "string"
                   }
                 }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
               }
             }
           },
@@ -307,6 +363,11 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -314,6 +375,11 @@
             "description": "Internal Server Error",
             "content": {
               "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
