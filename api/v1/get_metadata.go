@@ -6,6 +6,18 @@ import (
 	"net/http"
 )
 
+// GetRunMetadata godoc
+//
+//	@Summary		Read a run metadata
+//	@Description	Retrieves checkpointed metadata for a run
+//	@Tags			metadata
+//	@Produce		json
+//	@Param			algorithmName	path		string	true	"Algorithm name"
+//	@Param			requestId	path		string	true	"Request identifier"
+//	@Success		200	{object}	models.CheckpointedRequest
+//	@Failure		400	{object}	string
+//	@Failure		404	{object}	string
+//	@Router			/metadata/{algorithmName}/requests/{requestId} [get]
 func GetRunMetadata(buffer *request.DefaultBuffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors

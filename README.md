@@ -24,7 +24,7 @@ in buffered state and tries to resolve the situation by either terminating the r
 
 ### Scheduler
 
-Scheduler is what makes it possible to run algorithms through Crystal. Each scheduler has a public API that can be used to submit runs and retrieve results. Moreover, each scheduler holds a separate virtual queue that it uses to process incoming requests.
+Scheduler is what makes it possible to run algorithms through Nexus. Each scheduler has a public API that can be used to submit runs and retrieve results. Moreover, each scheduler holds a separate virtual queue that it uses to process incoming requests.
 Nexus relies on load balancer using round-robin algorithm when distributing requests between scheduler pods, so a horizontal autoscaler can be used to the maximum efficiency.
 
 ## Usage
@@ -36,3 +36,11 @@ Nexus relies on load balancer using round-robin algorithm when distributing requ
 Nexus's API is versioned. Requests against a specific version with have URI suffix like this: `/algorithm/v1.0/run`. If a version is not specified, `latest` will be targeted - which includes experimental
 and unstable features. For production use cases, always use one of the current production versions: 
 - `/algorithm/v1.2/run`
+
+### API Management
+Adding new API paths must be reflected in Swagger docs, even though the app doesn't serve Swagger. Update the generated docs:
+```shell
+./swag init --parseDependency --parseInternal -g main.go
+```
+
+This is required for the API clients (Go and Python) to be updated correctly.
