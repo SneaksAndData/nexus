@@ -6,7 +6,7 @@ require (
 	github.com/SneaksAndData/nexus-core v1.0.1-0.20250603114033-17aabba12290
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
-	github.com/swaggo/swag v1.8.12
+	github.com/swaggo/swag v1.16.4
 	k8s.io/api v0.32.1
 	k8s.io/apimachinery v0.32.1
 	k8s.io/client-go v0.32.1

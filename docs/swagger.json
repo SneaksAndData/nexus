@@ -15,6 +15,194 @@
     },
     "basePath": "/algorithm/v1.2",
     "paths": {
+        "/metadata/{algorithmName}/requests/{requestId}": {
+            "get": {
+                "description": "Retrieves checkpointed metadata for a run",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "metadata"
+                ],
+                "summary": "Read a run metadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.CheckpointedRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/payload/{algorithmName}/requests/{requestId}": {
+            "get": {
+                "description": "Retrieves payload sent by the client for the provided run",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payload"
+                ],
+                "summary": "Read a run payload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/results/tags/{tag}": {
+            "get": {
+                "description": "Read results of all runs with a matching tag",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Read run results by tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Request tag assigned by a client",
+                        "name": "tag",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.RequestResult"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/results/{algorithmName}/requests/{requestId}": {
+            "get": {
+                "description": "Retrieves a result for the provided run",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Read a run result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.RequestResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/run/{algorithmName}": {
             "post": {
                 "description": "Accepts an algorithm payload and places it into a scheduling queue",
@@ -111,6 +299,88 @@
                     "type": "string"
                 },
                 "requestId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CheckpointedRequest": {
+            "type": "object",
+            "properties": {
+                "algorithm": {
+                    "type": "string"
+                },
+                "algorithm_failure_cause": {
+                    "type": "string"
+                },
+                "algorithm_failure_details": {
+                    "type": "string"
+                },
+                "api_version": {
+                    "type": "string"
+                },
+                "applied_configuration": {
+                    "$ref": "#/definitions/v1.NexusAlgorithmSpec"
+                },
+                "configuration_overrides": {
+                    "$ref": "#/definitions/v1.NexusAlgorithmSpec"
+                },
+                "content_hash": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "job_uid": {
+                    "type": "string"
+                },
+                "last_modified": {
+                    "type": "string"
+                },
+                "lifecycle_stage": {
+                    "type": "string"
+                },
+                "parent_job": {
+                    "$ref": "#/definitions/models.ParentJobReference"
+                },
+                "payload_uri": {
+                    "type": "string"
+                },
+                "payload_valid_for": {
+                    "type": "string"
+                },
+                "received_at": {
+                    "type": "string"
+                },
+                "received_by_host": {
+                    "type": "string"
+                },
+                "result_uri": {
+                    "type": "string"
+                },
+                "sent_at": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ParentJobReference": {
+            "type": "object"
+        },
+        "models.RequestResult": {
+            "type": "object",
+            "properties": {
+                "requestId": {
+                    "type": "string"
+                },
+                "resultUri": {
+                    "type": "string"
+                },
+                "runErrorMessage": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }

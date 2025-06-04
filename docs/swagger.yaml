@@ -28,6 +28,60 @@ definitions:
     - algorithmName
     - requestId
     type: object
+  models.CheckpointedRequest:
+    properties:
+      algorithm:
+        type: string
+      algorithm_failure_cause:
+        type: string
+      algorithm_failure_details:
+        type: string
+      api_version:
+        type: string
+      applied_configuration:
+        $ref: '#/definitions/v1.NexusAlgorithmSpec'
+      configuration_overrides:
+        $ref: '#/definitions/v1.NexusAlgorithmSpec'
+      content_hash:
+        type: string
+      id:
+        type: string
+      job_uid:
+        type: string
+      last_modified:
+        type: string
+      lifecycle_stage:
+        type: string
+      parent_job:
+        $ref: '#/definitions/models.ParentJobReference'
+      payload_uri:
+        type: string
+      payload_valid_for:
+        type: string
+      received_at:
+        type: string
+      received_by_host:
+        type: string
+      result_uri:
+        type: string
+      sent_at:
+        type: string
+      tag:
+        type: string
+    type: object
+  models.ParentJobReference:
+    type: object
+  models.RequestResult:
+    properties:
+      requestId:
+        type: string
+      resultUri:
+        type: string
+      runErrorMessage:
+        type: string
+      status:
+        type: string
+    type: object
   resource.Quantity:
     properties:
       Format:
@@ -333,6 +387,131 @@ info:
   title: Nexus Scheduler API
   version: "1.0"
 paths:
+  /metadata/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves checkpointed metadata for a run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CheckpointedRequest'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a run metadata
+      tags:
+      - metadata
+  /payload/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves payload sent by the client for the provided run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Found
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a run payload
+      tags:
+      - payload
+  /results/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves a result for the provided run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RequestResult'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a run result
+      tags:
+      - results
+  /results/tags/{tag}:
+    get:
+      description: Read results of all runs with a matching tag
+      parameters:
+      - description: Request tag assigned by a client
+        in: path
+        name: tag
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.RequestResult'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read run results by tag
+      tags:
+      - results
   /run/{algorithmName}:
     post:
       consumes:

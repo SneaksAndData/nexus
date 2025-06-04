@@ -6,6 +6,18 @@ import (
 	"net/http"
 )
 
+// GetRunPayload godoc
+//
+//	@Summary		Read a run payload
+//	@Description	Retrieves payload sent by the client for the provided run
+//	@Tags			payload
+//	@Produce		json
+//	@Param			algorithmName	path		string	true	"Algorithm name"
+//	@Param			requestId	path		string	true	"Request identifier"
+//	@Success		302	{object}    string
+//	@Failure		400	{object}	string
+//	@Failure		404	{object}	string
+//	@Router			/payload/{algorithmName}/requests/{requestId} [get]
 func GetRunPayload(buffer *request.DefaultBuffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors
