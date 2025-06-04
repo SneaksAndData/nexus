@@ -13,12 +13,13 @@ import (
 //	@Description	Retrieves a result for the provided run
 //	@Tags			results
 //	@Produce		json
+//	@Produce		plain
 //	@Param			algorithmName	path		string	true	"Algorithm name"
 //	@Param			requestId	path		string	true	"Request identifier"
 //	@Success		200	{object}    models.RequestResult
 //	@Failure		400	{object}	string
 //	@Failure		404	{object}	string
-//	@Router			/results/{algorithmName}/requests/{requestId} [get]
+//	@Router			/algorithm/v1.2/results/{algorithmName}/requests/{requestId} [get]
 func GetRunResult(buffer *request.DefaultBuffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors

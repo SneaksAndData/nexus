@@ -12,12 +12,13 @@ import (
 //	@Description	Retrieves checkpointed metadata for a run
 //	@Tags			metadata
 //	@Produce		json
+//	@Produce		plain
 //	@Param			algorithmName	path		string	true	"Algorithm name"
 //	@Param			requestId	path		string	true	"Request identifier"
 //	@Success		200	{object}	models.CheckpointedRequest
-//	@Failure		400	{object}	string
-//	@Failure		404	{object}	string
-//	@Router			/metadata/{algorithmName}/requests/{requestId} [get]
+//	@Failure		400	{string}	string
+//	@Failure		404	{string}	string
+//	@Router			/algorithm/v1.2/metadata/{algorithmName}/requests/{requestId} [get]
 func GetRunMetadata(buffer *request.DefaultBuffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors

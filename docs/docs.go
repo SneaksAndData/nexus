@@ -22,11 +22,12 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/metadata/{algorithmName}/requests/{requestId}": {
+        "/algorithm/v1.2/metadata/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves checkpointed metadata for a run",
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "text/plain"
                 ],
                 "tags": [
                     "metadata"
@@ -70,11 +71,11 @@ const docTemplate = `{
                 }
             }
         },
-        "/payload/{algorithmName}/requests/{requestId}": {
+        "/algorithm/v1.2/payload/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "payload"
@@ -118,11 +119,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/results/tags/{tag}": {
+        "/algorithm/v1.2/results/tags/{requestTag}": {
             "get": {
                 "description": "Read results of all runs with a matching tag",
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "text/plain"
                 ],
                 "tags": [
                     "results"
@@ -132,7 +134,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Request tag assigned by a client",
-                        "name": "tag",
+                        "name": "requestTag",
                         "in": "path",
                         "required": true
                     }
@@ -162,11 +164,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/results/{algorithmName}/requests/{requestId}": {
+        "/algorithm/v1.2/results/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves a result for the provided run",
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "text/plain"
                 ],
                 "tags": [
                     "results"
@@ -210,14 +213,15 @@ const docTemplate = `{
                 }
             }
         },
-        "/run/{algorithmName}": {
+        "/algorithm/v1.2/run/{algorithmName}": {
             "post": {
                 "description": "Accepts an algorithm payload and places it into a scheduling queue",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "text/plain"
                 ],
                 "tags": [
                     "run"

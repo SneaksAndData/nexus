@@ -400,7 +400,7 @@ info:
   title: Nexus Scheduler API
   version: "1.0"
 paths:
-  /metadata/{algorithmName}/requests/{requestId}:
+  /algorithm/v1.2/metadata/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves checkpointed metadata for a run
       parameters:
@@ -416,6 +416,7 @@ paths:
         type: string
       produces:
       - application/json
+      - text/plain
       responses:
         "200":
           description: OK
@@ -432,7 +433,7 @@ paths:
       summary: Read a run metadata
       tags:
       - metadata
-  /payload/{algorithmName}/requests/{requestId}:
+  /algorithm/v1.2/payload/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves payload sent by the client for the provided run
       parameters:
@@ -447,7 +448,7 @@ paths:
         required: true
         type: string
       produces:
-      - application/json
+      - text/plain
       responses:
         "302":
           description: Found
@@ -464,7 +465,7 @@ paths:
       summary: Read a run payload
       tags:
       - payload
-  /results/{algorithmName}/requests/{requestId}:
+  /algorithm/v1.2/results/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves a result for the provided run
       parameters:
@@ -480,6 +481,7 @@ paths:
         type: string
       produces:
       - application/json
+      - text/plain
       responses:
         "200":
           description: OK
@@ -496,17 +498,18 @@ paths:
       summary: Read a run result
       tags:
       - results
-  /results/tags/{tag}:
+  /algorithm/v1.2/results/tags/{requestTag}:
     get:
       description: Read results of all runs with a matching tag
       parameters:
       - description: Request tag assigned by a client
         in: path
-        name: tag
+        name: requestTag
         required: true
         type: string
       produces:
       - application/json
+      - text/plain
       responses:
         "200":
           description: OK
@@ -525,7 +528,7 @@ paths:
       summary: Read run results by tag
       tags:
       - results
-  /run/{algorithmName}:
+  /algorithm/v1.2/run/{algorithmName}:
     post:
       consumes:
       - application/json
@@ -544,6 +547,7 @@ paths:
           $ref: '#/definitions/models.AlgorithmRequest'
       produces:
       - application/json
+      - text/plain
       responses:
         "202":
           description: Accepted
