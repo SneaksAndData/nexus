@@ -14,7 +14,7 @@ import (
 //	@Tags			results
 //	@Produce		json
 //	@Param			tag	path		string	true	"Request tag assigned by a client"
-//	@Success		200	{object}    []models.RequestResult
+//	@Success		200	{object}    []models.TaggedRequestResult
 //	@Failure		400	{object}	string
 //	@Failure		404	{object}	string
 //	@Router			/results/tags/{tag} [get]
@@ -35,9 +35,9 @@ func GetRunResultsByTag(buffer *request.DefaultBuffer) gin.HandlerFunc {
 			return
 		}
 
-		responseContent := []*models.RequestResult{}
+		responseContent := []*models.TaggedRequestResult{}
 		for result := range results {
-			responseContent = append(responseContent, models.FromCheckpointedRequest(result))
+			responseContent = append(responseContent, models.NewTaggedRequestResult(result))
 		}
 
 		ctx.JSON(http.StatusOK, responseContent)

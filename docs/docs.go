@@ -143,7 +143,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.RequestResult"
+                                "$ref": "#/definitions/models.TaggedRequestResult"
                             }
                         }
                     },
@@ -378,6 +378,26 @@ const docTemplate = `{
         "models.RequestResult": {
             "type": "object",
             "properties": {
+                "requestId": {
+                    "type": "string"
+                },
+                "resultUri": {
+                    "type": "string"
+                },
+                "runErrorMessage": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TaggedRequestResult": {
+            "type": "object",
+            "properties": {
+                "algorithmName": {
+                    "type": "string"
+                },
                 "requestId": {
                     "type": "string"
                 },
