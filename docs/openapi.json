@@ -1,0 +1,799 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Nexus Scheduler API",
+    "description": "Nexus Scheduler API specification. All Nexus supported clients conform to this spec.",
+    "contact": {
+      "name": "ESD Support",
+      "email": "esdsupport@ecco.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "/algorithm/v1.2"
+    }
+  ],
+  "paths": {
+    "/metadata/{algorithmName}/requests/{requestId}": {
+      "get": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Read a run metadata",
+        "description": "Retrieves checkpointed metadata for a run",
+        "parameters": [
+          {
+            "name": "algorithmName",
+            "in": "path",
+            "description": "Algorithm name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "description": "Request identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.CheckpointedRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payload/{algorithmName}/requests/{requestId}": {
+      "get": {
+        "tags": [
+          "payload"
+        ],
+        "summary": "Read a run payload",
+        "description": "Retrieves payload sent by the client for the provided run",
+        "parameters": [
+          {
+            "name": "algorithmName",
+            "in": "path",
+            "description": "Algorithm name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "description": "Request identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/results/tags/{tag}": {
+      "get": {
+        "tags": [
+          "results"
+        ],
+        "summary": "Read run results by tag",
+        "description": "Read results of all runs with a matching tag",
+        "parameters": [
+          {
+            "name": "tag",
+            "in": "path",
+            "description": "Request tag assigned by a client",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/models.RequestResult"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/results/{algorithmName}/requests/{requestId}": {
+      "get": {
+        "tags": [
+          "results"
+        ],
+        "summary": "Read a run result",
+        "description": "Retrieves a result for the provided run",
+        "parameters": [
+          {
+            "name": "algorithmName",
+            "in": "path",
+            "description": "Algorithm name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "description": "Request identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.RequestResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/run/{algorithmName}": {
+      "post": {
+        "tags": [
+          "run"
+        ],
+        "summary": "Create a new algorithm run",
+        "description": "Accepts an algorithm payload and places it into a scheduling queue",
+        "parameters": [
+          {
+            "name": "algorithmName",
+            "in": "path",
+            "description": "Algorithm name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Run configuration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/models.AlgorithmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "payload"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "models.AlgorithmRequest": {
+        "required": [
+          "algorithmParameters"
+        ],
+        "type": "object",
+        "properties": {
+          "algorithmParameters": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "customConfiguration": {
+            "$ref": "#/components/schemas/v1.NexusAlgorithmSpec"
+          },
+          "parentRequest": {
+            "$ref": "#/components/schemas/models.AlgorithmRequestRef"
+          },
+          "payloadValidFor": {
+            "type": "string"
+          },
+          "requestApiVersion": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          }
+        }
+      },
+      "models.AlgorithmRequestRef": {
+        "required": [
+          "algorithmName",
+          "requestId"
+        ],
+        "type": "object",
+        "properties": {
+          "algorithmName": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          }
+        }
+      },
+      "models.CheckpointedRequest": {
+        "type": "object",
+        "properties": {
+          "algorithm": {
+            "type": "string"
+          },
+          "algorithm_failure_cause": {
+            "type": "string"
+          },
+          "algorithm_failure_details": {
+            "type": "string"
+          },
+          "api_version": {
+            "type": "string"
+          },
+          "applied_configuration": {
+            "$ref": "#/components/schemas/v1.NexusAlgorithmSpec"
+          },
+          "configuration_overrides": {
+            "$ref": "#/components/schemas/v1.NexusAlgorithmSpec"
+          },
+          "content_hash": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "job_uid": {
+            "type": "string"
+          },
+          "last_modified": {
+            "type": "string"
+          },
+          "lifecycle_stage": {
+            "type": "string"
+          },
+          "parent_job": {
+            "$ref": "#/components/schemas/models.ParentJobReference"
+          },
+          "payload_uri": {
+            "type": "string"
+          },
+          "payload_valid_for": {
+            "type": "string"
+          },
+          "received_at": {
+            "type": "string"
+          },
+          "received_by_host": {
+            "type": "string"
+          },
+          "result_uri": {
+            "type": "string"
+          },
+          "sent_at": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          }
+        }
+      },
+      "models.ParentJobReference": {
+        "type": "object"
+      },
+      "models.RequestResult": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string"
+          },
+          "resultUri": {
+            "type": "string"
+          },
+          "runErrorMessage": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "resource.Quantity": {
+        "type": "object",
+        "properties": {
+          "Format": {
+            "type": "string",
+            "enum": [
+              "DecimalExponent",
+              "BinarySI",
+              "DecimalSI"
+            ],
+            "x-enum-varnames": [
+              "DecimalExponent",
+              "BinarySI",
+              "DecimalSI"
+            ],
+            "x-enum-comments": {
+              "BinarySI": "e.g., 12Mi (12 * 2^20)",
+              "DecimalExponent": "e.g., 12e6",
+              "DecimalSI": "e.g., 12M  (12 * 10^6)"
+            }
+          }
+        }
+      },
+      "v1.ConfigMapEnvSource": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896."
+          },
+          "optional": {
+            "type": "boolean",
+            "description": "Specify whether the ConfigMap must be defined\n+optional"
+          }
+        }
+      },
+      "v1.ConfigMapKeySelector": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The key to select."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896."
+          },
+          "optional": {
+            "type": "boolean",
+            "description": "Specify whether the ConfigMap or its key must be defined\n+optional"
+          }
+        }
+      },
+      "v1.EnvFromSource": {
+        "type": "object",
+        "properties": {
+          "configMapRef": {
+            "type": "object",
+            "description": "The ConfigMap to select from\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.ConfigMapEnvSource"
+              }
+            ]
+          },
+          "prefix": {
+            "type": "string",
+            "description": "An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.\n+optional"
+          },
+          "secretRef": {
+            "type": "object",
+            "description": "The Secret to select from\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.SecretEnvSource"
+              }
+            ]
+          }
+        }
+      },
+      "v1.EnvVar": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the environment variable. Must be a C_IDENTIFIER."
+          },
+          "value": {
+            "type": "string",
+            "description": "Variable references $(VAR_NAME) are expanded\nusing the previously defined environment variables in the container and\nany service environment variables. If a variable cannot be resolved,\nthe reference in the input string will be unchanged. Double $$ are reduced\nto a single $, which allows for escaping the $(VAR_NAME) syntax: i.e.\n\"$$(VAR_NAME)\" will produce the string literal \"$(VAR_NAME)\".\nEscaped references will never be expanded, regardless of whether the variable\nexists or not.\nDefaults to \"\".\n+optional"
+          },
+          "valueFrom": {
+            "type": "object",
+            "description": "Source for the environment variable's value. Cannot be used if value is not empty.\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.EnvVarSource"
+              }
+            ]
+          }
+        }
+      },
+      "v1.EnvVarSource": {
+        "type": "object",
+        "properties": {
+          "configMapKeyRef": {
+            "type": "object",
+            "description": "Selects a key of a ConfigMap.\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.ConfigMapKeySelector"
+              }
+            ]
+          },
+          "fieldRef": {
+            "type": "object",
+            "description": "Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`,\nspec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.ObjectFieldSelector"
+              }
+            ]
+          },
+          "resourceFieldRef": {
+            "type": "object",
+            "description": "Selects a resource of the container: only resources limits and requests\n(limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.ResourceFieldSelector"
+              }
+            ]
+          },
+          "secretKeyRef": {
+            "type": "object",
+            "description": "Selects a key of a secret in the pod's namespace\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.SecretKeySelector"
+              }
+            ]
+          }
+        }
+      },
+      "v1.NexusAlgorithmContainer": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string"
+          },
+          "registry": {
+            "type": "string"
+          },
+          "serviceAccountName": {
+            "type": "string"
+          },
+          "versionTag": {
+            "type": "string"
+          }
+        }
+      },
+      "v1.NexusAlgorithmResources": {
+        "type": "object",
+        "properties": {
+          "cpuLimit": {
+            "type": "string"
+          },
+          "customResources": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "memoryLimit": {
+            "type": "string"
+          }
+        }
+      },
+      "v1.NexusAlgorithmRuntimeEnvironment": {
+        "type": "object",
+        "properties": {
+          "annotations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "deadlineSeconds": {
+            "type": "integer"
+          },
+          "environmentVariables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/v1.EnvVar"
+            }
+          },
+          "mappedEnvironmentVariables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/v1.EnvFromSource"
+            }
+          },
+          "maximumRetries": {
+            "type": "integer"
+          }
+        }
+      },
+      "v1.NexusAlgorithmSpec": {
+        "type": "object",
+        "properties": {
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "command": {
+            "type": "string"
+          },
+          "computeResources": {
+            "$ref": "#/components/schemas/v1.NexusAlgorithmResources"
+          },
+          "container": {
+            "$ref": "#/components/schemas/v1.NexusAlgorithmContainer"
+          },
+          "datadogIntegrationSettings": {
+            "$ref": "#/components/schemas/v1.NexusDatadogIntegrationSettings"
+          },
+          "errorHandlingBehaviour": {
+            "$ref": "#/components/schemas/v1.NexusErrorHandlingBehaviour"
+          },
+          "runtimeEnvironment": {
+            "$ref": "#/components/schemas/v1.NexusAlgorithmRuntimeEnvironment"
+          },
+          "workgroupRef": {
+            "$ref": "#/components/schemas/v1.NexusAlgorithmWorkgroupRef"
+          }
+        }
+      },
+      "v1.NexusAlgorithmWorkgroupRef": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "v1.NexusDatadogIntegrationSettings": {
+        "type": "object",
+        "properties": {
+          "mountDatadogSocket": {
+            "type": "boolean"
+          }
+        }
+      },
+      "v1.NexusErrorHandlingBehaviour": {
+        "type": "object",
+        "properties": {
+          "fatalExitCodes": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "transientExitCodes": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "v1.ObjectFieldSelector": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {
+            "type": "string",
+            "description": "Version of the schema the FieldPath is written in terms of, defaults to \"v1\".\n+optional"
+          },
+          "fieldPath": {
+            "type": "string",
+            "description": "Path of the field to select in the specified API version."
+          }
+        }
+      },
+      "v1.ResourceFieldSelector": {
+        "type": "object",
+        "properties": {
+          "containerName": {
+            "type": "string",
+            "description": "Container name: required for volumes, optional for env vars\n+optional"
+          },
+          "divisor": {
+            "type": "object",
+            "description": "Specifies the output format of the exposed resources, defaults to \"1\"\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resource.Quantity"
+              }
+            ]
+          },
+          "resource": {
+            "type": "string",
+            "description": "Required: resource to select"
+          }
+        }
+      },
+      "v1.SecretEnvSource": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896."
+          },
+          "optional": {
+            "type": "boolean",
+            "description": "Specify whether the Secret must be defined\n+optional"
+          }
+        }
+      },
+      "v1.SecretKeySelector": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The key of the secret to select from.  Must be a valid secret key."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896."
+          },
+          "optional": {
+            "type": "boolean",
+            "description": "Specify whether the Secret or its key must be defined\n+optional"
+          }
+        }
+      }
+    }
+  },
+  "x-original-swagger-version": "2.0"
+}
