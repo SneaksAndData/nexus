@@ -167,7 +167,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/models.RequestResult"
+                    "$ref": "#/components/schemas/models.TaggedRequestResult"
                   }
                 }
               }
@@ -437,6 +437,26 @@
       "models.RequestResult": {
         "type": "object",
         "properties": {
+          "requestId": {
+            "type": "string"
+          },
+          "resultUri": {
+            "type": "string"
+          },
+          "runErrorMessage": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "models.TaggedRequestResult": {
+        "type": "object",
+        "properties": {
+          "algorithmName": {
+            "type": "string"
+          },
           "requestId": {
             "type": "string"
           },

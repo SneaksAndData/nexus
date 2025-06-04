@@ -82,6 +82,19 @@ definitions:
       status:
         type: string
     type: object
+  models.TaggedRequestResult:
+    properties:
+      algorithmName:
+        type: string
+      requestId:
+        type: string
+      resultUri:
+        type: string
+      runErrorMessage:
+        type: string
+      status:
+        type: string
+    type: object
   resource.Quantity:
     properties:
       Format:
@@ -499,7 +512,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.RequestResult'
+              $ref: '#/definitions/models.TaggedRequestResult'
             type: array
         "400":
           description: Bad Request
