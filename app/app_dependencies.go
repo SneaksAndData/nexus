@@ -131,6 +131,10 @@ func (appServices *ApplicationServices) CheckpointBuffer() *request.DefaultBuffe
 	return appServices.checkpointBuffer
 }
 
+func (appServices *ApplicationServices) Logger(ctx context.Context) klog.Logger {
+	return klog.FromContext(ctx)
+}
+
 func (appServices *ApplicationServices) KubeClient() *kubernetes.Clientset {
 	return appServices.kubeClient
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	"github.com/SneaksAndData/nexus/api/v1/models"
 	"github.com/gin-gonic/gin"
+	"k8s.io/klog/v2"
 	"net/http"
 )
 
@@ -18,20 +19,22 @@ import (
 //	@Success		200	{array}    models.TaggedRequestResult
 //	@Failure		400	{string}	string
 //	@Failure		404	{string}	string
+//	@Failure		401	{string}	string
 //	@Router			/algorithm/v1.2/results/tags/{requestTag} [get]
-func GetRunResultsByTag(buffer *request.DefaultBuffer) gin.HandlerFunc {
+func GetRunResultsByTag(buffer *request.DefaultBuffer, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// TODO: log errors
 		tag := ctx.Param("requestTag")
 
 		results, err := buffer.GetTagged(tag)
 
 		if err != nil {
+			logger.V(0).Error(err, "Failed to read tagged results", "tag", tag)
 			ctx.String(http.StatusBadRequest, `Failed to read tagged results for %s`, tag)
 			return
 		}
 
 		if results == nil {
+			logger.V(1).Info("Tag not found", "tag", tag)
 			ctx.String(http.StatusNotFound, "")
 			return
 		}
