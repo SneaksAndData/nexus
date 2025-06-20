@@ -15,6 +15,7 @@ import (
 //	@Tags			results
 //	@Produce		json
 //	@Produce		plain
+//	@Produce		html
 //	@Param			requestTag	path		string	true	"Request tag assigned by a client"
 //	@Success		200	{array}    models.TaggedRequestResult
 //	@Failure		400	{string}	string

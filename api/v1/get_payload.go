@@ -12,11 +12,13 @@ import (
 //	@Description	Retrieves payload sent by the client for the provided run
 //	@Tags			payload
 //	@Produce		plain
+//	@Produce		html
 //	@Param			algorithmName	path		string	true	"Algorithm name"
 //	@Param			requestId	path		string	true	"Request identifier"
 //	@Success		302	{string}    string
 //	@Failure		400	{string}	string
 //	@Failure		404	{string}	string
+//	@Failure		401	{string}	string
 //	@Router			/algorithm/v1.2/payload/{algorithmName}/requests/{requestId} [get]
 func GetRunPayload(buffer *request.DefaultBuffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {

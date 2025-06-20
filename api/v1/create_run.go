@@ -17,11 +17,13 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Produce		plain
+//	@Produce		html
 //	@Param			algorithmName	path		string	true	"Algorithm name"
 //	@Param			payload	body		models.AlgorithmRequest	true	"Run configuration"
 //	@Success		202	{object}	map[string]string
 //	@Failure		400	{string}	string
 //	@Failure		500	{string}	string
+//	@Failure		401	{string}	string
 //	@Router			/algorithm/v1.2/run/{algorithmName} [post]
 func CreateRun(buffer *request.DefaultBuffer, configCache *services.NexusResourceCache) gin.HandlerFunc {
 	return func(ctx *gin.Context) {

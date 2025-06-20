@@ -27,7 +27,8 @@ const docTemplate = `{
                 "description": "Retrieves checkpointed metadata for a run",
                 "produces": [
                     "application/json",
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "metadata"
@@ -62,6 +63,12 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -75,7 +82,8 @@ const docTemplate = `{
             "get": {
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "payload"
@@ -110,6 +118,12 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -124,7 +138,8 @@ const docTemplate = `{
                 "description": "Read results of all runs with a matching tag",
                 "produces": [
                     "application/json",
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "results"
@@ -175,7 +190,8 @@ const docTemplate = `{
                 "description": "Retrieves a result for the provided run",
                 "produces": [
                     "application/json",
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "results"
@@ -210,6 +226,12 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -227,7 +249,8 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json",
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "run"
@@ -263,6 +286,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }

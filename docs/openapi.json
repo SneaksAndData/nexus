@@ -59,6 +59,11 @@
                 "schema": {
                   "$ref": "#/components/schemas/models.CheckpointedRequest"
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.CheckpointedRequest"
+                }
               }
             }
           },
@@ -74,6 +79,31 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -86,6 +116,11 @@
                 }
               },
               "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
                 "schema": {
                   "type": "string"
                 }
@@ -130,6 +165,11 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -140,6 +180,26 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -147,6 +207,11 @@
             "description": "Not Found",
             "content": {
               "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
                 "schema": {
                   "type": "string"
                 }
@@ -193,6 +258,14 @@
                     "$ref": "#/components/schemas/models.TaggedRequestResult"
                   }
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/models.TaggedRequestResult"
+                  }
+                }
               }
             }
           },
@@ -205,6 +278,11 @@
                 }
               },
               "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
                 "schema": {
                   "type": "string"
                 }
@@ -223,6 +301,11 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -235,6 +318,11 @@
                 }
               },
               "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
                 "schema": {
                   "type": "string"
                 }
@@ -284,6 +372,11 @@
                 "schema": {
                   "$ref": "#/components/schemas/models.RequestResult"
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/models.RequestResult"
+                }
               }
             }
           },
@@ -299,6 +392,31 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -311,6 +429,11 @@
                 }
               },
               "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
                 "schema": {
                   "type": "string"
                 }
@@ -368,6 +491,14 @@
                     "type": "string"
                   }
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
               }
             }
           },
@@ -383,6 +514,31 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -395,6 +551,11 @@
                 }
               },
               "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
                 "schema": {
                   "type": "string"
                 }

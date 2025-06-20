@@ -417,6 +417,7 @@ paths:
       produces:
       - application/json
       - text/plain
+      - text/html
       responses:
         "200":
           description: OK
@@ -424,6 +425,10 @@ paths:
             $ref: '#/definitions/models.CheckpointedRequest'
         "400":
           description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "404":
@@ -449,6 +454,7 @@ paths:
         type: string
       produces:
       - text/plain
+      - text/html
       responses:
         "302":
           description: Found
@@ -456,6 +462,10 @@ paths:
             type: string
         "400":
           description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "404":
@@ -482,6 +492,7 @@ paths:
       produces:
       - application/json
       - text/plain
+      - text/html
       responses:
         "200":
           description: OK
@@ -489,6 +500,10 @@ paths:
             $ref: '#/definitions/models.RequestResult'
         "400":
           description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "404":
@@ -510,6 +525,7 @@ paths:
       produces:
       - application/json
       - text/plain
+      - text/html
       responses:
         "200":
           description: OK
@@ -552,6 +568,7 @@ paths:
       produces:
       - application/json
       - text/plain
+      - text/html
       responses:
         "202":
           description: Accepted
@@ -561,6 +578,10 @@ paths:
             type: object
         "400":
           description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "500":
