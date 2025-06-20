@@ -20,7 +20,8 @@
                 "description": "Retrieves checkpointed metadata for a run",
                 "produces": [
                     "application/json",
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "metadata"
@@ -55,6 +56,12 @@
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -68,7 +75,8 @@
             "get": {
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "payload"
@@ -103,6 +111,12 @@
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -117,7 +131,8 @@
                 "description": "Read results of all runs with a matching tag",
                 "produces": [
                     "application/json",
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "results"
@@ -168,7 +183,8 @@
                 "description": "Retrieves a result for the provided run",
                 "produces": [
                     "application/json",
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "results"
@@ -203,6 +219,12 @@
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -220,7 +242,8 @@
                 ],
                 "produces": [
                     "application/json",
-                    "text/plain"
+                    "text/plain",
+                    "text/html"
                 ],
                 "tags": [
                     "run"
@@ -256,6 +279,12 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
