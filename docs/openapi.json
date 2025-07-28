@@ -308,26 +308,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/html": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
           }
         }
       }
@@ -780,7 +760,7 @@
           },
           "prefix": {
             "type": "string",
-            "description": "An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.\n+optional"
+            "description": "Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.\n+optional"
           },
           "secretRef": {
             "type": "object",

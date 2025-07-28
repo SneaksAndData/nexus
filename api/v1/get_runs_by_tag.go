@@ -19,7 +19,6 @@ import (
 //	@Param			requestTag	path		string	true	"Request tag assigned by a client"
 //	@Success		200	{array}    models.TaggedRequestResult
 //	@Failure		400	{string}	string
-//	@Failure		404	{string}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1.2/results/tags/{requestTag} [get]
 func GetRunResultsByTag(buffer *request.DefaultBuffer, logger klog.Logger) gin.HandlerFunc {
@@ -31,12 +30,6 @@ func GetRunResultsByTag(buffer *request.DefaultBuffer, logger klog.Logger) gin.H
 		if err != nil {
 			logger.V(0).Error(err, "Failed to read tagged results", "tag", tag)
 			ctx.String(http.StatusBadRequest, `Failed to read tagged results for %s`, tag)
-			return
-		}
-
-		if results == nil {
-			logger.V(1).Info("Tag not found", "tag", tag)
-			ctx.String(http.StatusNotFound, "")
 			return
 		}
 
