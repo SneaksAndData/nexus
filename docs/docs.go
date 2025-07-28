@@ -175,12 +175,6 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 }
             }
@@ -516,7 +510,7 @@ const docTemplate = `{
                     ]
                 },
                 "prefix": {
-                    "description": "An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.\n+optional",
+                    "description": "Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.\n+optional",
                     "type": "string"
                 },
                 "secretRef": {
