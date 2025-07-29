@@ -212,6 +212,8 @@ scheduler:
         secretName: ""
     
     cqlStore:
+      # type of CqlStore to use. Support options: `astra`, `scylla`
+      type: astra
       # Enable mounting Cassandra credentials from a secret
       secretRefEnabled: true
       

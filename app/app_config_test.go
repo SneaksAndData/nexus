@@ -27,11 +27,12 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 			Endpoint:        "http://127.0.0.1:9000",
 			Region:          "us-east-1",
 		},
-		CqlStore: request.AstraBundleConfig{
+		AstraCqlStore: request.AstraBundleConfig{
 			SecureConnectionBundleBase64: "base64value",
 			GatewayUser:                  "user",
 			GatewayPassword:              "password",
 		},
+		CqlStoreType:        CqlStoreAstra,
 		ResourceNamespace:   "nexus",
 		KubeConfigPath:      "/tmp/nexus-test",
 		ShardKubeConfigPath: "/tmp/shards",
