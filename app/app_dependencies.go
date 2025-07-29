@@ -30,9 +30,18 @@ type ApplicationServices struct {
 	workerConfig     *models.PipelineWorkerConfig
 }
 
-func (appServices *ApplicationServices) WithBuffer(ctx context.Context, config *request.S3BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
+func (appServices *ApplicationServices) WithAstraS3Buffer(ctx context.Context, config *request.S3BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
 	if appServices.checkpointBuffer == nil {
-		appServices.checkpointBuffer = request.NewDefaultBuffer(ctx, config, bundleConfig, map[string]string{})
+		appServices.checkpointBuffer = request.NewAstraS3Buffer(ctx, config, bundleConfig, map[string]string{})
+		appServices.workerConfig = models.FromBufferConfig(config.BufferConfig)
+	}
+
+	return appServices
+}
+
+func (appServices *ApplicationServices) WithScyllaS3Buffer(ctx context.Context, config *request.S3BufferConfig, scyllaConfig *request.ScyllaCqlStoreConfig) *ApplicationServices {
+	if appServices.checkpointBuffer == nil {
+		appServices.checkpointBuffer = request.NewScyllaS3Buffer(ctx, config, scyllaConfig, map[string]string{})
 		appServices.workerConfig = models.FromBufferConfig(config.BufferConfig)
 	}
 

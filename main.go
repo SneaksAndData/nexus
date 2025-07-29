@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 	"github.com/SneaksAndData/nexus-core/pkg/signals"
 	"github.com/SneaksAndData/nexus-core/pkg/telemetry"
@@ -23,8 +24,19 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 	gin.SetMode(os.Getenv("GIN_MODE"))
 
 	appServices := (&app.ApplicationServices{}).
-		WithKubeClients(ctx, appConfig.KubeConfigPath).
-		WithBuffer(ctx, &appConfig.S3Buffer, &appConfig.CqlStore).
+		WithKubeClients(ctx, appConfig.KubeConfigPath)
+
+	switch appConfig.CqlStoreType {
+	case app.CqlStoreAstra:
+		appServices = appServices.WithAstraS3Buffer(ctx, &appConfig.S3Buffer, &appConfig.AstraCqlStore)
+	case app.CqlStoreScylla:
+		appServices = appServices.WithScyllaS3Buffer(ctx, &appConfig.S3Buffer, &appConfig.ScyllaCqlStore)
+	default:
+		klog.FromContext(ctx).Error(errors.New("unknown store type "+appConfig.CqlStoreType), "failed to initialize a CqlStore")
+		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+	}
+
+	appServices = appServices.
 		WithCache(ctx, appConfig.ResourceNamespace).
 		WithRecorder(ctx, appConfig.ResourceNamespace).
 		WithShards(ctx, appConfig.ShardKubeConfigPath, appConfig.ResourceNamespace).

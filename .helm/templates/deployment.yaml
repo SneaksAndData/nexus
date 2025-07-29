@@ -49,6 +49,8 @@ spec:
             - name: GIN_MODE
               value: {{ .Values.ginMode }}
           {{- if .Values.scheduler.config.enabled }}
+            - name: NEXUS__CQL_STORE_TYPE
+              value: {{ .Values.scheduler.config.cqlStore.type }}
             - name: NEXUS__RESOURCE_NAMESPACE              
               value: {{ .Values.scheduler.config.resourceNamespace }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH
