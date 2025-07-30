@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 	"os"
@@ -32,6 +33,13 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 			GatewayUser:                  "user",
 			GatewayPassword:              "password",
 		},
+		ScyllaCqlStore: request.ScyllaCqlStoreConfig{
+			Hosts:    []string{"127.0.0.1:9000"},
+			Port:     "",
+			User:     "",
+			Password: "",
+			LocalDC:  "",
+		},
 		CqlStoreType:        CqlStoreAstra,
 		ResourceNamespace:   "nexus",
 		KubeConfigPath:      "/tmp/nexus-test",
@@ -53,11 +61,15 @@ func Test_LoadConfig(t *testing.T) {
 func Test_LoadConfigFromEnv(t *testing.T) {
 	storagePath := "s3://bucket-2/nexus/payloads"
 	keyId := "test-key-id"
+	host1 := "127.0.0.1:9042"
+	host2 := "127.0.0.2:9042"
 	_ = os.Setenv("NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH", storagePath)
 	_ = os.Setenv("NEXUS__S3_BUFFER__ACCESS_KEY_ID", keyId)
+	_ = os.Setenv("NEXUS__SCYLLA_CQL_STORE__HOSTS", fmt.Sprintf("%s,%s", host1, host2))
 
 	var expected = getExpectedConfig(storagePath)
 	expected.S3Buffer.AccessKeyID = keyId
+	expected.ScyllaCqlStore.Hosts = []string{host1, host2}
 
 	var result = nexusconf.LoadConfig[SchedulerConfig](context.TODO())
 	if !reflect.DeepEqual(*expected, result) {
