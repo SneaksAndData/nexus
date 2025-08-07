@@ -78,7 +78,7 @@ func (c *NexusResourceCache) onConfigurationAdded(obj interface{}) {
 		return
 	}
 
-	c.logger.V(3).Info("resource loaded", "algorithm", objectRef.Name)
+	c.logger.V(3).Info("resource loaded", "resource", objectRef.Name)
 }
 
 func (c *NexusResourceCache) onConfigurationUpdated(old, new interface{}) {
@@ -98,7 +98,13 @@ func (c *NexusResourceCache) onConfigurationUpdated(old, new interface{}) {
 	c.logger.V(3).Info("resource updated", "resource", newRef.Name, "diff", diff.ObjectGoPrintSideBySide(old, new))
 }
 func (c *NexusResourceCache) onConfigurationDeleted(obj interface{}) {
-	c.logger.V(3).Info("resource deleted", "resource", obj.(*v1.NexusAlgorithmTemplate).Name)
+	objectRef, err := cache.ObjectToName(obj)
+	if err != nil {
+		utilruntime.HandleError(err)
+		return
+	}
+
+	c.logger.V(3).Info("resource deleted", "resource", objectRef.Name)
 }
 
 // GetAlgorithmConfiguration retrieves a cached NexusAlgorithmTemplate resource from informer cache
