@@ -24,7 +24,7 @@ import (
 //	@Failure		400	{string}	string
 //	@Failure		500	{string}	string
 //	@Failure		401	{string}	string
-//	@Router			/algorithm/v1.2/run/{algorithmName} [post]
+//	@Router			/algorithm/v1/run/{algorithmName} [post]
 func CreateRun(buffer *request.DefaultBuffer, configCache *services.NexusResourceCache) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors

@@ -22,7 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/algorithm/v1.2/metadata/{algorithmName}/requests/{requestId}": {
+        "/algorithm/v1/metadata/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves checkpointed metadata for a run",
                 "produces": [
@@ -78,7 +78,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/algorithm/v1.2/payload/{algorithmName}/requests/{requestId}": {
+        "/algorithm/v1/payload/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
@@ -133,7 +133,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/algorithm/v1.2/results/tags/{requestTag}": {
+        "/algorithm/v1/results/tags/{requestTag}": {
             "get": {
                 "description": "Read results of all runs with a matching tag",
                 "produces": [
@@ -179,7 +179,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/algorithm/v1.2/results/{algorithmName}/requests/{requestId}": {
+        "/algorithm/v1/results/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves a result for the provided run",
                 "produces": [
@@ -235,7 +235,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/algorithm/v1.2/run/{algorithmName}": {
+        "/algorithm/v1/run/{algorithmName}": {
             "post": {
                 "description": "Accepts an algorithm payload and places it into a scheduling queue",
                 "consumes": [
@@ -786,7 +786,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "/algorithm/v1.2",
+	BasePath:         "/algorithm/v1",
 	Schemes:          []string{},
 	Title:            "Nexus Scheduler API",
 	Description:      "Nexus Scheduler API specification. All Nexus supported clients conform to this spec.",
