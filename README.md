@@ -30,9 +30,89 @@ Supervisor handles the following scenarios:
 Scheduler is what makes it possible to run algorithms through Nexus. Each scheduler has a public API that can be used to submit runs and retrieve results. Moreover, each scheduler holds a separate virtual queue that it uses to process incoming requests.
 Nexus relies on load balancer using round-robin algorithm when distributing requests between scheduler pods, so a horizontal autoscaler should be used for production deployments.
 
-## Usage
+## Quickstart
 
+1. Deploy Nexus Custom Resource Definitions:
+```shell
+helm install nexus-crd --namespace nexus --create-namespace oci://ghcr.io/sneaksanddata/helm/nexus-crd --version v1.0.0
+```
 
+Make sure to always install the latest CRD version. `v1` API is guaranteed to be backwards compatible with all `v1.*` CRD releases, however `latest` is not.
+
+2. We currently do not ship backend dependencies as subcharts, thus make sure you have the following up and running:
+- An Apache Cassandra or similar cluster
+- An S3-compatible object storage
+- *optional* a Kubernetes cluster for running workloads
+
+For Cassandra you can use AstraDB, Scylla or native Cassandra, however you'll need to use Scylla config to configure it. For S3, make sure you have the following:
+- a dedicated bucket
+- an IAM policy for the service account Nexus will use. Permissions required are:
+  - "s3:ListBucket"
+  - "s3:GetObject"
+  - "s3:PutObject"
+  - "s3:DeleteObject"
+  - "s3:DeleteObjectVersion"
+  - "s3:*MultipartUpload"
+  - "s3:*Parts"
+
+3. Create the secrets containing configuration for Cassandra, S3 and Kubernetes connections. You can find examples for Cassandra and S3 in [helm values](.helm/values.yaml). In case of a single cluster mode, you do not need to provide external kubernetes configs. For a multi-cluster mode, export your worker clusters kubeconfigs and create the following secret in both controller and worker clusters.
+For example, if you have a worker cluster called `nexus-worker-cluster` with kubeconfig file `config.json` contents:
+```json
+{
+  "apiVersion": "v1",
+  "clusters": [
+    {
+      "cluster": {
+        "certificate-authority-data": "...",
+        "server": "https://..."
+      },
+      "name": "nexus-worker-cluster"
+    }
+  ],
+  "contexts": [
+    {
+      "context": {
+        "cluster": "nexus-worker-cluster",
+        "user": "user"
+      },
+      "name": "nexus-worker-cluster"
+    }
+  ],
+  "current-context": "nexus-worker-cluster",
+  "kind": "Config",
+  "preferences": {},
+  "users": [
+    {
+      "name": "user",
+      "user": {
+        "exec": {
+          "apiVersion": "client.authentication.k8s.io/v1beta1",
+          "args": [],
+          "command": "get-token",
+          "env": [],
+          "interactiveMode": "IfAvailable",
+          "provideClusterInfo": false
+        }
+      }
+    }
+  ]
+}
+```
+You can then create a secret:
+```shell
+kubectl create secret generic nexus-workers \
+    --from-file=nexus-worker-cluster=./config.json
+```
+
+Now you are ready to install the scheduler:
+```shell
+helm install nexus --namespace nexus --create-namespace oci://ghcr.io/sneaksanddata/helm/nexus \
+--set scheduler.config.s3Buffer.payloadStoragePath=s3a://nexus-s3-bucket/payload-store \
+--set scheduler.config.s3Buffer.s3Credentials.secretName=nexus-s3 \
+--set scheduler.config.cqlStore.type=scylla \
+--set scheduler.config.cqlStore.secretName=nexus-cassandra \
+--set ginMode=release
+```
 
 ### Versioning
 
