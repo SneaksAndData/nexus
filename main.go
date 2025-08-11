@@ -43,14 +43,14 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 		WithDefaultNamespace(appConfig.ResourceNamespace).
 		BuildScheduler(ctx)
 
-	// version 1.2
-	apiV12 := router.Group("algorithm/v1.2")
+	// version 1
+	apiV1 := router.Group("algorithm/v1")
 
-	apiV12.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache()))
-	apiV12.GET("results/:algorithmName/requests/:requestId", v1.GetRunResult(appServices.CheckpointBuffer()))
-	apiV12.GET("results/tags/:requestTag", v1.GetRunResultsByTag(appServices.CheckpointBuffer(), appServices.Logger(ctx)))
-	apiV12.GET("metadata/:algorithmName/requests/:requestId", v1.GetRunMetadata(appServices.CheckpointBuffer()))
-	apiV12.GET("payload/:algorithmName/requests/:requestId", v1.GetRunPayload(appServices.CheckpointBuffer()))
+	apiV1.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache()))
+	apiV1.GET("results/:algorithmName/requests/:requestId", v1.GetRunResult(appServices.CheckpointBuffer()))
+	apiV1.GET("results/tags/:requestTag", v1.GetRunResultsByTag(appServices.CheckpointBuffer(), appServices.Logger(ctx)))
+	apiV1.GET("metadata/:algorithmName/requests/:requestId", v1.GetRunMetadata(appServices.CheckpointBuffer()))
+	apiV1.GET("payload/:algorithmName/requests/:requestId", v1.GetRunPayload(appServices.CheckpointBuffer()))
 
 	go func() {
 		appServices.Start(ctx)
@@ -79,7 +79,7 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @BasePath  /algorithm/v1.2
+// @BasePath  /algorithm/v1
 func main() {
 	ctx := signals.SetupSignalHandler()
 	appConfig := nexusconf.LoadConfig[app.SchedulerConfig](ctx)

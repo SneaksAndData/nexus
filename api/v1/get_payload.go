@@ -19,7 +19,7 @@ import (
 //	@Failure		400	{string}	string
 //	@Failure		404	{string}	string
 //	@Failure		401	{string}	string
-//	@Router			/algorithm/v1.2/payload/{algorithmName}/requests/{requestId} [get]
+//	@Router			/algorithm/v1/payload/{algorithmName}/requests/{requestId} [get]
 func GetRunPayload(buffer *request.DefaultBuffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors

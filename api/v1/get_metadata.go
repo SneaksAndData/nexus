@@ -20,7 +20,7 @@ import (
 //	@Failure		400	{string}	string
 //	@Failure		404	{string}	string
 //	@Failure		401	{string}	string
-//	@Router			/algorithm/v1.2/metadata/{algorithmName}/requests/{requestId} [get]
+//	@Router			/algorithm/v1/metadata/{algorithmName}/requests/{requestId} [get]
 func GetRunMetadata(buffer *request.DefaultBuffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors
