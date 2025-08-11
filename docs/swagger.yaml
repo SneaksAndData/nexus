@@ -1,4 +1,4 @@
-basePath: /algorithm/v1.2
+basePath: /algorithm/v1
 definitions:
   models.AlgorithmRequest:
     properties:
@@ -400,7 +400,7 @@ info:
   title: Nexus Scheduler API
   version: "1.0"
 paths:
-  /algorithm/v1.2/metadata/{algorithmName}/requests/{requestId}:
+  /algorithm/v1/metadata/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves checkpointed metadata for a run
       parameters:
@@ -438,7 +438,7 @@ paths:
       summary: Read a run metadata
       tags:
       - metadata
-  /algorithm/v1.2/payload/{algorithmName}/requests/{requestId}:
+  /algorithm/v1/payload/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves payload sent by the client for the provided run
       parameters:
@@ -475,7 +475,7 @@ paths:
       summary: Read a run payload
       tags:
       - payload
-  /algorithm/v1.2/results/{algorithmName}/requests/{requestId}:
+  /algorithm/v1/results/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves a result for the provided run
       parameters:
@@ -513,7 +513,7 @@ paths:
       summary: Read a run result
       tags:
       - results
-  /algorithm/v1.2/results/tags/{requestTag}:
+  /algorithm/v1/results/tags/{requestTag}:
     get:
       description: Read results of all runs with a matching tag
       parameters:
@@ -544,7 +544,7 @@ paths:
       summary: Read run results by tag
       tags:
       - results
-  /algorithm/v1.2/run/{algorithmName}:
+  /algorithm/v1/run/{algorithmName}:
     post:
       consumes:
       - application/json

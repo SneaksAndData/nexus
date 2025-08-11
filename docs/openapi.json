@@ -15,11 +15,11 @@
   },
   "servers": [
     {
-      "url": "/algorithm/v1.2"
+      "url": "/algorithm/v1"
     }
   ],
   "paths": {
-    "/algorithm/v1.2/metadata/{algorithmName}/requests/{requestId}": {
+    "/algorithm/v1/metadata/{algorithmName}/requests/{requestId}": {
       "get": {
         "tags": [
           "metadata"
@@ -130,7 +130,7 @@
         }
       }
     },
-    "/algorithm/v1.2/payload/{algorithmName}/requests/{requestId}": {
+    "/algorithm/v1/payload/{algorithmName}/requests/{requestId}": {
       "get": {
         "tags": [
           "payload"
@@ -221,7 +221,7 @@
         }
       }
     },
-    "/algorithm/v1.2/results/tags/{requestTag}": {
+    "/algorithm/v1/results/tags/{requestTag}": {
       "get": {
         "tags": [
           "results"
@@ -312,7 +312,7 @@
         }
       }
     },
-    "/algorithm/v1.2/results/{algorithmName}/requests/{requestId}": {
+    "/algorithm/v1/results/{algorithmName}/requests/{requestId}": {
       "get": {
         "tags": [
           "results"
@@ -423,7 +423,7 @@
         }
       }
     },
-    "/algorithm/v1.2/run/{algorithmName}": {
+    "/algorithm/v1/run/{algorithmName}": {
       "post": {
         "tags": [
           "run"
