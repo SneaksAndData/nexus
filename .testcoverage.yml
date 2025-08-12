@@ -14,3 +14,4 @@ exclude:
     - ^pkg/signals        # exclude signal handlers from sample controller
     - hack/*.go           # exclude hack folder
     - main.go             # exclude main file
+    - ^api/v1             # exclude API routes

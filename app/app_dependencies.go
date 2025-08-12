@@ -21,9 +21,9 @@ import (
 type ApplicationServices struct {
 	checkpointBuffer *request.DefaultBuffer
 	defaultNamespace string
-	kubeClient       *kubernetes.Clientset
+	kubeClient       kubernetes.Interface
 	shardClients     []*shards.ShardClient
-	nexusClient      *nexuscore.Clientset
+	nexusClient      nexuscore.Interface
 	recorder         record.EventRecorder
 	configCache      *services.NexusResourceCache
 	scheduler        *services.RequestScheduler
@@ -114,7 +114,7 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceNamespace string) *ApplicationServices {
 	if appServices.configCache == nil {
 		logger := klog.FromContext(ctx)
-		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, resourceNamespace, logger)
+		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, resourceNamespace, logger, nil)
 	}
 
 	return appServices
@@ -144,11 +144,11 @@ func (appServices *ApplicationServices) Logger(ctx context.Context) klog.Logger 
 	return klog.FromContext(ctx)
 }
 
-func (appServices *ApplicationServices) KubeClient() *kubernetes.Clientset {
+func (appServices *ApplicationServices) KubeClient() kubernetes.Interface {
 	return appServices.kubeClient
 }
 
-func (appServices *ApplicationServices) NexusClient() *nexuscore.Clientset {
+func (appServices *ApplicationServices) NexusClient() nexuscore.Interface {
 	return appServices.nexusClient
 }
 
