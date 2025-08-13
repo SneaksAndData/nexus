@@ -99,3 +99,58 @@ func TestNexusResourceCache_GetAlgorithmConfiguration(t *testing.T) {
 		t.Errorf("algorithm configuration should not be nil")
 	}
 }
+
+func TestNexusResourceCache_GetWorkgroup(t *testing.T) {
+	workgroups := []*v1.NexusAlgorithmWorkgroup{
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "NexusAlgorithmWorkgroup",
+				APIVersion: "science.sneaksanddata.com/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-workgroup-1",
+				Namespace: "test",
+			},
+			Spec: v1.NexusAlgorithmWorkgroupSpec{},
+		},
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "NexusAlgorithmWorkgroup",
+				APIVersion: "science.sneaksanddata.com/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-workgroup-2",
+				Namespace: "test",
+			},
+			Spec: v1.NexusAlgorithmWorkgroupSpec{},
+		},
+	}
+
+	existingConfigurations := []runtime.Object{}
+
+	for _, workgroup := range workgroups {
+		existingConfigurations = append(existingConfigurations, workgroup)
+	}
+
+	f := newFixture(t, existingConfigurations)
+
+	f.populateWorkgroups(workgroups)
+
+	err := f.configCache.Init(f.ctx)
+
+	if err != nil {
+		t.Errorf("failed to init configuration cache: %v", err)
+		t.FailNow()
+	}
+
+	config, err := f.configCache.GetWorkgroupConfiguration("test-workgroup-2")
+
+	if err != nil {
+		t.Errorf("failed to get algorithm workgroup: %v", err)
+		t.FailNow()
+	}
+
+	if config == nil {
+		t.Errorf("algorithm workgroup should not be nil")
+	}
+}
