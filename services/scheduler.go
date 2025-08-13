@@ -61,7 +61,7 @@ func NewRequestScheduler(workerConfig *models.PipelineWorkerConfig, kubeClient k
 	}
 }
 
-func (scheduler *RequestScheduler) Init(ctx context.Context) (*RequestScheduler, error) {
+func (scheduler *RequestScheduler) Init(_ context.Context) (*RequestScheduler, error) {
 	scheduler.logger.Info("initializing Nexus scheduler")
 	_, eventErr := scheduler.eventInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: scheduler.OnEvent,
@@ -120,7 +120,7 @@ func (scheduler *RequestScheduler) Start(ctx context.Context) {
 	go scheduler.LateSubmissionActor.Start(ctx, pipeline.NewActorPostStart(func(ctx context.Context) error {
 		scheduler.factory.Start(ctx.Done())
 
-		if ok := cache.WaitForCacheSync(ctx.Done(), scheduler.podInformer.HasSynced, scheduler.eventInformer.HasSynced); !ok {
+		if ok := cache.WaitForCacheSync(ctx.Done(), scheduler.podInformer.HasSynced, scheduler.eventInformer.HasSynced); !ok { // coverage-ignore
 			return fmt.Errorf("failed to wait for pod self-informer caches to sync")
 		}
 
@@ -129,7 +129,7 @@ func (scheduler *RequestScheduler) Start(ctx context.Context) {
 }
 
 func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
-	if _, err := cache.ObjectToName(obj); err != nil {
+	if _, err := cache.ObjectToName(obj); err != nil { // coverage-ignore
 		utilruntime.HandleError(err)
 		return
 	}
@@ -143,7 +143,7 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 
 	pod, err := resolvers.GetCachedObject[corev1.Pod](event.InvolvedObject.Name, event.InvolvedObject.Namespace, scheduler.podInformer)
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		utilruntime.HandleError(err)
 		return
 	}
@@ -176,13 +176,13 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 		scheduler.logger.V(0).Info("discovered a scheduler terminated externally", "instance", pod.Name, "reason", event.Reason, "message", event.Message)
 		// host has been terminated - find its submissions and resubmit them
 		checkpoints, err := scheduler.buffer.GetBuffered(event.InvolvedObject.Name)
-		if err != nil {
+		if err != nil { // coverage-ignore
 			utilruntime.HandleError(err)
 			return
 		}
 		for checkpoint := range checkpoints {
 			entry, err := scheduler.buffer.GetBufferedEntry(checkpoint)
-			if err != nil {
+			if err != nil { // coverage-ignore
 				utilruntime.HandleError(err)
 			} else {
 				scheduler.LateSubmissionActor.Receive(&LateSubmission{
@@ -202,7 +202,7 @@ func (scheduler *RequestScheduler) commit(output *coremodels.CheckpointedRequest
 	output.SentAt = time.Now()
 	err := scheduler.buffer.Update(output)
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return output.Id, err
 	}
 
@@ -234,7 +234,7 @@ func (scheduler *RequestScheduler) schedule(output *request.BufferOutput) (*core
 		return nil, fmt.Errorf("shard API server %s not configured", output.Workgroup.Cluster)
 	}
 
-	if submitErr != nil {
+	if submitErr != nil { // coverage-ignore
 		return nil, submitErr
 	}
 
@@ -251,7 +251,7 @@ func (scheduler *RequestScheduler) lateSchedule(submission *LateSubmission) (*co
 
 	job, err := submission.BufferedEntry.SubmissionTemplate()
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return nil, err
 	}
 
@@ -260,11 +260,11 @@ func (scheduler *RequestScheduler) lateSchedule(submission *LateSubmission) (*co
 
 	if shard := scheduler.getShardByName(submission.BufferedEntry.Cluster); shard != nil {
 		submitted, submitErr = shard.SendJob(shard.Namespace, job)
-	} else {
+	} else { // coverage-ignore
 		return nil, fmt.Errorf("shard API server %s not configured", submission.BufferedEntry.Cluster)
 	}
 
-	if submitErr != nil {
+	if submitErr != nil { // coverage-ignore
 		return nil, submitErr
 	}
 

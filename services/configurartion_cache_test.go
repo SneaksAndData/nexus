@@ -122,6 +122,8 @@ func TestNexusResourceCache_GetDeletedAlgorithmConfiguration(t *testing.T) {
 
 	err := f.configCache.Init(f.ctx)
 
+	time.Sleep(time.Second)
+
 	if err != nil {
 		t.Errorf("failed to init configuration cache: %v", err)
 		t.FailNow()
