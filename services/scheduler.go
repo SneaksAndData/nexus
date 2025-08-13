@@ -71,12 +71,6 @@ func (scheduler *RequestScheduler) Init(ctx context.Context) (*RequestScheduler,
 		return nil, eventErr
 	}
 
-	scheduler.factory.Start(ctx.Done())
-
-	if ok := cache.WaitForCacheSync(ctx.Done(), scheduler.podInformer.HasSynced, scheduler.eventInformer.HasSynced); !ok {
-		return nil, fmt.Errorf("failed to wait for pod self-informer caches to sync")
-	}
-
 	scheduler.logger.Info("pod and event informers synced")
 
 	scheduler.CommitActor = pipeline.NewDefaultPipelineStageActor[*coremodels.CheckpointedRequest, string](
@@ -115,9 +109,23 @@ func (scheduler *RequestScheduler) Init(ctx context.Context) (*RequestScheduler,
 		scheduler.CommitActor,
 	)
 
-	scheduler.logger.Info("actors launched")
+	scheduler.logger.Info("actors configured")
 
 	return scheduler, nil
+}
+
+func (scheduler *RequestScheduler) Start(ctx context.Context) {
+	go scheduler.CommitActor.Start(ctx, nil)
+	go scheduler.SchedulerActor.Start(ctx, nil)
+	go scheduler.LateSubmissionActor.Start(ctx, pipeline.NewActorPostStart(func(ctx context.Context) error {
+		scheduler.factory.Start(ctx.Done())
+
+		if ok := cache.WaitForCacheSync(ctx.Done(), scheduler.podInformer.HasSynced, scheduler.eventInformer.HasSynced); !ok {
+			return fmt.Errorf("failed to wait for pod self-informer caches to sync")
+		}
+
+		return nil
+	}))
 }
 
 func (scheduler *RequestScheduler) OnEvent(obj interface{}) {

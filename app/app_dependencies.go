@@ -168,7 +168,6 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 
-	go appServices.scheduler.CommitActor.Start(ctx)
-	go appServices.scheduler.SchedulerActor.Start(ctx)
+	appServices.scheduler.Start(ctx)
 	appServices.checkpointBuffer.Start(appServices.scheduler.SchedulerActor)
 }
