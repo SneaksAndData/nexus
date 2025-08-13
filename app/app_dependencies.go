@@ -19,7 +19,7 @@ import (
 )
 
 type ApplicationServices struct {
-	checkpointBuffer *request.DefaultBuffer
+	checkpointBuffer request.Buffer
 	defaultNamespace string
 	kubeClient       kubernetes.Interface
 	shardClients     []*shards.ShardClient
@@ -125,7 +125,7 @@ func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *App
 	var err error
 
 	appServices.scheduler, err = services.
-		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.defaultNamespace, logger).
+		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.defaultNamespace, logger, nil).
 		Init(ctx)
 
 	if err != nil {
@@ -136,8 +136,8 @@ func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *App
 	return appServices
 }
 
-func (appServices *ApplicationServices) CheckpointBuffer() *request.DefaultBuffer {
-	return appServices.checkpointBuffer
+func (appServices *ApplicationServices) CheckpointBuffer() *request.Buffer {
+	return &appServices.checkpointBuffer
 }
 
 func (appServices *ApplicationServices) Logger(ctx context.Context) klog.Logger {

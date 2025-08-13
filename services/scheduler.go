@@ -9,6 +9,7 @@ import (
 	"github.com/SneaksAndData/nexus-core/pkg/pipeline"
 	"github.com/SneaksAndData/nexus-core/pkg/resolvers"
 	"github.com/SneaksAndData/nexus-core/pkg/shards"
+	"github.com/SneaksAndData/nexus-core/pkg/util"
 	"github.com/SneaksAndData/nexus/services/models"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -41,11 +42,12 @@ type RequestScheduler struct {
 	SchedulerActor      *pipeline.DefaultPipelineStageActor[*request.BufferOutput, *coremodels.CheckpointedRequest]
 	CommitActor         *pipeline.DefaultPipelineStageActor[*coremodels.CheckpointedRequest, string]
 	shardClients        []*shards.ShardClient
-	buffer              *request.DefaultBuffer
+	buffer              request.Buffer
 }
 
-func NewRequestScheduler(workerConfig *models.PipelineWorkerConfig, kubeClient kubernetes.Interface, shardClients []*shards.ShardClient, buffer *request.DefaultBuffer, resourceNamespace string, logger klog.Logger) *RequestScheduler {
-	factory := kubeinformers.NewSharedInformerFactoryWithOptions(kubeClient, time.Second*30, kubeinformers.WithNamespace(resourceNamespace))
+func NewRequestScheduler(workerConfig *models.PipelineWorkerConfig, kubeClient kubernetes.Interface, shardClients []*shards.ShardClient, buffer request.Buffer, resourceNamespace string, logger klog.Logger, resyncPeriod *time.Duration) *RequestScheduler {
+	defaultResyncPeriod := time.Second * 30
+	factory := kubeinformers.NewSharedInformerFactoryWithOptions(kubeClient, *util.CoalescePointer(resyncPeriod, &defaultResyncPeriod), kubeinformers.WithNamespace(resourceNamespace))
 
 	return &RequestScheduler{
 		SchedulerActor: nil,
