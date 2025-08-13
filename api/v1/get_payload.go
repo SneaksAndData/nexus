@@ -20,7 +20,7 @@ import (
 //	@Failure		404	{string}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1/payload/{algorithmName}/requests/{requestId} [get]
-func GetRunPayload(buffer *request.DefaultBuffer) gin.HandlerFunc {
+func GetRunPayload(buffer request.Buffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors
 		algorithmName := ctx.Param("algorithmName")

@@ -136,8 +136,8 @@ func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *App
 	return appServices
 }
 
-func (appServices *ApplicationServices) CheckpointBuffer() *request.Buffer {
-	return &appServices.checkpointBuffer
+func (appServices *ApplicationServices) CheckpointBuffer() request.Buffer {
+	return appServices.checkpointBuffer
 }
 
 func (appServices *ApplicationServices) Logger(ctx context.Context) klog.Logger {

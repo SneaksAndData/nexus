@@ -21,7 +21,7 @@ import (
 //	@Failure		400	{string}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1/results/tags/{requestTag} [get]
-func GetRunResultsByTag(buffer *request.DefaultBuffer, logger klog.Logger) gin.HandlerFunc {
+func GetRunResultsByTag(buffer request.Buffer, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tag := ctx.Param("requestTag")
 
