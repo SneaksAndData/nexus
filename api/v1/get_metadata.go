@@ -21,7 +21,7 @@ import (
 //	@Failure		404	{string}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1/metadata/{algorithmName}/requests/{requestId} [get]
-func GetRunMetadata(buffer *request.DefaultBuffer) gin.HandlerFunc {
+func GetRunMetadata(buffer request.Buffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors
 		algorithmName := ctx.Param("algorithmName")

@@ -19,11 +19,11 @@ import (
 )
 
 type ApplicationServices struct {
-	checkpointBuffer *request.DefaultBuffer
+	checkpointBuffer request.Buffer
 	defaultNamespace string
-	kubeClient       *kubernetes.Clientset
+	kubeClient       kubernetes.Interface
 	shardClients     []*shards.ShardClient
-	nexusClient      *nexuscore.Clientset
+	nexusClient      nexuscore.Interface
 	recorder         record.EventRecorder
 	configCache      *services.NexusResourceCache
 	scheduler        *services.RequestScheduler
@@ -114,7 +114,7 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceNamespace string) *ApplicationServices {
 	if appServices.configCache == nil {
 		logger := klog.FromContext(ctx)
-		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, resourceNamespace, logger)
+		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, resourceNamespace, logger, nil)
 	}
 
 	return appServices
@@ -125,7 +125,7 @@ func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *App
 	var err error
 
 	appServices.scheduler, err = services.
-		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.defaultNamespace, logger).
+		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.defaultNamespace, logger, nil).
 		Init(ctx)
 
 	if err != nil {
@@ -136,7 +136,7 @@ func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *App
 	return appServices
 }
 
-func (appServices *ApplicationServices) CheckpointBuffer() *request.DefaultBuffer {
+func (appServices *ApplicationServices) CheckpointBuffer() request.Buffer {
 	return appServices.checkpointBuffer
 }
 
@@ -144,11 +144,11 @@ func (appServices *ApplicationServices) Logger(ctx context.Context) klog.Logger 
 	return klog.FromContext(ctx)
 }
 
-func (appServices *ApplicationServices) KubeClient() *kubernetes.Clientset {
+func (appServices *ApplicationServices) KubeClient() kubernetes.Interface {
 	return appServices.kubeClient
 }
 
-func (appServices *ApplicationServices) NexusClient() *nexuscore.Clientset {
+func (appServices *ApplicationServices) NexusClient() nexuscore.Interface {
 	return appServices.nexusClient
 }
 
@@ -168,7 +168,6 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 
-	go appServices.scheduler.CommitActor.Start(ctx)
-	go appServices.scheduler.SchedulerActor.Start(ctx)
+	appServices.scheduler.Start(ctx)
 	appServices.checkpointBuffer.Start(appServices.scheduler.SchedulerActor)
 }

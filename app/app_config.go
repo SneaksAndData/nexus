@@ -22,7 +22,7 @@ const (
 	CqlStoreScylla = "scylla"
 )
 
-func (c *SchedulerConfig) MaxPayloadSizeBytes() int64 {
+func (c *SchedulerConfig) MaxPayloadSizeBytes() int64 { // coverage-ignore
 	var quantity = resource.MustParse(c.MaxPayloadSize)
 	return quantity.Value()
 }

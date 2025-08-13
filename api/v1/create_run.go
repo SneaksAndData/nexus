@@ -25,7 +25,7 @@ import (
 //	@Failure		500	{string}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1/run/{algorithmName} [post]
-func CreateRun(buffer *request.DefaultBuffer, configCache *services.NexusResourceCache) gin.HandlerFunc {
+func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors
 		algorithmName := ctx.Param("algorithmName")
