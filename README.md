@@ -1,3 +1,5 @@
+![coverage](https://raw.githubusercontent.com/SneaksAndData/nexus/badges/.badges/main/coverage.svg)
+
 # Introduction
 Nexus is a lightweight, Kubernetes-native, high-throughput client-server proxy for machine learning, optimization and AI algorithms. Nexus allows data science teams to author and deploy their products to live environments with a few YAML manifests, and provides a simple flexible HTTP API for interacting with machine learning applications.
 
