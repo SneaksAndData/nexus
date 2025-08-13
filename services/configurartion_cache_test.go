@@ -100,6 +100,45 @@ func TestNexusResourceCache_GetAlgorithmConfiguration(t *testing.T) {
 	}
 }
 
+func TestNexusResourceCache_GetDeletedAlgorithmConfiguration(t *testing.T) {
+	templates := []*v1.NexusAlgorithmTemplate{
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "NexusAlgorithmTemplate",
+				APIVersion: "science.sneaksanddata.com/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-algorithm-1",
+				Namespace: "test",
+			},
+			Spec:   v1.NexusAlgorithmSpec{},
+			Status: v1.NexusAlgorithmStatus{},
+		},
+	}
+
+	f := newFixture(t, []runtime.Object{})
+
+	f.populateTemplates(templates)
+
+	err := f.configCache.Init(f.ctx)
+
+	if err != nil {
+		t.Errorf("failed to init configuration cache: %v", err)
+		t.FailNow()
+	}
+
+	config, err := f.configCache.GetAlgorithmConfiguration("test-algorithm-1")
+
+	if err != nil {
+		t.Errorf("failed to get algorithm configuration: %v", err)
+		t.FailNow()
+	}
+
+	if config != nil {
+		t.Errorf("algorithm configuration should be nil")
+	}
+}
+
 func TestNexusResourceCache_GetWorkgroup(t *testing.T) {
 	workgroups := []*v1.NexusAlgorithmWorkgroup{
 		{

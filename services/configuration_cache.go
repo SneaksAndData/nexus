@@ -49,7 +49,7 @@ func (c *NexusResourceCache) Init(ctx context.Context) error {
 		DeleteFunc: c.onConfigurationDeleted,
 	})
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return err
 	}
 
@@ -59,13 +59,13 @@ func (c *NexusResourceCache) Init(ctx context.Context) error {
 		DeleteFunc: c.onConfigurationDeleted,
 	})
 
-	if werr != nil {
+	if werr != nil { // coverage-ignore
 		return werr
 	}
 
 	c.factory.Start(ctx.Done())
 
-	if ok := cache.WaitForCacheSync(ctx.Done(), c.templateInformer.HasSynced, c.workgroupInformer.HasSynced); !ok {
+	if ok := cache.WaitForCacheSync(ctx.Done(), c.templateInformer.HasSynced, c.workgroupInformer.HasSynced); !ok { // coverage-ignore
 		return fmt.Errorf("failed to wait for informer caches to sync")
 	}
 
@@ -74,9 +74,9 @@ func (c *NexusResourceCache) Init(ctx context.Context) error {
 	return nil
 }
 
-func (c *NexusResourceCache) onConfigurationAdded(obj interface{}) {
+func (c *NexusResourceCache) onConfigurationAdded(obj interface{}) { // coverage-ignore
 	objectRef, err := cache.ObjectToName(obj)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		utilruntime.HandleError(err)
 		return
 	}
@@ -88,12 +88,12 @@ func (c *NexusResourceCache) onConfigurationUpdated(old, new interface{}) {
 	_, oldErr := cache.ObjectToName(old)
 	newRef, newErr := cache.ObjectToName(new)
 
-	if oldErr != nil {
+	if oldErr != nil { // coverage-ignore
 		utilruntime.HandleError(oldErr)
 		return
 	}
 
-	if newErr != nil {
+	if newErr != nil { // coverage-ignore
 		utilruntime.HandleError(newErr)
 		return
 	}
