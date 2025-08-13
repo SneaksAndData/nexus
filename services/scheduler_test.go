@@ -36,12 +36,6 @@ func (f *schedulerFixture) populatePods(pods []corev1.Pod) {
 	}
 }
 
-func (f *schedulerFixture) populateEvents(events []corev1.Event) {
-	for _, event := range events {
-		_ = f.scheduler.eventInformer.GetIndexer().Add(&event)
-	}
-}
-
 func newFakeRequest() *coremodels.AlgorithmRequest {
 	return &coremodels.AlgorithmRequest{
 		AlgorithmParameters: map[string]interface{}{
