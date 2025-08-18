@@ -1,0 +1,38 @@
+{{- if .Values.rbac.clusterRole.scheduler.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "app.clusteRole.scheduler" . }}
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"    
+    {{- include "app.labels" $ | nindent 4 }}
+    {{- with .Values.rbac.clusterRole.scheduler.additionalLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.rbac.clusterRole.scheduler.additionalAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+rules:
+  - verbs:
+      - get
+      - list
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+    apiGroups:
+      - batch
+    resources:
+      - events
+      - jobs
+  - verbs:
+      - get
+      - list
+      - watch
+    apiGroups: [""]
+    resources:
+      - events
+      - pods
+{{- end }}
