@@ -52,8 +52,8 @@ definitions:
         type: string
       lifecycle_stage:
         type: string
-      parent_job:
-        $ref: '#/definitions/models.ParentJobReference'
+      parent:
+        $ref: '#/definitions/models.AlgorithmRequestRef'
       payload_uri:
         type: string
       payload_valid_for:
@@ -68,8 +68,6 @@ definitions:
         type: string
       tag:
         type: string
-    type: object
-  models.ParentJobReference:
     type: object
   models.RequestResult:
     properties:
@@ -400,6 +398,44 @@ info:
   title: Nexus Scheduler API
   version: "1.0"
 paths:
+  /algorithm/v1/buffer/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves a buffered metadata for a run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/plain
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a buffered run metadata (Kubernetes Job JSON)
+      tags:
+      - metadata
   /algorithm/v1/metadata/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves checkpointed metadata for a run

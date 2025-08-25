@@ -22,6 +22,62 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/algorithm/v1/buffer/{algorithmName}/requests/{requestId}": {
+            "get": {
+                "description": "Retrieves a buffered metadata for a run",
+                "produces": [
+                    "application/json",
+                    "text/plain",
+                    "text/html"
+                ],
+                "tags": [
+                    "metadata"
+                ],
+                "summary": "Read a buffered run metadata (Kubernetes Job JSON)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/algorithm/v1/metadata/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves checkpointed metadata for a run",
@@ -379,8 +435,8 @@ const docTemplate = `{
                 "lifecycle_stage": {
                     "type": "string"
                 },
-                "parent_job": {
-                    "$ref": "#/definitions/models.ParentJobReference"
+                "parent": {
+                    "$ref": "#/definitions/models.AlgorithmRequestRef"
                 },
                 "payload_uri": {
                     "type": "string"
@@ -404,9 +460,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "models.ParentJobReference": {
-            "type": "object"
         },
         "models.RequestResult": {
             "type": "object",

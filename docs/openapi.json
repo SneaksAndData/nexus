@@ -19,6 +19,117 @@
     }
   ],
   "paths": {
+    "/algorithm/v1/buffer/{algorithmName}/requests/{requestId}": {
+      "get": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Read a buffered run metadata (Kubernetes Job JSON)",
+        "description": "Retrieves a buffered metadata for a run",
+        "parameters": [
+          {
+            "name": "algorithmName",
+            "in": "path",
+            "description": "Algorithm name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "description": "Request identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/algorithm/v1/metadata/{algorithmName}/requests/{requestId}": {
       "get": {
         "tags": [
@@ -627,8 +738,8 @@
           "lifecycle_stage": {
             "type": "string"
           },
-          "parent_job": {
-            "$ref": "#/components/schemas/models.ParentJobReference"
+          "parent": {
+            "$ref": "#/components/schemas/models.AlgorithmRequestRef"
           },
           "payload_uri": {
             "type": "string"
@@ -652,9 +763,6 @@
             "type": "string"
           }
         }
-      },
-      "models.ParentJobReference": {
-        "type": "object"
       },
       "models.RequestResult": {
         "type": "object",
