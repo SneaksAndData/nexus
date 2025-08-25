@@ -1,5 +1,14 @@
 basePath: /algorithm/v1
 definitions:
+  github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest:
+    properties:
+      cancellationPolicy:
+        type: string
+      initiator:
+        type: string
+      reason:
+        type: string
+    type: object
   models.AlgorithmRequest:
     properties:
       algorithmParameters:
@@ -436,6 +445,57 @@ paths:
       summary: Read a buffered run metadata (Kubernetes Job JSON)
       tags:
       - metadata
+  /algorithm/v1/cancel/{algorithmName}/requests/{requestId}:
+    post:
+      consumes:
+      - application/json
+      description: Interrupts the provided run id and cancels the execution tree if
+        it exists
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      - description: Cancellation configuration
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest'
+      produces:
+      - application/json
+      - text/plain
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Cancels an algorithm run
+      tags:
+      - run
   /algorithm/v1/metadata/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves checkpointed metadata for a run
