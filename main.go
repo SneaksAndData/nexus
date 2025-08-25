@@ -40,6 +40,7 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 		WithCache(ctx, appConfig.ResourceNamespace).
 		WithRecorder(ctx, appConfig.ResourceNamespace).
 		WithShards(ctx, appConfig.ShardKubeConfigPath, appConfig.ResourceNamespace).
+		WithJobInformer(ctx, appConfig.ResourceNamespace).
 		WithDefaultNamespace(appConfig.ResourceNamespace).
 		BuildScheduler(ctx)
 
