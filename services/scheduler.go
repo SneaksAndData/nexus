@@ -224,7 +224,7 @@ func (scheduler *RequestScheduler) schedule(output *request.BufferOutput) (*core
 		return nil, fmt.Errorf("buffer has not provided any data to schedule")
 	}
 
-	var job = output.Checkpoint.ToV1Job(fmt.Sprintf("%s-%s", buildmeta.AppVersion, buildmeta.BuildNumber), output.Workgroup)
+	var job = output.Checkpoint.ToV1Job(fmt.Sprintf("%s-%s", buildmeta.AppVersion, buildmeta.BuildNumber), output.Workgroup, output.ParentReference)
 	var submitted *batchv1.Job
 	var submitErr error
 
