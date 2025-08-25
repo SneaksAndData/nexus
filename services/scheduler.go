@@ -25,6 +25,7 @@ import (
 const (
 	ComponentName = "scheduler"
 	ComponentKey  = "app.kubernetes.io/component"
+	DryRunUID     = "dry-run"
 )
 
 type LateSubmission struct {
@@ -198,14 +199,23 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 }
 
 func (scheduler *RequestScheduler) commit(output *coremodels.CheckpointedRequest) (string, error) {
-	output.LifecycleStage = coremodels.LifecycleStageRunning
-	output.SentAt = time.Now()
-	err := scheduler.buffer.Update(output)
+	if output.JobUid == DryRunUID {
+		output.LifecycleStage = coremodels.LifecycleStageCompleted
+		output.SentAt = time.Now()
+		err := scheduler.buffer.Update(output)
 
-	if err != nil { // coverage-ignore
-		return output.Id, err
+		if err != nil { // coverage-ignore
+			return output.Id, err
+		}
+	} else {
+		output.LifecycleStage = coremodels.LifecycleStageRunning
+		output.SentAt = time.Now()
+		err := scheduler.buffer.Update(output)
+
+		if err != nil { // coverage-ignore
+			return output.Id, err
+		}
 	}
-
 	return output.Id, nil
 }
 
@@ -222,6 +232,13 @@ func (scheduler *RequestScheduler) getShardByName(shardName string) *shards.Shar
 func (scheduler *RequestScheduler) schedule(output *request.BufferOutput) (*coremodels.CheckpointedRequest, error) {
 	if output == nil {
 		return nil, fmt.Errorf("buffer has not provided any data to schedule")
+	}
+
+	if output.IsDryRun { // coverage-ignore
+		scheduler.logger.V(0).Info("request marked as dry run - skipping job creation")
+		resultCheckpoint := output.Checkpoint.DeepCopy()
+		resultCheckpoint.JobUid = DryRunUID
+		return resultCheckpoint, nil
 	}
 
 	var job = output.Checkpoint.ToV1Job(fmt.Sprintf("%s-%s", buildmeta.AppVersion, buildmeta.BuildNumber), output.Workgroup, output.ParentReference)

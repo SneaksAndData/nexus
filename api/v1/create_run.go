@@ -24,7 +24,8 @@ import (
 //	@Produce		plain
 //	@Produce		html
 //	@Param			algorithmName	path		string	true	"Algorithm name"
-//	@Param			payload	body		models.AlgorithmRequest	true	"Run configuration"
+//	@Param			payload	body	models.AlgorithmRequest	true	"Run configuration"
+//	@Param			dryRun	query	string	true	"If false, will buffer but not submit to the target cluster"
 //	@Success		202	{object}	map[string]string
 //	@Failure		400	{string}	string
 //	@Failure		500	{string}	string
@@ -36,6 +37,7 @@ func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, 
 
 		algorithmName := ctx.Param("algorithmName")
 		payload := models.AlgorithmRequest{}
+		dryRun := ctx.DefaultQuery("dryRun", "false") == "true"
 		requestId := uuid.New()
 
 		if err := ctx.ShouldBindJSON(&payload); err != nil {
@@ -86,7 +88,7 @@ func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, 
 			}
 		}
 
-		if err := buffer.Add(requestId.String(), algorithmName, &payload, &config.Spec, &workgroup.Spec, &parentRef); err != nil {
+		if err := buffer.Add(requestId.String(), algorithmName, &payload, &config.Spec, &workgroup.Spec, &parentRef, dryRun); err != nil {
 			ctx.String(http.StatusBadRequest, `Request buffering failed for: %s/%s`, algorithmName, requestId)
 			logger.V(0).Error(err, "error when retrieving a parent request for %s/%s", algorithmName, requestId)
 			return

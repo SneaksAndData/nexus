@@ -90,7 +90,7 @@ const docTemplate = `{
                     "text/html"
                 ],
                 "tags": [
-                    "run"
+                    "cancellation"
                 ],
                 "summary": "Cancels an algorithm run",
                 "parameters": [
@@ -114,7 +114,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest"
+                            "$ref": "#/definitions/models.CancellationRequest"
                         }
                     }
                 ],
@@ -396,6 +396,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.AlgorithmRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "If false, will buffer but not submit to the target cluster",
+                        "name": "dryRun",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -431,20 +438,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest": {
-            "type": "object",
-            "properties": {
-                "cancellationPolicy": {
-                    "type": "string"
-                },
-                "initiator": {
-                    "type": "string"
-                },
-                "reason": {
-                    "type": "string"
-                }
-            }
-        },
         "models.AlgorithmRequest": {
             "type": "object",
             "required": [
@@ -483,6 +476,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "requestId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CancellationRequest": {
+            "type": "object",
+            "properties": {
+                "cancellationPolicy": {
+                    "type": "string"
+                },
+                "initiator": {
+                    "type": "string"
+                },
+                "reason": {
                     "type": "string"
                 }
             }
