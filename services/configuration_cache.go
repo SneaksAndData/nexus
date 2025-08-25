@@ -24,7 +24,7 @@ type NexusResourceCache struct {
 	prefix            string
 }
 
-// NewNexusResourceCache creates a new cache + resource watcher for MLA resources
+// NewNexusResourceCache creates a new cache for Nexus resources
 func NewNexusResourceCache(client nexuscore.Interface, resourceNamespace string, logger klog.Logger, resyncPeriod *time.Duration) *NexusResourceCache {
 	defaultResyncPeriod := time.Second * 30
 	factory := nexusinf.NewSharedInformerFactoryWithOptions(client, *util.CoalescePointer(resyncPeriod, &defaultResyncPeriod), nexusinf.WithNamespace(resourceNamespace))

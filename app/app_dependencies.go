@@ -10,12 +10,15 @@ import (
 	"github.com/SneaksAndData/nexus/services/models"
 	corev1 "k8s.io/api/core/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
+	"time"
 )
 
 type ApplicationServices struct {
@@ -26,6 +29,7 @@ type ApplicationServices struct {
 	nexusClient      nexuscore.Interface
 	recorder         record.EventRecorder
 	configCache      *services.NexusResourceCache
+	jobInformer      cache.SharedIndexInformer
 	scheduler        *services.RequestScheduler
 	workerConfig     *models.PipelineWorkerConfig
 }
@@ -120,6 +124,18 @@ func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceN
 	return appServices
 }
 
+func (appServices *ApplicationServices) WithJobInformer(ctx context.Context, resourceNamespace string) *ApplicationServices {
+	if appServices.jobInformer == nil {
+		logger := klog.FromContext(ctx)
+		logger.V(4).Info("creating job informer")
+		factory := informers.NewSharedInformerFactoryWithOptions(appServices.kubeClient, time.Second*30, informers.WithNamespace(resourceNamespace))
+		appServices.jobInformer = factory.Batch().V1().Jobs().Informer()
+		factory.Start(ctx.Done())
+	}
+
+	return appServices
+}
+
 func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *ApplicationServices {
 	logger := klog.FromContext(ctx)
 	var err error
@@ -158,6 +174,10 @@ func (appServices *ApplicationServices) Cache() *services.NexusResourceCache {
 
 func (appServices *ApplicationServices) ShardClients() []*shards.ShardClient {
 	return appServices.shardClients
+}
+
+func (appServices *ApplicationServices) JobInformer() cache.SharedIndexInformer {
+	return appServices.jobInformer
 }
 
 func (appServices *ApplicationServices) Start(ctx context.Context) {

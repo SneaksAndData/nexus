@@ -142,7 +142,7 @@ func TestScheduler(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	err = f.buffer.Add("test", "test-algorithm", newFakeRequest(), newFakeSpec(), newFakeWorkgroupSpec())
+	err = f.buffer.Add("test", "test-algorithm", newFakeRequest(), newFakeSpec(), newFakeWorkgroupSpec(), nil)
 
 	if err != nil {
 		t.Errorf("failed to buffer an element: %s", err)
@@ -233,7 +233,7 @@ func TestScheduler_Restart(t *testing.T) {
 	checkpoint.ReceivedByHost = "test-terminated-scheduler"
 
 	buffer.Checkpoints = append(buffer.Checkpoints, checkpoint)
-	buffer.BufferedEntries = append(buffer.BufferedEntries, coremodels.FromCheckpoint(checkpoint, newFakeWorkgroupSpec()))
+	buffer.BufferedEntries = append(buffer.BufferedEntries, coremodels.FromCheckpoint(checkpoint, newFakeWorkgroupSpec(), nil))
 
 	_, err := f.scheduler.Init(f.ctx)
 
