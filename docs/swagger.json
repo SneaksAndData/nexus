@@ -71,6 +71,80 @@
                 }
             }
         },
+        "/algorithm/v1/cancel/{algorithmName}/requests/{requestId}": {
+            "post": {
+                "description": "Interrupts the provided run id and cancels the execution tree if it exists",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/plain",
+                    "text/html"
+                ],
+                "tags": [
+                    "run"
+                ],
+                "summary": "Cancels an algorithm run",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Cancellation configuration",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/algorithm/v1/metadata/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves checkpointed metadata for a run",
@@ -350,6 +424,20 @@
         }
     },
     "definitions": {
+        "github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest": {
+            "type": "object",
+            "properties": {
+                "cancellationPolicy": {
+                    "type": "string"
+                },
+                "initiator": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
         "models.AlgorithmRequest": {
             "type": "object",
             "required": [
