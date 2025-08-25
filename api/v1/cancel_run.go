@@ -17,7 +17,7 @@ import (
 //
 //	@Summary		Cancels an algorithm run
 //	@Description	Interrupts the provided run id and cancels the execution tree if it exists
-//	@Tags			run
+//	@Tags			cancellation
 //	@Accept			json
 //	@Produce		json
 //	@Produce		plain

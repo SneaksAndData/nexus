@@ -1,14 +1,5 @@
 basePath: /algorithm/v1
 definitions:
-  github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest:
-    properties:
-      cancellationPolicy:
-        type: string
-      initiator:
-        type: string
-      reason:
-        type: string
-    type: object
   models.AlgorithmRequest:
     properties:
       algorithmParameters:
@@ -36,6 +27,15 @@ definitions:
     required:
     - algorithmName
     - requestId
+    type: object
+  models.CancellationRequest:
+    properties:
+      cancellationPolicy:
+        type: string
+      initiator:
+        type: string
+      reason:
+        type: string
     type: object
   models.CheckpointedRequest:
     properties:
@@ -467,7 +467,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest'
+          $ref: '#/definitions/models.CancellationRequest'
       produces:
       - application/json
       - text/plain
@@ -495,7 +495,7 @@ paths:
             type: string
       summary: Cancels an algorithm run
       tags:
-      - run
+      - cancellation
   /algorithm/v1/metadata/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves checkpointed metadata for a run
@@ -657,6 +657,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.AlgorithmRequest'
+      - description: If false, will buffer but not submit to the target cluster
+        in: query
+        name: dryRun
+        required: true
+        type: string
       produces:
       - application/json
       - text/plain
