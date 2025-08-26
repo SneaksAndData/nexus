@@ -94,3 +94,14 @@ Generate the Workgroup editor cluster role name
 {{- printf "%s-workgroup-editor" (include "app.fullname" .) }}
 {{- end }}
 {{- end }}
+
+{{/*
+Generate the Scheduler cluster role name
+*/}}
+{{- define "app.clusteRole.scheduler" -}}
+{{- if .Values.rbac.clusterRole.workgroupEditor.nameOverride }}
+{{- .Values.rbac.clusterRole.workgroupEditor.nameOverride }}
+{{- else }}
+{{- printf "%s-scheduler" (include "app.fullname" .) }}
+{{- end }}
+{{- end }}
