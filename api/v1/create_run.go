@@ -33,7 +33,7 @@ import (
 //	@Router			/algorithm/v1/run/{algorithmName} [post]
 func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, jobInformer cache.SharedIndexInformer, jobNamespace string, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var parentRef metav1.OwnerReference
+		var parentRef *metav1.OwnerReference
 
 		algorithmName := ctx.Param("algorithmName")
 		payload := models.AlgorithmRequest{}
@@ -80,7 +80,7 @@ func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, 
 				return
 			}
 
-			parentRef = metav1.OwnerReference{
+			parentRef = &metav1.OwnerReference{
 				APIVersion: batchv1.SchemeGroupVersion.String(),
 				Kind:       "Job",
 				Name:       payload.ParentRequest.RequestId,
@@ -88,7 +88,7 @@ func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, 
 			}
 		}
 
-		if err := buffer.Add(requestId.String(), algorithmName, &payload, &config.Spec, &workgroup.Spec, &parentRef, dryRun); err != nil {
+		if err := buffer.Add(requestId.String(), algorithmName, &payload, &config.Spec, &workgroup.Spec, parentRef, dryRun); err != nil {
 			ctx.String(http.StatusBadRequest, `Request buffering failed for: %s/%s`, algorithmName, requestId)
 			logger.V(0).Error(err, "error when retrieving a parent request for %s/%s", algorithmName, requestId)
 			return
