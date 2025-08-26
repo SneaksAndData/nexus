@@ -17,10 +17,9 @@ create table nexus.checkpoints
     tag                       text,
     api_version               text,
     job_uid                   text,
-    parent_job                text,
+    parent                    text,
     payload_valid_for         text,
-    PRIMARY KEY ((algorithm, id)
-        )
+    PRIMARY KEY ((algorithm, id))
 );
 
 alter table nexus.checkpoints

@@ -36,6 +36,7 @@ Selector labels
 {{- define "app.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "app.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: scheduler
 {{- end }}
 
 {{/*
@@ -91,5 +92,16 @@ Generate the Workgroup editor cluster role name
 {{- .Values.rbac.clusterRole.workgroupEditor.nameOverride }}
 {{- else }}
 {{- printf "%s-workgroup-editor" (include "app.fullname" .) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Generate the Scheduler cluster role name
+*/}}
+{{- define "app.clusteRole.scheduler" -}}
+{{- if .Values.rbac.clusterRole.workgroupEditor.nameOverride }}
+{{- .Values.rbac.clusterRole.workgroupEditor.nameOverride }}
+{{- else }}
+{{- printf "%s-scheduler" (include "app.fullname" .) }}
 {{- end }}
 {{- end }}

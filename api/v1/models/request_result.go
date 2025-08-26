@@ -11,6 +11,14 @@ type RequestResult struct {
 	RunErrorMessage string `json:"runErrorMessage"`
 }
 
+type TaggedRequestResult struct {
+	RequestId       string `json:"requestId"`
+	AlgorithmName   string `json:"algorithmName"`
+	Status          string `json:"status"`
+	ResultUri       string `json:"resultUri"`
+	RunErrorMessage string `json:"runErrorMessage"`
+}
+
 // FromCheckpointedRequest converts CheckpointedRequest to a simplified result model
 func FromCheckpointedRequest(request *models.CheckpointedRequest) *RequestResult {
 	if request == nil {
@@ -34,5 +42,19 @@ func FromCheckpointedRequest(request *models.CheckpointedRequest) *RequestResult
 			RequestId: request.Id,
 			Status:    request.LifecycleStage,
 		}
+	}
+}
+
+// NewTaggedRequestResult creates a new TaggedRequestResult from a CheckpointedRequest
+func NewTaggedRequestResult(request *models.CheckpointedRequest) *TaggedRequestResult {
+	if request == nil {
+		return nil
+	}
+	return &TaggedRequestResult{
+		AlgorithmName:   request.Algorithm,
+		RequestId:       request.Id,
+		Status:          request.LifecycleStage,
+		ResultUri:       request.ResultUri,
+		RunErrorMessage: request.AlgorithmFailureCause,
 	}
 }

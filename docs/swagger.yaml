@@ -1,0 +1,686 @@
+basePath: /algorithm/v1
+definitions:
+  github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest:
+    properties:
+      cancellationPolicy:
+        type: string
+      initiator:
+        type: string
+      reason:
+        type: string
+    type: object
+  models.AlgorithmRequest:
+    properties:
+      algorithmParameters:
+        additionalProperties: true
+        type: object
+      customConfiguration:
+        $ref: '#/definitions/v1.NexusAlgorithmSpec'
+      parentRequest:
+        $ref: '#/definitions/models.AlgorithmRequestRef'
+      payloadValidFor:
+        type: string
+      requestApiVersion:
+        type: string
+      tag:
+        type: string
+    required:
+    - algorithmParameters
+    type: object
+  models.AlgorithmRequestRef:
+    properties:
+      algorithmName:
+        type: string
+      requestId:
+        type: string
+    required:
+    - algorithmName
+    - requestId
+    type: object
+  models.CheckpointedRequest:
+    properties:
+      algorithm:
+        type: string
+      algorithm_failure_cause:
+        type: string
+      algorithm_failure_details:
+        type: string
+      api_version:
+        type: string
+      applied_configuration:
+        $ref: '#/definitions/v1.NexusAlgorithmSpec'
+      configuration_overrides:
+        $ref: '#/definitions/v1.NexusAlgorithmSpec'
+      content_hash:
+        type: string
+      id:
+        type: string
+      job_uid:
+        type: string
+      last_modified:
+        type: string
+      lifecycle_stage:
+        type: string
+      parent:
+        $ref: '#/definitions/models.AlgorithmRequestRef'
+      payload_uri:
+        type: string
+      payload_valid_for:
+        type: string
+      received_at:
+        type: string
+      received_by_host:
+        type: string
+      result_uri:
+        type: string
+      sent_at:
+        type: string
+      tag:
+        type: string
+    type: object
+  models.RequestResult:
+    properties:
+      requestId:
+        type: string
+      resultUri:
+        type: string
+      runErrorMessage:
+        type: string
+      status:
+        type: string
+    type: object
+  models.TaggedRequestResult:
+    properties:
+      algorithmName:
+        type: string
+      requestId:
+        type: string
+      resultUri:
+        type: string
+      runErrorMessage:
+        type: string
+      status:
+        type: string
+    type: object
+  resource.Quantity:
+    properties:
+      Format:
+        enum:
+        - DecimalExponent
+        - BinarySI
+        - DecimalSI
+        type: string
+        x-enum-comments:
+          BinarySI: e.g., 12Mi (12 * 2^20)
+          DecimalExponent: e.g., 12e6
+          DecimalSI: e.g., 12M  (12 * 10^6)
+        x-enum-varnames:
+        - DecimalExponent
+        - BinarySI
+        - DecimalSI
+    type: object
+  v1.ConfigMapEnvSource:
+    properties:
+      name:
+        description: |-
+          Name of the referent.
+          This field is effectively required, but due to backwards compatibility is
+          allowed to be empty. Instances of this type with an empty value here are
+          almost certainly wrong.
+          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+          +optional
+          +default=""
+          +kubebuilder:default=""
+          TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
+        type: string
+      optional:
+        description: |-
+          Specify whether the ConfigMap must be defined
+          +optional
+        type: boolean
+    type: object
+  v1.ConfigMapKeySelector:
+    properties:
+      key:
+        description: The key to select.
+        type: string
+      name:
+        description: |-
+          Name of the referent.
+          This field is effectively required, but due to backwards compatibility is
+          allowed to be empty. Instances of this type with an empty value here are
+          almost certainly wrong.
+          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+          +optional
+          +default=""
+          +kubebuilder:default=""
+          TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
+        type: string
+      optional:
+        description: |-
+          Specify whether the ConfigMap or its key must be defined
+          +optional
+        type: boolean
+    type: object
+  v1.EnvFromSource:
+    properties:
+      configMapRef:
+        allOf:
+        - $ref: '#/definitions/v1.ConfigMapEnvSource'
+        description: |-
+          The ConfigMap to select from
+          +optional
+      prefix:
+        description: |-
+          Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.
+          +optional
+        type: string
+      secretRef:
+        allOf:
+        - $ref: '#/definitions/v1.SecretEnvSource'
+        description: |-
+          The Secret to select from
+          +optional
+    type: object
+  v1.EnvVar:
+    properties:
+      name:
+        description: Name of the environment variable. Must be a C_IDENTIFIER.
+        type: string
+      value:
+        description: |-
+          Variable references $(VAR_NAME) are expanded
+          using the previously defined environment variables in the container and
+          any service environment variables. If a variable cannot be resolved,
+          the reference in the input string will be unchanged. Double $$ are reduced
+          to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e.
+          "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)".
+          Escaped references will never be expanded, regardless of whether the variable
+          exists or not.
+          Defaults to "".
+          +optional
+        type: string
+      valueFrom:
+        allOf:
+        - $ref: '#/definitions/v1.EnvVarSource'
+        description: |-
+          Source for the environment variable's value. Cannot be used if value is not empty.
+          +optional
+    type: object
+  v1.EnvVarSource:
+    properties:
+      configMapKeyRef:
+        allOf:
+        - $ref: '#/definitions/v1.ConfigMapKeySelector'
+        description: |-
+          Selects a key of a ConfigMap.
+          +optional
+      fieldRef:
+        allOf:
+        - $ref: '#/definitions/v1.ObjectFieldSelector'
+        description: |-
+          Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`,
+          spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
+          +optional
+      resourceFieldRef:
+        allOf:
+        - $ref: '#/definitions/v1.ResourceFieldSelector'
+        description: |-
+          Selects a resource of the container: only resources limits and requests
+          (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
+          +optional
+      secretKeyRef:
+        allOf:
+        - $ref: '#/definitions/v1.SecretKeySelector'
+        description: |-
+          Selects a key of a secret in the pod's namespace
+          +optional
+    type: object
+  v1.NexusAlgorithmContainer:
+    properties:
+      image:
+        type: string
+      registry:
+        type: string
+      serviceAccountName:
+        type: string
+      versionTag:
+        type: string
+    type: object
+  v1.NexusAlgorithmResources:
+    properties:
+      cpuLimit:
+        type: string
+      customResources:
+        additionalProperties:
+          type: string
+        type: object
+      memoryLimit:
+        type: string
+    type: object
+  v1.NexusAlgorithmRuntimeEnvironment:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
+      deadlineSeconds:
+        type: integer
+      environmentVariables:
+        items:
+          $ref: '#/definitions/v1.EnvVar'
+        type: array
+      mappedEnvironmentVariables:
+        items:
+          $ref: '#/definitions/v1.EnvFromSource'
+        type: array
+      maximumRetries:
+        type: integer
+    type: object
+  v1.NexusAlgorithmSpec:
+    properties:
+      args:
+        items:
+          type: string
+        type: array
+      command:
+        type: string
+      computeResources:
+        $ref: '#/definitions/v1.NexusAlgorithmResources'
+      container:
+        $ref: '#/definitions/v1.NexusAlgorithmContainer'
+      datadogIntegrationSettings:
+        $ref: '#/definitions/v1.NexusDatadogIntegrationSettings'
+      errorHandlingBehaviour:
+        $ref: '#/definitions/v1.NexusErrorHandlingBehaviour'
+      runtimeEnvironment:
+        $ref: '#/definitions/v1.NexusAlgorithmRuntimeEnvironment'
+      workgroupRef:
+        $ref: '#/definitions/v1.NexusAlgorithmWorkgroupRef'
+    type: object
+  v1.NexusAlgorithmWorkgroupRef:
+    properties:
+      group:
+        type: string
+      kind:
+        type: string
+      name:
+        type: string
+    type: object
+  v1.NexusDatadogIntegrationSettings:
+    properties:
+      mountDatadogSocket:
+        type: boolean
+    type: object
+  v1.NexusErrorHandlingBehaviour:
+    properties:
+      fatalExitCodes:
+        items:
+          type: integer
+        type: array
+      transientExitCodes:
+        items:
+          type: integer
+        type: array
+    type: object
+  v1.ObjectFieldSelector:
+    properties:
+      apiVersion:
+        description: |-
+          Version of the schema the FieldPath is written in terms of, defaults to "v1".
+          +optional
+        type: string
+      fieldPath:
+        description: Path of the field to select in the specified API version.
+        type: string
+    type: object
+  v1.ResourceFieldSelector:
+    properties:
+      containerName:
+        description: |-
+          Container name: required for volumes, optional for env vars
+          +optional
+        type: string
+      divisor:
+        allOf:
+        - $ref: '#/definitions/resource.Quantity'
+        description: |-
+          Specifies the output format of the exposed resources, defaults to "1"
+          +optional
+      resource:
+        description: 'Required: resource to select'
+        type: string
+    type: object
+  v1.SecretEnvSource:
+    properties:
+      name:
+        description: |-
+          Name of the referent.
+          This field is effectively required, but due to backwards compatibility is
+          allowed to be empty. Instances of this type with an empty value here are
+          almost certainly wrong.
+          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+          +optional
+          +default=""
+          +kubebuilder:default=""
+          TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
+        type: string
+      optional:
+        description: |-
+          Specify whether the Secret must be defined
+          +optional
+        type: boolean
+    type: object
+  v1.SecretKeySelector:
+    properties:
+      key:
+        description: The key of the secret to select from.  Must be a valid secret
+          key.
+        type: string
+      name:
+        description: |-
+          Name of the referent.
+          This field is effectively required, but due to backwards compatibility is
+          allowed to be empty. Instances of this type with an empty value here are
+          almost certainly wrong.
+          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+          +optional
+          +default=""
+          +kubebuilder:default=""
+          TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
+        type: string
+      optional:
+        description: |-
+          Specify whether the Secret or its key must be defined
+          +optional
+        type: boolean
+    type: object
+info:
+  contact:
+    email: esdsupport@ecco.com
+    name: ESD Support
+  description: Nexus Scheduler API specification. All Nexus supported clients conform
+    to this spec.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Nexus Scheduler API
+  version: "1.0"
+paths:
+  /algorithm/v1/buffer/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves a buffered metadata for a run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/plain
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a buffered run metadata (Kubernetes Job JSON)
+      tags:
+      - metadata
+  /algorithm/v1/cancel/{algorithmName}/requests/{requestId}:
+    post:
+      consumes:
+      - application/json
+      description: Interrupts the provided run id and cancels the execution tree if
+        it exists
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      - description: Cancellation configuration
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest'
+      produces:
+      - application/json
+      - text/plain
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Cancels an algorithm run
+      tags:
+      - run
+  /algorithm/v1/metadata/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves checkpointed metadata for a run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/plain
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CheckpointedRequest'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a run metadata
+      tags:
+      - metadata
+  /algorithm/v1/payload/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves payload sent by the client for the provided run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - text/plain
+      - text/html
+      responses:
+        "302":
+          description: Found
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a run payload
+      tags:
+      - payload
+  /algorithm/v1/results/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves a result for the provided run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/plain
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RequestResult'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a run result
+      tags:
+      - results
+  /algorithm/v1/results/tags/{requestTag}:
+    get:
+      description: Read results of all runs with a matching tag
+      parameters:
+      - description: Request tag assigned by a client
+        in: path
+        name: requestTag
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/plain
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TaggedRequestResult'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: Read run results by tag
+      tags:
+      - results
+  /algorithm/v1/run/{algorithmName}:
+    post:
+      consumes:
+      - application/json
+      description: Accepts an algorithm payload and places it into a scheduling queue
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Run configuration
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/models.AlgorithmRequest'
+      produces:
+      - application/json
+      - text/plain
+      - text/html
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new algorithm run
+      tags:
+      - run
+swagger: "2.0"

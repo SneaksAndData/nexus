@@ -7,7 +7,22 @@ import (
 	"net/http"
 )
 
-func GetRunResult(buffer *request.DefaultBuffer) gin.HandlerFunc {
+// GetRunResult godoc
+//
+//	@Summary		Read a run result
+//	@Description	Retrieves a result for the provided run
+//	@Tags			results
+//	@Produce		json
+//	@Produce		plain
+//	@Produce		html
+//	@Param			algorithmName	path		string	true	"Algorithm name"
+//	@Param			requestId	path		string	true	"Request identifier"
+//	@Success		200	{object}    models.RequestResult
+//	@Failure		400	{object}	string
+//	@Failure		404	{object}	string
+//	@Failure		401	{string}	string
+//	@Router			/algorithm/v1/results/{algorithmName}/requests/{requestId} [get]
+func GetRunResult(buffer request.Buffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO: log errors
 		algorithmName := ctx.Param("algorithmName")

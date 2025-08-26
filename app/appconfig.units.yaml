@@ -12,10 +12,14 @@ s3-buffer:
   region: us-east-1
   endpoint: http://127.0.0.1:9000
 resource-namespace: nexus
-cql-store: # can be read from environment
+astra-cql-store: # can be read from environment
   secure-connection-bundle-base64: base64value
   gateway-user: user
   gateway-password: password
+scylla-cql-store:
+  hosts:
+    - 127.0.0.1:9000
+cql-store-type: astra
 kube-config-path: "/tmp/nexus-test"
 shard-kube-config-path: "/tmp/shards"
 max-payload-size: 500Mi
