@@ -3,7 +3,8 @@ module github.com/SneaksAndData/nexus
 go 1.24.4
 
 require (
-	github.com/SneaksAndData/nexus-core v1.2.1
+	github.com/SneaksAndData/nexus-core v1.3.7
+	github.com/aws/smithy-go v1.22.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
 	github.com/swaggo/swag v1.16.4
@@ -36,7 +37,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.25.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.34.0 // indirect
-	github.com/aws/smithy-go v1.22.4 // indirect
 	github.com/bytedance/sonic v1.12.8 // indirect
 	github.com/bytedance/sonic/loader v0.2.3 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect

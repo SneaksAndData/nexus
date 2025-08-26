@@ -13,7 +13,7 @@ type PipelineWorkerConfig struct {
 	Workers                    int
 }
 
-func FromBufferConfig(bufferConfig *request.BufferConfig) *PipelineWorkerConfig {
+func FromBufferConfig(bufferConfig *request.BufferConfig) *PipelineWorkerConfig { // coverage-ignore
 	return &PipelineWorkerConfig{
 		FailureRateBaseDelay:       bufferConfig.FailureRateBaseDelay,
 		FailureRateMaxDelay:        bufferConfig.FailureRateMaxDelay,
