@@ -142,7 +142,7 @@ func TestScheduler(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	err = f.buffer.Add("test", "test-algorithm", newFakeRequest(), newFakeSpec(), newFakeWorkgroupSpec(), nil)
+	err = f.buffer.Add("test", "test-algorithm", newFakeRequest(), newFakeSpec(), newFakeWorkgroupSpec(), nil, false)
 
 	if err != nil {
 		t.Errorf("failed to buffer an element: %s", err)
