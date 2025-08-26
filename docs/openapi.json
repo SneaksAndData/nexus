@@ -133,7 +133,7 @@
     "/algorithm/v1/cancel/{algorithmName}/requests/{requestId}": {
       "post": {
         "tags": [
-          "run"
+          "cancellation"
         ],
         "summary": "Cancels an algorithm run",
         "description": "Interrupts the provided run id and cancels the execution tree if it exists",
@@ -162,7 +162,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest"
+                "$ref": "#/components/schemas/models.CancellationRequest"
               }
             }
           },
@@ -693,6 +693,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "dryRun",
+            "in": "query",
+            "description": "If false, will buffer but not submit to the target cluster",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -803,20 +812,6 @@
   },
   "components": {
     "schemas": {
-      "github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest": {
-        "type": "object",
-        "properties": {
-          "cancellationPolicy": {
-            "type": "string"
-          },
-          "initiator": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
       "models.AlgorithmRequest": {
         "required": [
           "algorithmParameters"
@@ -855,6 +850,20 @@
             "type": "string"
           },
           "requestId": {
+            "type": "string"
+          }
+        }
+      },
+      "models.CancellationRequest": {
+        "type": "object",
+        "properties": {
+          "cancellationPolicy": {
+            "type": "string"
+          },
+          "initiator": {
+            "type": "string"
+          },
+          "reason": {
             "type": "string"
           }
         }
