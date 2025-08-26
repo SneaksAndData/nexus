@@ -401,8 +401,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "If false, will buffer but not submit to the target cluster",
                         "name": "dryRun",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {

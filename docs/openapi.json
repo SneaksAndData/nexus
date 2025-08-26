@@ -698,7 +698,6 @@
             "name": "dryRun",
             "in": "query",
             "description": "If false, will buffer but not submit to the target cluster",
-            "required": true,
             "schema": {
               "type": "string"
             }

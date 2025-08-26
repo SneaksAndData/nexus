@@ -660,7 +660,6 @@ paths:
       - description: If false, will buffer but not submit to the target cluster
         in: query
         name: dryRun
-        required: true
         type: string
       produces:
       - application/json

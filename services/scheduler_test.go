@@ -122,7 +122,7 @@ func newSchedulerFixture(t *testing.T, existingObjects []runtime.Object) *schedu
 		RateLimitElementsBurst:     10,
 		Workers:                    2,
 	}, f.kubeClient, []*shards.ShardClient{
-		shards.NewShardClient(f.shardClient, f.nexusShardClient, "test-shard", "nexus"),
+		shards.NewShardClient(f.shardClient, f.nexusShardClient, "test-shard", "nexus", klog.FromContext(f.ctx)),
 	}, f.buffer, "nexus", klog.FromContext(ctx), &resyncPeriod)
 
 	return f

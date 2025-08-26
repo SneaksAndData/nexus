@@ -13,6 +13,7 @@ import (
 	"github.com/SneaksAndData/nexus/services/models"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -43,6 +44,7 @@ type RequestScheduler struct {
 	SchedulerActor      *pipeline.DefaultPipelineStageActor[*request.BufferOutput, *coremodels.CheckpointedRequest]
 	CommitActor         *pipeline.DefaultPipelineStageActor[*coremodels.CheckpointedRequest, string]
 	shardClients        []*shards.ShardClient
+	jobNamespace        string
 	buffer              request.Buffer
 }
 
@@ -57,6 +59,7 @@ func NewRequestScheduler(workerConfig *models.PipelineWorkerConfig, kubeClient k
 		factory:        factory,
 		podInformer:    factory.Core().V1().Pods().Informer(),
 		eventInformer:  factory.Core().V1().Events().Informer(),
+		jobNamespace:   resourceNamespace,
 		buffer:         buffer,
 		logger:         logger,
 	}
@@ -289,4 +292,33 @@ func (scheduler *RequestScheduler) lateSchedule(submission *LateSubmission) (*co
 	resultCheckpoint.JobUid = string(submitted.UID)
 
 	return resultCheckpoint, nil
+}
+
+func (scheduler *RequestScheduler) ResolveParent(parentRequestId string, clusterName string) (*metav1.OwnerReference, error) {
+	if shard := scheduler.getShardByName(clusterName); shard != nil {
+		job, err := shard.FindJob(parentRequestId, scheduler.jobNamespace)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return &metav1.OwnerReference{
+			APIVersion: "batch/v1",
+			Kind:       "Job",
+			Name:       job.Name,
+			UID:        job.UID,
+		}, nil
+	} else {
+		return nil, fmt.Errorf("no shard matches provided name '%s'", clusterName)
+	}
+}
+
+func (scheduler *RequestScheduler) CancelRun(requestId string, policy metav1.DeletionPropagation) (exists bool, err error) {
+	for _, shard := range scheduler.shardClients {
+		if _, err := shard.FindJob(requestId, scheduler.jobNamespace); err == nil {
+			return true, shard.DeleteJob(scheduler.jobNamespace, requestId, policy)
+		}
+	}
+
+	return false, fmt.Errorf("no shard has a run with identifier '%s'", requestId)
 }
