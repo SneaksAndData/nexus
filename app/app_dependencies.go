@@ -10,22 +10,26 @@ import (
 	"github.com/SneaksAndData/nexus/services/models"
 	corev1 "k8s.io/api/core/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
+	"time"
 )
 
 type ApplicationServices struct {
-	checkpointBuffer *request.DefaultBuffer
+	checkpointBuffer request.Buffer
 	defaultNamespace string
-	kubeClient       *kubernetes.Clientset
+	kubeClient       kubernetes.Interface
 	shardClients     []*shards.ShardClient
-	nexusClient      *nexuscore.Clientset
+	nexusClient      nexuscore.Interface
 	recorder         record.EventRecorder
 	configCache      *services.NexusResourceCache
+	jobInformer      cache.SharedIndexInformer
 	scheduler        *services.RequestScheduler
 	workerConfig     *models.PipelineWorkerConfig
 }
@@ -114,7 +118,19 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceNamespace string) *ApplicationServices {
 	if appServices.configCache == nil {
 		logger := klog.FromContext(ctx)
-		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, resourceNamespace, logger)
+		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, resourceNamespace, logger, nil)
+	}
+
+	return appServices
+}
+
+func (appServices *ApplicationServices) WithJobInformer(ctx context.Context, resourceNamespace string) *ApplicationServices {
+	if appServices.jobInformer == nil {
+		logger := klog.FromContext(ctx)
+		logger.V(4).Info("creating job informer")
+		factory := informers.NewSharedInformerFactoryWithOptions(appServices.kubeClient, time.Second*30, informers.WithNamespace(resourceNamespace))
+		appServices.jobInformer = factory.Batch().V1().Jobs().Informer()
+		factory.Start(ctx.Done())
 	}
 
 	return appServices
@@ -125,7 +141,7 @@ func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *App
 	var err error
 
 	appServices.scheduler, err = services.
-		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.defaultNamespace, logger).
+		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.defaultNamespace, logger, nil).
 		Init(ctx)
 
 	if err != nil {
@@ -136,7 +152,7 @@ func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *App
 	return appServices
 }
 
-func (appServices *ApplicationServices) CheckpointBuffer() *request.DefaultBuffer {
+func (appServices *ApplicationServices) CheckpointBuffer() request.Buffer {
 	return appServices.checkpointBuffer
 }
 
@@ -144,11 +160,11 @@ func (appServices *ApplicationServices) Logger(ctx context.Context) klog.Logger 
 	return klog.FromContext(ctx)
 }
 
-func (appServices *ApplicationServices) KubeClient() *kubernetes.Clientset {
+func (appServices *ApplicationServices) KubeClient() kubernetes.Interface {
 	return appServices.kubeClient
 }
 
-func (appServices *ApplicationServices) NexusClient() *nexuscore.Clientset {
+func (appServices *ApplicationServices) NexusClient() nexuscore.Interface {
 	return appServices.nexusClient
 }
 
@@ -160,6 +176,10 @@ func (appServices *ApplicationServices) ShardClients() []*shards.ShardClient {
 	return appServices.shardClients
 }
 
+func (appServices *ApplicationServices) JobInformer() cache.SharedIndexInformer {
+	return appServices.jobInformer
+}
+
 func (appServices *ApplicationServices) Start(ctx context.Context) {
 	logger := klog.FromContext(ctx)
 	err := appServices.configCache.Init(ctx)
@@ -168,7 +188,6 @@ func (appServices *ApplicationServices) Start(ctx context.Context) {
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 
-	go appServices.scheduler.CommitActor.Start(ctx)
-	go appServices.scheduler.SchedulerActor.Start(ctx)
+	appServices.scheduler.Start(ctx)
 	appServices.checkpointBuffer.Start(appServices.scheduler.SchedulerActor)
 }

@@ -48,6 +48,12 @@ rbac:
       additionalAnnotations: { }
       create: true
       nameOverride: ""
+
+    scheduler:
+      additionalLabels: { }
+      additionalAnnotations: { }
+      create: true
+      nameOverride: ""
   
   # This parameter determines whether role binding resources need to be created.
   # If you have any roles in your configuration set to 'true', then this parameter for creating role binding resources
@@ -217,8 +223,7 @@ scheduler:
       # Enable mounting Cassandra credentials from a secret
       secretRefEnabled: true
       
-      # Name of a secret containing Cassandra credentials
-      # Example content:
+      # Example for AstraDB:
       #  apiVersion: v1
       #  kind: Secret
       #  metadata:
@@ -226,10 +231,22 @@ scheduler:
       #    namespace: nexus
       #  data:
       #    AstraDB specific setting, contains base64-encoded bundle zip. Leave empty for other Cassandra installations
-      #    Support for Scylla and Apache OSS (generic Cassandra) is coming in the production release
       #    NEXUS__CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64: base64value
       #    NEXUS__CQL_STORE__GATEWAY_USER: user
       #    NEXUS__CQL_STORE__GATEWAY_PASSWORD: password
+      #  type: Opaque
+
+      # Example for Scylla:
+      #  apiVersion: v1
+      #  kind: Secret
+      #  metadata:
+      #    name: cassandra-credentials
+      #    namespace: nexus
+      #  data:
+      #    AstraDB specific setting, contains base64-encoded bundle zip. Leave empty for other Cassandra installations
+      #    NEXUS__SCYLLA_CQL_STORE__HOSTS: 1.2.3.4,1.2.3.5
+      #    NEXUS__SCYLLA_CQL_STORE__USER: user
+      #    NEXUS__SCYLLA_CQL_STORE__PASSWORD: password
       #  type: Opaque
       
       secretName: ""

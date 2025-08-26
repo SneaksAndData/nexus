@@ -22,7 +22,137 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/algorithm/v1.2/metadata/{algorithmName}/requests/{requestId}": {
+        "/algorithm/v1/buffer/{algorithmName}/requests/{requestId}": {
+            "get": {
+                "description": "Retrieves a buffered metadata for a run",
+                "produces": [
+                    "application/json",
+                    "text/plain",
+                    "text/html"
+                ],
+                "tags": [
+                    "metadata"
+                ],
+                "summary": "Read a buffered run metadata (Kubernetes Job JSON)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/algorithm/v1/cancel/{algorithmName}/requests/{requestId}": {
+            "post": {
+                "description": "Interrupts the provided run id and cancels the execution tree if it exists",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/plain",
+                    "text/html"
+                ],
+                "tags": [
+                    "run"
+                ],
+                "summary": "Cancels an algorithm run",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Cancellation configuration",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/algorithm/v1/metadata/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves checkpointed metadata for a run",
                 "produces": [
@@ -78,7 +208,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/algorithm/v1.2/payload/{algorithmName}/requests/{requestId}": {
+        "/algorithm/v1/payload/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
@@ -133,7 +263,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/algorithm/v1.2/results/tags/{requestTag}": {
+        "/algorithm/v1/results/tags/{requestTag}": {
             "get": {
                 "description": "Read results of all runs with a matching tag",
                 "produces": [
@@ -179,7 +309,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/algorithm/v1.2/results/{algorithmName}/requests/{requestId}": {
+        "/algorithm/v1/results/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves a result for the provided run",
                 "produces": [
@@ -235,7 +365,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/algorithm/v1.2/run/{algorithmName}": {
+        "/algorithm/v1/run/{algorithmName}": {
             "post": {
                 "description": "Accepts an algorithm payload and places it into a scheduling queue",
                 "consumes": [
@@ -301,6 +431,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_SneaksAndData_nexus_api_v1_models.CancellationRequest": {
+            "type": "object",
+            "properties": {
+                "cancellationPolicy": {
+                    "type": "string"
+                },
+                "initiator": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
         "models.AlgorithmRequest": {
             "type": "object",
             "required": [
@@ -379,8 +523,8 @@ const docTemplate = `{
                 "lifecycle_stage": {
                     "type": "string"
                 },
-                "parent_job": {
-                    "$ref": "#/definitions/models.ParentJobReference"
+                "parent": {
+                    "$ref": "#/definitions/models.AlgorithmRequestRef"
                 },
                 "payload_uri": {
                     "type": "string"
@@ -404,9 +548,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "models.ParentJobReference": {
-            "type": "object"
         },
         "models.RequestResult": {
             "type": "object",
@@ -786,7 +927,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "/algorithm/v1.2",
+	BasePath:         "/algorithm/v1",
 	Schemes:          []string{},
 	Title:            "Nexus Scheduler API",
 	Description:      "Nexus Scheduler API specification. All Nexus supported clients conform to this spec.",
