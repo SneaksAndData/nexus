@@ -40,15 +40,14 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 		WithCache(ctx, appConfig.ResourceNamespace).
 		WithRecorder(ctx, appConfig.ResourceNamespace).
 		WithShards(ctx, appConfig.ShardKubeConfigPath, appConfig.ResourceNamespace).
-		WithJobInformer(ctx, appConfig.ResourceNamespace).
 		WithDefaultNamespace(appConfig.ResourceNamespace).
 		BuildScheduler(ctx)
 
 	// version 1
 	apiV1 := router.Group("algorithm/v1")
 
-	apiV1.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache(), appServices.JobInformer(), appConfig.ResourceNamespace, appServices.Logger(ctx)))
-	apiV1.POST("cancel/:algorithmName/requests/:requestId", v1.CancelRun(appServices.CheckpointBuffer(), appServices.KubeClient(), appConfig.ResourceNamespace, appServices.Logger(ctx)))
+	apiV1.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache(), appServices.Scheduler(), appServices.Logger(ctx)))
+	apiV1.POST("cancel/:algorithmName/requests/:requestId", v1.CancelRun(appServices.CheckpointBuffer(), appServices.Scheduler(), appServices.Logger(ctx)))
 	apiV1.GET("results/:algorithmName/requests/:requestId", v1.GetRunResult(appServices.CheckpointBuffer()))
 	apiV1.GET("results/tags/:requestTag", v1.GetRunResultsByTag(appServices.CheckpointBuffer(), appServices.Logger(ctx)))
 	apiV1.GET("metadata/:algorithmName/requests/:requestId", v1.GetRunMetadata(appServices.CheckpointBuffer()))

@@ -3,13 +3,10 @@ package v1
 import (
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/models"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
-	"github.com/SneaksAndData/nexus-core/pkg/resolvers"
 	"github.com/SneaksAndData/nexus/services"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
 	"net/http"
 )
@@ -25,13 +22,13 @@ import (
 //	@Produce		html
 //	@Param			algorithmName	path		string	true	"Algorithm name"
 //	@Param			payload	body	models.AlgorithmRequest	true	"Run configuration"
-//	@Param			dryRun	query	string	true	"If false, will buffer but not submit to the target cluster"
+//	@Param			dryRun	query	string	false	"If false, will buffer but not submit to the target cluster"
 //	@Success		202	{object}	map[string]string
 //	@Failure		400	{string}	string
 //	@Failure		500	{string}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1/run/{algorithmName} [post]
-func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, jobInformer cache.SharedIndexInformer, jobNamespace string, logger klog.Logger) gin.HandlerFunc {
+func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, scheduler *services.RequestScheduler, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var parentRef *metav1.OwnerReference
 
@@ -72,19 +69,12 @@ func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, 
 		}
 
 		if payload.ParentRequest != nil {
-			parentMeta, err := resolvers.GetCachedObject[batchv1.Job](payload.ParentRequest.RequestId, jobNamespace, jobInformer)
+			parentRef, err = scheduler.ResolveParent(payload.ParentRequest.RequestId, workgroup.Spec.Cluster)
 
 			if err != nil {
 				ctx.String(http.StatusInternalServerError, `Internal error occurred when processing your request.`, algorithmName)
 				logger.V(0).Error(err, "error when retrieving a parent request for %s/%s", algorithmName, requestId)
 				return
-			}
-
-			parentRef = &metav1.OwnerReference{
-				APIVersion: batchv1.SchemeGroupVersion.String(),
-				Kind:       "Job",
-				Name:       payload.ParentRequest.RequestId,
-				UID:        parentMeta.UID,
 			}
 		}
 

@@ -3,7 +3,7 @@ module github.com/SneaksAndData/nexus
 go 1.24.4
 
 require (
-	github.com/SneaksAndData/nexus-core v1.3.8
+	github.com/SneaksAndData/nexus-core v1.4.0
 	github.com/aws/smithy-go v1.22.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
@@ -60,6 +60,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gnostic-models v0.6.9 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
