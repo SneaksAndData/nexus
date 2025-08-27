@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	schedulermodels "github.com/SneaksAndData/nexus/api/v1/models"
 	"github.com/SneaksAndData/nexus/services"
 	"github.com/gin-gonic/gin"
@@ -28,7 +27,7 @@ import (
 //	@Failure		404	{string}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1/cancel/{algorithmName}/requests/{requestId} [post]
-func CancelRun(buffer request.Buffer, scheduler *services.RequestScheduler, logger klog.Logger) gin.HandlerFunc {
+func CancelRun(scheduler *services.RequestScheduler, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		algorithmName := ctx.Param("algorithmName")
@@ -54,7 +53,7 @@ func CancelRun(buffer request.Buffer, scheduler *services.RequestScheduler, logg
 			return
 		}
 
-		if !errors.IsNotFound(err) {
+		if err != nil && !errors.IsNotFound(err) {
 			ctx.String(http.StatusInternalServerError, `Unhandled error when executing a run cancellation. Please try again later`)
 			logger.V(0).Error(err, "error when cancelling run %s/%s", algorithmName, requestId)
 			return
