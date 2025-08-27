@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"fmt"
-	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/models"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	schedulermodels "github.com/SneaksAndData/nexus/api/v1/models"
 	"github.com/SneaksAndData/nexus/services"
@@ -49,7 +47,7 @@ func CancelRun(buffer request.Buffer, scheduler *services.RequestScheduler, logg
 			return
 		}
 
-		exists, err := scheduler.CancelRun(requestId, *policy)
+		exists, err := scheduler.CancelRun(requestId, algorithmName, payload.Initiator, payload.Reason, *policy)
 
 		if !exists {
 			ctx.String(http.StatusNotFound, `Provided request with identifier '%s' not found`, requestId)
@@ -59,26 +57,6 @@ func CancelRun(buffer request.Buffer, scheduler *services.RequestScheduler, logg
 		if !errors.IsNotFound(err) {
 			ctx.String(http.StatusInternalServerError, `Unhandled error when executing a run cancellation. Please try again later`)
 			logger.V(0).Error(err, "error when cancelling run %s/%s", algorithmName, requestId)
-			return
-		}
-
-		// update status once the delete is done
-		checkpoint, err := buffer.Get(requestId, algorithmName)
-		if err != nil {
-			ctx.String(http.StatusInternalServerError, `Error when reading a checkpoint for the cancelled request: %s/%s`, algorithmName, requestId)
-			logger.V(0).Error(err, "checkpoint store failure when reading %s/%s", algorithmName, requestId)
-			return
-		}
-
-		cancelled := checkpoint.DeepCopy()
-		cancelled.LifecycleStage = models.LifecycleStageCancelled
-		cancelled.AlgorithmFailureCause = fmt.Sprintf("Cancelled by '%s'", payload.Initiator)
-		cancelled.AlgorithmFailureDetails = fmt.Sprintf("Run cancelled, reason: '%s'", payload.Reason)
-		err = buffer.Update(cancelled)
-
-		if err != nil {
-			ctx.String(http.StatusInternalServerError, `Error when updating a checkpoint for the cancelled request: %s/%s`, algorithmName, requestId)
-			logger.V(0).Error(err, "checkpoint store failure when updating %s/%s", algorithmName, requestId)
 			return
 		}
 

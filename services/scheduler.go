@@ -313,9 +313,25 @@ func (scheduler *RequestScheduler) ResolveParent(parentRequestId string, cluster
 	}
 }
 
-func (scheduler *RequestScheduler) CancelRun(requestId string, policy metav1.DeletionPropagation) (exists bool, err error) {
+func (scheduler *RequestScheduler) CancelRun(requestId string, algorithmName string, initiator string, reason string, policy metav1.DeletionPropagation) (exists bool, err error) {
 	for _, shard := range scheduler.shardClients {
 		if _, err := shard.FindJob(requestId, scheduler.jobNamespace); err == nil {
+
+			checkpoint, err := scheduler.buffer.Get(requestId, algorithmName)
+			if err != nil {
+				return true, err
+			}
+
+			cancelled := checkpoint.DeepCopy()
+			cancelled.LifecycleStage = coremodels.LifecycleStageCancelled
+			cancelled.AlgorithmFailureCause = fmt.Sprintf("Cancelled by '%s'", initiator)
+			cancelled.AlgorithmFailureDetails = fmt.Sprintf("Run cancelled, reason: '%s'", reason)
+			err = scheduler.buffer.Update(cancelled)
+
+			if err != nil {
+				return true, err
+			}
+
 			return true, shard.DeleteJob(scheduler.jobNamespace, requestId, policy)
 		}
 	}

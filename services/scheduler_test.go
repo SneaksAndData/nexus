@@ -10,7 +10,9 @@ import (
 	"github.com/SneaksAndData/nexus-core/pkg/shards"
 	"github.com/SneaksAndData/nexus/services/models"
 	"github.com/aws/smithy-go/ptr"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -105,13 +107,13 @@ func newFakeWorkgroupSpec() *v1.NexusAlgorithmWorkgroupSpec {
 	}
 }
 
-func newSchedulerFixture(t *testing.T, existingObjects []runtime.Object) *schedulerFixture {
+func newSchedulerFixture(t *testing.T, existingObjects []runtime.Object, existingShardObjects []runtime.Object) *schedulerFixture {
 	_, ctx := ktesting.NewTestContext(t)
 	f := &schedulerFixture{}
 	f.ctx = ctx
 
 	f.kubeClient = k8sfake.NewClientset(existingObjects...)
-	f.shardClient = k8sfake.NewClientset()
+	f.shardClient = k8sfake.NewClientset(existingShardObjects...)
 	f.nexusShardClient = fake.NewClientset()
 	f.buffer = request.NewMemoryPassthroughBuffer(ctx, map[string]string{})
 
@@ -129,7 +131,7 @@ func newSchedulerFixture(t *testing.T, existingObjects []runtime.Object) *schedu
 }
 
 func TestScheduler(t *testing.T) {
-	f := newSchedulerFixture(t, []runtime.Object{})
+	f := newSchedulerFixture(t, []runtime.Object{}, []runtime.Object{})
 	scheduler, err := f.scheduler.Init(f.ctx)
 
 	if err != nil {
@@ -168,10 +170,6 @@ func TestScheduler(t *testing.T) {
 		t.Errorf("The checkpoint lifecycle stage must be running, but %s", checkpoint.LifecycleStage)
 		t.FailNow()
 	}
-
-	// gracefully stop
-	f.ctx.Done()
-	time.Sleep(time.Second)
 }
 
 func TestScheduler_Restart(t *testing.T) {
@@ -223,7 +221,7 @@ func TestScheduler_Restart(t *testing.T) {
 		objects = append(objects, &pod)
 	}
 
-	f := newSchedulerFixture(t, objects)
+	f := newSchedulerFixture(t, objects, []runtime.Object{})
 	f.populatePods(terminatedPods)
 
 	// add BUFFERED submission
@@ -262,8 +260,147 @@ func TestScheduler_Restart(t *testing.T) {
 		t.Errorf("The checkpoint lifecycle stage must be running, but %s", lateCheckpoint.LifecycleStage)
 		t.FailNow()
 	}
+}
 
-	// gracefully stop
-	f.ctx.Done()
-	time.Sleep(time.Second)
+func TestScheduler_ResolveParent(t *testing.T) {
+	jobs := []batchv1.Job{
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Job",
+				APIVersion: "batch/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-job-1",
+				Namespace: "nexus",
+				UID:       "test-job-1-uid",
+			},
+			Spec: batchv1.JobSpec{},
+		},
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Job",
+				APIVersion: "batch/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-job-2",
+				Namespace: "nexus",
+				UID:       "test-job-2-uid",
+			},
+			Spec: batchv1.JobSpec{},
+		},
+	}
+
+	objects := []runtime.Object{}
+
+	for _, job := range jobs {
+		objects = append(objects, &job)
+	}
+
+	f := newSchedulerFixture(t, []runtime.Object{}, objects)
+
+	_, err := f.scheduler.Init(f.ctx)
+
+	if err != nil {
+		t.Errorf("failed to initialize scheduler: %s", err)
+		t.FailNow()
+	}
+	go f.scheduler.Start(f.ctx)
+
+	time.Sleep(1 * time.Second)
+
+	// check status
+	owner, err := f.scheduler.ResolveParent("test-job-1", "test-shard")
+	if err != nil {
+		t.Errorf("failed to resolve parent: %s", err)
+		t.FailNow()
+	}
+
+	if owner.UID != "test-job-1-uid" {
+		t.Errorf("expected owner name to be 'test-job-1-uid', but found '%s'", owner.Name)
+	}
+}
+
+func TestScheduler_CancelRun(t *testing.T) {
+	jobs := []batchv1.Job{
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Job",
+				APIVersion: "batch/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-job-1",
+				Namespace: "nexus",
+				UID:       "test-job-1-uid",
+			},
+			Spec: batchv1.JobSpec{},
+		},
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Job",
+				APIVersion: "batch/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-job-2",
+				Namespace: "nexus",
+				UID:       "test-job-2-uid",
+			},
+			Spec: batchv1.JobSpec{},
+		},
+	}
+
+	objects := []runtime.Object{}
+
+	for _, job := range jobs {
+		objects = append(objects, &job)
+	}
+
+	f := newSchedulerFixture(t, []runtime.Object{}, objects)
+
+	// add RUNNING submission
+	buffer := f.buffer.(*request.MemoryPassthroughBuffer)
+	checkpoint, _, _ := coremodels.FromAlgorithmRequest("test-job-1", "test-algorithm", newFakeRequest(), newFakeSpec())
+	checkpoint.LifecycleStage = coremodels.LifecycleStageRunning
+
+	buffer.Checkpoints = append(buffer.Checkpoints, checkpoint)
+	buffer.BufferedEntries = append(buffer.BufferedEntries, coremodels.FromCheckpoint(checkpoint, newFakeWorkgroupSpec(), nil))
+
+	_, err := f.scheduler.Init(f.ctx)
+
+	if err != nil {
+		t.Errorf("failed to initialize scheduler: %s", err)
+		t.FailNow()
+	}
+	go f.scheduler.Start(f.ctx)
+
+	time.Sleep(1 * time.Second)
+
+	// cancel and check status
+	exists, err := f.scheduler.CancelRun("test-job-1", "test-algorithm", "tester", "test", metav1.DeletePropagationForeground)
+
+	if !exists {
+		t.Error("failed to cancel run as the provided request does not exist", err)
+		t.FailNow()
+	}
+
+	if err != nil && !errors.IsNotFound(err) {
+		t.Errorf("failed to cancel run: %s", err)
+	}
+
+	// check status
+	cancelled, err := f.buffer.Get("test-job-1", "test-algorithm")
+
+	if err != nil {
+		t.Errorf("failed to read a submitted run information: %s", err)
+		t.FailNow()
+	}
+
+	if cancelled == nil {
+		t.Errorf("submitted run information expected but nil returned")
+		t.FailNow()
+	}
+
+	if cancelled.LifecycleStage != coremodels.LifecycleStageCancelled {
+		t.Errorf("expected lifecycle stage to be cancelled, but %s", cancelled.LifecycleStage)
+		t.FailNow()
+	}
 }
