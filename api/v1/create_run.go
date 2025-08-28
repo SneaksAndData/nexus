@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"net/http"
 )
@@ -69,13 +70,24 @@ func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, 
 		}
 
 		if payload.ParentRequest != nil {
-			parentRef, err = scheduler.ResolveParent(payload.ParentRequest.RequestId, workgroup.Spec.Cluster)
+			if !dryRun {
+				parentRef, err = scheduler.ResolveParent(payload.ParentRequest.RequestId, workgroup.Spec.Cluster)
 
-			if err != nil {
-				ctx.String(http.StatusInternalServerError, `Internal error occurred when processing your request.`, algorithmName)
-				logger.V(0).Error(err, "error when retrieving a parent request for %s/%s", algorithmName, requestId)
-				return
+				if err != nil {
+					ctx.String(http.StatusInternalServerError, `Internal error occurred when processing your request.`, algorithmName)
+					logger.V(0).Error(err, "error when retrieving a parent request for %s/%s", algorithmName, requestId)
+					return
+				}
+			} else {
+				// for dry runs parent job might not exist at all, thus we create a fake reference
+				parentRef = &metav1.OwnerReference{
+					APIVersion: "batch/v1",
+					Kind:       "Job",
+					Name:       payload.ParentRequest.RequestId,
+					UID:        types.UID(payload.ParentRequest.RequestId),
+				}
 			}
+
 		}
 
 		if err := buffer.Add(requestId.String(), algorithmName, &payload, &config.Spec, &workgroup.Spec, parentRef, dryRun); err != nil {
