@@ -129,6 +129,10 @@ securityContext: { }
 # Available values: debug, test, release
 ginMode: debug
 
+# topology spread uses kubernetes.io/hostname
+topologySpread:
+  maxSkew: 1
+
 # Nexus Scheduler configurations
 scheduler:
   
