@@ -15,6 +15,7 @@ import (
 //	@Produce		html
 //	@Param			algorithmName	path		string	true	"Algorithm name"
 //	@Param			requestId	path		string	true	"Request identifier"
+//	@Success		200	{string}    string
 //	@Success		302	{string}    string
 //	@Failure		400	{string}	string
 //	@Failure		404	{string}	string
