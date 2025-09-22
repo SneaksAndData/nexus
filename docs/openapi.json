@@ -412,6 +412,26 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
           "302": {
             "description": "Found",
             "content": {
@@ -421,6 +441,11 @@
                 }
               },
               "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/octet-stream": {
                 "schema": {
                   "type": "string"
                 }
@@ -439,6 +464,11 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -454,6 +484,11 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -466,6 +501,11 @@
                 }
               },
               "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/octet-stream": {
                 "schema": {
                   "type": "string"
                 }

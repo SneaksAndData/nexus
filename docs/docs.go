@@ -213,7 +213,8 @@ const docTemplate = `{
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
                     "text/plain",
-                    "text/html"
+                    "text/html",
+                    "application/octet-stream"
                 ],
                 "tags": [
                     "payload"
@@ -236,6 +237,12 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "302": {
                         "description": "Found",
                         "schema": {
