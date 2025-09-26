@@ -101,6 +101,16 @@ spec:
                 fieldRef:
                   fieldPath: metadata.uid
           {{- end }}
+          {{- if .Values.datadog.tracer.enabled }}
+            - name: DD_INSTRUMENTATION_TELEMETRY_ENABLED
+              value: {{ .Values.datadog.tracer.disable_vendor_telemetry | quote }}
+            - name: DD_TRACE_ENABLED
+              value: {{ .Values.datadog.tracer.enabled | quote }}
+            - name: DD_TRACE_AGENT_URL
+              value: {{ .Values.datadog.tracer.agent_url | quote }}
+            - name: DD_ENV
+              value: {{ .Values.datadog.tracer.service_env | quote }}
+          {{- end }}
             - name: DATADOG__SERVICE_NAME
               value: {{ .Values.datadog.serviceName }}
             - name: DD_SERVICE

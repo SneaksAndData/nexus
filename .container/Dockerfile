@@ -9,9 +9,13 @@ WORKDIR /app
 
 COPY . ./
 
-RUN go mod verify && go mod vendor
 
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags "-X github.com/SneaksAndData/nexus-core/pkg/buildmeta.AppVersion=$APPVERSION -X github.com/SneaksAndData/nexus-core/pkg/buildmeta.BuildNumber=$BUILDNUMBER" -o /app -v ./...
+RUN go install github.com/DataDog/orchestrion@v1.5.0 \
+    && orchestrion pin \
+    && go mod tidy \
+    && go mod verify \
+    && go mod vendor \
+    && CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOFLAGS="${GOFLAGS} '-toolexec=orchestrion toolexec'" go build -ldflags "-X github.com/SneaksAndData/nexus-core/pkg/buildmeta.AppVersion=$APPVERSION -X github.com/SneaksAndData/nexus-core/pkg/buildmeta.BuildNumber=$BUILDNUMBER" -o /app -v ./...
 
 FROM --platform=$BUILDPLATFORM public.ecr.aws/amazonlinux/amazonlinux:2 AS aws-cli-stage
 
