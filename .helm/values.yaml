@@ -297,4 +297,17 @@ datadog:
   
   # enables metric origin detection by setting DD_ENTITY_ID
   enableOriginDetection: true
-  
+
+  # Datadog tracing via Orchestrion
+  tracer:
+    # enable tracer
+    enabled: false
+
+    # UDS/HTTP url for the tracer
+    agent_url: unix:///var/run/datadog/apm.socket
+
+    # disable Datadog product info collection
+    disable_vendor_telemetry: true
+
+    # service environment tag
+    service_env: development
