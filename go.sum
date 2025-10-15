@@ -13,6 +13,8 @@ github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbt
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/SneaksAndData/nexus-core v1.4.3-0.20251014084836-5734ca0ca7fa h1:2Cx1xSPAWFU8/Ms4N27I2rcWRPIx8aC7m0kLI0j+/ng=
 github.com/SneaksAndData/nexus-core v1.4.3-0.20251014084836-5734ca0ca7fa/go.mod h1:q1cBUQ7UDAfNks886D8FOp92lrb39ksgH7Zd8cwyEO4=
+github.com/SneaksAndData/nexus-core v1.4.3 h1:dhyB3kWm0NqhM4k6ncXPNMCy/JC7IT1GwyAiTg15QUo=
+github.com/SneaksAndData/nexus-core v1.4.3/go.mod h1:q1cBUQ7UDAfNks886D8FOp92lrb39ksgH7Zd8cwyEO4=
 github.com/aws/aws-sdk-go-v2 v1.39.2 h1:EJLg8IdbzgeD7xgvZ+I8M1e0fL0ptn/M47lianzth0I=
 github.com/aws/aws-sdk-go-v2 v1.39.2/go.mod h1:sDioUELIUO9Znk23YVmIk86/9DOpkbyyVb1i/gUNFXY=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.1 h1:i8p8P4diljCr60PpJp6qZXNlgX4m2yQFpYk+9ZT+J4E=
