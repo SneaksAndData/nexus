@@ -138,6 +138,9 @@ scheduler:
   
   # Number of scheduler replicas. Increase to support higher request rates
   replicas: 3
+
+  # Max number of scheduler replicas when using HPA
+  maxReplicas: 9
   
   # Disruption budget for the deployment
   maxUnavailable: 2

@@ -14,8 +14,8 @@ spec:
     kind: Deployment
     name: {{ include "app.name" . }}
     apiVersion: apps/v1
-  minReplicas: {{ .Values.scheduler.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.scheduler.autoscaling.maxReplicas }}
+  minReplicas: {{ .Values.scheduler.replicas | default 3 }}
+  maxReplicas: {{ .Values.scheduler.maxReplicas | default 9 }}
   metrics:
     - type: Resource
       resource:
