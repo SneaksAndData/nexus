@@ -11,10 +11,8 @@ github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERo
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
-github.com/SneaksAndData/nexus-core v1.4.3-0.20251014084836-5734ca0ca7fa h1:2Cx1xSPAWFU8/Ms4N27I2rcWRPIx8aC7m0kLI0j+/ng=
-github.com/SneaksAndData/nexus-core v1.4.3-0.20251014084836-5734ca0ca7fa/go.mod h1:q1cBUQ7UDAfNks886D8FOp92lrb39ksgH7Zd8cwyEO4=
-github.com/SneaksAndData/nexus-core v1.4.3 h1:dhyB3kWm0NqhM4k6ncXPNMCy/JC7IT1GwyAiTg15QUo=
-github.com/SneaksAndData/nexus-core v1.4.3/go.mod h1:q1cBUQ7UDAfNks886D8FOp92lrb39ksgH7Zd8cwyEO4=
+github.com/SneaksAndData/nexus-core v1.4.4-0.20251020083837-d47836783d57 h1:3Y45GoNCge6xrgSrtl8ZOg7ZnXueSm2cx2ez+T9UAAw=
+github.com/SneaksAndData/nexus-core v1.4.4-0.20251020083837-d47836783d57/go.mod h1:q1cBUQ7UDAfNks886D8FOp92lrb39ksgH7Zd8cwyEO4=
 github.com/aws/aws-sdk-go-v2 v1.39.2 h1:EJLg8IdbzgeD7xgvZ+I8M1e0fL0ptn/M47lianzth0I=
 github.com/aws/aws-sdk-go-v2 v1.39.2/go.mod h1:sDioUELIUO9Znk23YVmIk86/9DOpkbyyVb1i/gUNFXY=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.1 h1:i8p8P4diljCr60PpJp6qZXNlgX4m2yQFpYk+9ZT+J4E=

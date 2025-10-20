@@ -172,13 +172,10 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 		return
 	}
 
-	// log and get reason
-	scheduler.logger.V(0).Info("discovered an inactive scheduler instance", "instance", pod.Name)
-
 	switch event.Reason {
 	case "Killing", "Failed", "Terminated", "Evicted":
-		scheduler.logger.V(0).Info("discovered a scheduler terminated externally", "instance", pod.Name, "reason", event.Reason, "message", event.Message)
-		// host has been terminated - find its submissions and resubmit them
+		scheduler.logger.V(0).Info("discovered a scheduler terminated externally", "instance", pod.Name, "eventReason", event.Reason, "eventDetail", event.Message)
+		// host has been terminated - find its BUFFERED submissions and resubmit them
 		checkpoints, err := scheduler.buffer.GetBuffered(event.InvolvedObject.Name)
 		if err != nil { // coverage-ignore
 			utilruntime.HandleError(err)
@@ -195,8 +192,33 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 				})
 			}
 		}
+
+		// host has been been terminated - find its NEW submissions and fail them
+		lostCheckpoints, err := scheduler.buffer.GetNew(event.InvolvedObject.Name)
+		if err != nil { // coverage-ignore
+			utilruntime.HandleError(err)
+			return
+		}
+		for lostCheckpoint := range lostCheckpoints {
+			if lostCheckpoint.LifecycleStage == coremodels.LifecycleStageNew {
+				lostCopy := lostCheckpoint.DeepCopy()
+				lostCopy.LifecycleStage = coremodels.LifecycleStageSchedulingFailed
+				lostCopy.AlgorithmFailureCause = "Submission lost. Please resend the request."
+				lostCopy.AlgorithmFailureDetails = "Scheduler was interrupted before it could serialize the payload."
+
+				err := scheduler.buffer.Update(lostCopy)
+				if err != nil { // coverage-ignore
+					utilruntime.HandleError(err)
+					return
+				}
+			}
+		}
+
+	case "FailedScheduling", "Nominated", "Scheduled", "Pulled", "Created":
+		// do not log startup/schedule events
+		return
 	default:
-		scheduler.logger.V(0).Info("unmapped reason - skipping", "instance", pod.Name, "reason", event.Reason, "message", event.Message)
+		scheduler.logger.V(0).Info("unmapped reason - skipping", "instance", pod.Name, "eventReason", event.Reason, "eventDetail", event.Message)
 		return
 	}
 }
