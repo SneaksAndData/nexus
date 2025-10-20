@@ -85,7 +85,9 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 func main() {
 	ctx := signals.SetupSignalHandler()
 	appConfig := nexusconf.LoadConfig[app.SchedulerConfig](ctx)
-	appLogger, err := telemetry.ConfigureLogger(ctx, map[string]string{}, appConfig.LogLevel)
+	appLogger, err := telemetry.ConfigureLogger(ctx, map[string]string{
+		"environment": os.Getenv("GIN_MODE"),
+	}, appConfig.LogLevel)
 	ctx = telemetry.WithStatsd(ctx, "nexus")
 	logger := klog.FromContext(ctx)
 
