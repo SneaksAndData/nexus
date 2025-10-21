@@ -182,6 +182,8 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 			return
 		}
 		for checkpoint := range checkpoints {
+			scheduler.logger.V(0).Info("BUFFERED checkpoint left over from terminated host - scheduling", "request", checkpoint.Id, "template", checkpoint.Algorithm, "terminatedHost", pod.Name)
+
 			entry, err := scheduler.buffer.GetBufferedEntry(checkpoint)
 			if err != nil { // coverage-ignore
 				utilruntime.HandleError(err)
@@ -201,6 +203,8 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 		}
 		for lostCheckpoint := range lostCheckpoints {
 			if lostCheckpoint.LifecycleStage == coremodels.LifecycleStageNew {
+				scheduler.logger.V(0).Info("NEW checkpoint left over from terminated host - marking as SCHEDULING_FAILED", "request", lostCheckpoint.Id, "template", lostCheckpoint.Algorithm, "terminatedHost", pod.Name)
+
 				lostCopy := lostCheckpoint.DeepCopy()
 				lostCopy.LifecycleStage = coremodels.LifecycleStageSchedulingFailed
 				lostCopy.AlgorithmFailureCause = "Submission lost. Please resend the request."
@@ -301,6 +305,7 @@ func (scheduler *RequestScheduler) lateSchedule(submission *LateSubmission) (*co
 	var submitErr error
 
 	if shard := scheduler.getShardByName(submission.BufferedEntry.Cluster); shard != nil {
+		scheduler.logger.V(0).Info("picked up a delayed request - submitting", "request", job.Name, "template", submission.BufferedEntry.Algorithm)
 		submitted, submitErr = shard.SendJob(shard.Namespace, job)
 	} else { // coverage-ignore
 		return nil, fmt.Errorf("shard API server %s not configured", submission.BufferedEntry.Cluster)
