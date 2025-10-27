@@ -52,7 +52,7 @@ jobs:
         
       - name: Upload Coverage
         if: ${{ github.ref != 'refs/heads/main' && always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage
           path: cover.html
