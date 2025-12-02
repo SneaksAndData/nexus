@@ -46,34 +46,29 @@ jobs:
           APPLICATION_ENVIRONMENT: units
         run: go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
         
-      - name: Visualise Coverage
-        if: ${{ github.ref != 'refs/heads/main' && always() }}
-        run: go tool cover -html=cover.out -o=cover.html
-        
-      - name: Upload Coverage
-        if: ${{ github.ref != 'refs/heads/main' && always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: cover.html
-          retention-days: 1
-        id: cover
-          
-      - name: Post Coverage
-        if: ${{ github.ref != 'refs/heads/main' && always() }}
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.number }}
-          body: |
-            New [coverage report](${{ steps.cover.outputs.artifact-url }}) available :sparkles:
-
       - name: Check Coverage
-        uses: vladopajic/go-test-coverage@v2
+        id: coverage
+        uses: vladopajic/go-test-coverage@v2.18.0
+        continue-on-error: true # Should fail after coverage comment is posted
         with:
           config: ./.testcoverage.yml
-
           ## badge is created and committed only for main branch
           git-token: ${{ github.ref_name == 'main' && secrets.GITHUB_TOKEN || '' }}
           ## name of branch where badges are stored
           ## ideally this should be orphan branch (see below how to create this branch)
           git-branch: badges
+
+      - name: Post coverage report
+        uses: thollander/actions-comment-pull-request@v3
+        if: ${{ github.ref_name != 'main' }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-tag: coverage-report
+          message: |
+            go-test-coverage report:
+            ```${{ fromJSON(steps.coverage.outputs.report) }}```
+
+      - name: Finally check coverage
+        if: steps.coverage.outcome == 'failure'
+        shell: bash
+        run: echo "coverage check failed" && exit 1
