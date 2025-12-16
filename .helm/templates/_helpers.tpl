@@ -83,7 +83,6 @@ Generate the Template editor cluster role name
 {{- end }}
 {{- end }}
 
-
 {{/*
 Generate the Workgroup editor cluster role name
 */}}
@@ -103,5 +102,27 @@ Generate the Scheduler cluster role name
 {{- .Values.rbac.clusterRole.workgroupEditor.nameOverride }}
 {{- else }}
 {{- printf "%s-scheduler" (include "app.fullname" .) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Generate the Template viewer cluster role name
+*/}}
+{{- define "app.clusteRole.templateViewer" -}}
+{{- if .Values.rbac.clusterRole.templateEditor.nameOverride }}
+{{- .Values.rbac.clusterRole.templateEditor.nameOverride }}
+{{- else }}
+{{- printf "%s-template-viewer" (include "app.fullname" .) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Generate the Workgroup viewer cluster role name
+*/}}
+{{- define "app.clusteRole.workgroupViewer" -}}
+{{- if .Values.rbac.clusterRole.workgroupEditor.nameOverride }}
+{{- .Values.rbac.clusterRole.workgroupEditor.nameOverride }}
+{{- else }}
+{{- printf "%s-workgroup-viewer" (include "app.fullname" .) }}
 {{- end }}
 {{- end }}

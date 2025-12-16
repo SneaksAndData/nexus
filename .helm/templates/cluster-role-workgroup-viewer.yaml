@@ -1,0 +1,29 @@
+{{- if .Values.rbac.clusterRole.workgroupViewer.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "app.clusteRole.workgroupViewer" . }}
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+    {{- include "app.labels" $ | nindent 4 }}
+    {{- with .Values.rbac.clusterRole.workgroupViewer.additionalLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.rbac.clusterRole.workgroupViewer.additionalAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+rules:
+  - verbs:
+      - list
+      - watch
+      - get 
+    apiGroups:
+      - "science.sneaksanddata.com"
+    resources:
+      - events
+      - nexusalgorithmworkgroups
+      - nexusalgorithmworkgroups/status
+      - nexusalgorithmworkgroup
+      - nexusalgorithmworkgroup/status
+{{- end }}
