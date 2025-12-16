@@ -48,9 +48,9 @@ type RequestScheduler struct {
 	buffer              request.Buffer
 }
 
-func NewRequestScheduler(workerConfig *models.PipelineWorkerConfig, kubeClient kubernetes.Interface, shardClients []*shards.ShardClient, buffer request.Buffer, resourceNamespace string, logger klog.Logger, resyncPeriod *time.Duration) *RequestScheduler {
+func NewRequestScheduler(workerConfig *models.PipelineWorkerConfig, kubeClient kubernetes.Interface, shardClients []*shards.ShardClient, buffer request.Buffer, resourceNamespace string, deployNamespace string, logger klog.Logger, resyncPeriod *time.Duration) *RequestScheduler {
 	defaultResyncPeriod := time.Second * 30
-	factory := kubeinformers.NewSharedInformerFactoryWithOptions(kubeClient, *util.CoalescePointer(resyncPeriod, &defaultResyncPeriod), kubeinformers.WithNamespace(resourceNamespace))
+	factory := kubeinformers.NewSharedInformerFactoryWithOptions(kubeClient, *util.CoalescePointer(resyncPeriod, &defaultResyncPeriod), kubeinformers.WithNamespace(deployNamespace))
 
 	return &RequestScheduler{
 		SchedulerActor: nil,

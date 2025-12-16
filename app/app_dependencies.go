@@ -20,7 +20,8 @@ import (
 
 type ApplicationServices struct {
 	checkpointBuffer request.Buffer
-	defaultNamespace string
+	runtimeNamespace string
+	deployNamespace  string
 	kubeClient       kubernetes.Interface
 	shardClients     []*shards.ShardClient
 	nexusClient      nexuscore.Interface
@@ -73,11 +74,11 @@ func (appServices *ApplicationServices) WithKubeClients(ctx context.Context, kub
 	return appServices
 }
 
-func (appServices *ApplicationServices) WithShards(ctx context.Context, shardConfigPath string, namespace string) *ApplicationServices {
+func (appServices *ApplicationServices) WithShards(ctx context.Context, shardConfigPath string) *ApplicationServices {
 	if appServices.shardClients == nil {
 		logger := klog.FromContext(ctx)
 		var shardLoaderError error
-		appServices.shardClients, shardLoaderError = shards.LoadClients(shardConfigPath, namespace, logger)
+		appServices.shardClients, shardLoaderError = shards.LoadClients(shardConfigPath, appServices.runtimeNamespace, logger)
 		if shardLoaderError != nil {
 			logger.Error(shardLoaderError, "unable to initialize shard clients")
 			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
@@ -87,12 +88,17 @@ func (appServices *ApplicationServices) WithShards(ctx context.Context, shardCon
 	return appServices
 }
 
-func (appServices *ApplicationServices) WithDefaultNamespace(namespace string) *ApplicationServices {
-	appServices.defaultNamespace = namespace
+func (appServices *ApplicationServices) WithRuntimeNamespace(namespace string) *ApplicationServices {
+	appServices.runtimeNamespace = namespace
 	return appServices
 }
 
-func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resourceNamespace string) *ApplicationServices {
+func (appServices *ApplicationServices) WithDeployNamespace(namespace string) *ApplicationServices {
+	appServices.deployNamespace = namespace
+	return appServices
+}
+
+func (appServices *ApplicationServices) WithRecorder(ctx context.Context) *ApplicationServices {
 	if appServices.recorder == nil {
 		logger := klog.FromContext(ctx)
 		// Create event broadcaster
@@ -103,7 +109,7 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 
 		eventBroadcaster := record.NewBroadcaster(record.WithContext(ctx))
 		eventBroadcaster.StartStructuredLogging(0)
-		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: appServices.kubeClient.CoreV1().Events(resourceNamespace)})
+		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: appServices.kubeClient.CoreV1().Events(appServices.deployNamespace)})
 
 		appServices.recorder = eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "nexus"})
 	}
@@ -111,10 +117,10 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 	return appServices
 }
 
-func (appServices *ApplicationServices) WithCache(ctx context.Context, resourceNamespace string) *ApplicationServices {
+func (appServices *ApplicationServices) WithCache(ctx context.Context) *ApplicationServices {
 	if appServices.configCache == nil {
 		logger := klog.FromContext(ctx)
-		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, resourceNamespace, logger, nil)
+		appServices.configCache = services.NewNexusResourceCache(appServices.nexusClient, appServices.runtimeNamespace, logger, nil)
 	}
 
 	return appServices
@@ -125,7 +131,7 @@ func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *App
 	var err error
 
 	appServices.scheduler, err = services.
-		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.defaultNamespace, logger, nil).
+		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.runtimeNamespace, appServices.deployNamespace, logger, nil).
 		Init(ctx)
 
 	if err != nil {

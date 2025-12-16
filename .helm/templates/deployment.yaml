@@ -58,8 +58,10 @@ spec:
           {{- if .Values.scheduler.config.enabled }}
             - name: NEXUS__CQL_STORE_TYPE
               value: {{ .Values.scheduler.config.cqlStore.type }}
-            - name: NEXUS__RESOURCE_NAMESPACE              
-              value: {{ .Values.scheduler.config.resourceNamespace }}
+            - name: NEXUS__RUNTIME_NAMESPACE
+              value: {{ .Values.scheduler.config.runtimeNamespace | default .Release.Namespace }}
+            - name: NEXUS__DEPLOY_NAMESPACE
+              value: {{ .Release.Namespace }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH
               value: {{ .Values.scheduler.config.s3Buffer.processing.payloadStoragePath }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_VALID_FOR
