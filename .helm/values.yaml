@@ -54,6 +54,18 @@ rbac:
       additionalAnnotations: { }
       create: true
       nameOverride: ""
+
+    templateViewer:
+      additionalLabels: { }
+      additionalAnnotations: { }
+      create: true
+      nameOverride: ""
+
+    workgroupViewer:
+      additionalLabels: { }
+      additionalAnnotations: { }
+      create: true
+      nameOverride: ""
   
   # This parameter determines whether role binding resources need to be created.
   # If you have any roles in your configuration set to 'true', then this parameter for creating role binding resources
