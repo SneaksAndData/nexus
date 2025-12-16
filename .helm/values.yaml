@@ -179,7 +179,7 @@ scheduler:
     enabled: true
     # Namespace to schedule algorithms runs in
     # Override with: NEXUS__RUNTIME_NAMESPACE
-    runtimeNamespace: "nexus"
+    runtimeNamespace: ""
 
     # maximum size of a payload submitted to the scheduler
     # Override with: NEXUS__MAX_PAYLOAD_SIZE 

@@ -21,6 +21,7 @@ import (
 type ApplicationServices struct {
 	checkpointBuffer request.Buffer
 	runtimeNamespace string
+	deployNamespace  string
 	kubeClient       kubernetes.Interface
 	shardClients     []*shards.ShardClient
 	nexusClient      nexuscore.Interface
@@ -92,7 +93,12 @@ func (appServices *ApplicationServices) WithRuntimeNamespace(namespace string) *
 	return appServices
 }
 
-func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resourceNamespace string) *ApplicationServices {
+func (appServices *ApplicationServices) WithDeployNamespace(namespace string) *ApplicationServices {
+	appServices.deployNamespace = namespace
+	return appServices
+}
+
+func (appServices *ApplicationServices) WithRecorder(ctx context.Context) *ApplicationServices {
 	if appServices.recorder == nil {
 		logger := klog.FromContext(ctx)
 		// Create event broadcaster
@@ -103,7 +109,7 @@ func (appServices *ApplicationServices) WithRecorder(ctx context.Context, resour
 
 		eventBroadcaster := record.NewBroadcaster(record.WithContext(ctx))
 		eventBroadcaster.StartStructuredLogging(0)
-		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: appServices.kubeClient.CoreV1().Events(resourceNamespace)})
+		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: appServices.kubeClient.CoreV1().Events(appServices.deployNamespace)})
 
 		appServices.recorder = eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "nexus"})
 	}
@@ -125,7 +131,7 @@ func (appServices *ApplicationServices) BuildScheduler(ctx context.Context) *App
 	var err error
 
 	appServices.scheduler, err = services.
-		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.runtimeNamespace, logger, nil).
+		NewRequestScheduler(appServices.workerConfig, appServices.kubeClient, appServices.shardClients, appServices.checkpointBuffer, appServices.runtimeNamespace, appServices.deployNamespace, logger, nil).
 		Init(ctx)
 
 	if err != nil {

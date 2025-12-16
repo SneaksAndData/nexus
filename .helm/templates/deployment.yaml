@@ -59,7 +59,7 @@ spec:
             - name: NEXUS__CQL_STORE_TYPE
               value: {{ .Values.scheduler.config.cqlStore.type }}
             - name: NEXUS__RUNTIME_NAMESPACE
-              value: {{ .Values.scheduler.config.runtimeNamespace }}
+              value: {{ .Values.scheduler.config.runtimeNamespace | default .Release.Namespace }}
             - name: NEXUS__DEPLOY_NAMESPACE
               value: {{ .Release.Namespace }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH
