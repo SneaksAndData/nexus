@@ -10,7 +10,8 @@ type SchedulerConfig struct {
 	AstraCqlStore       request.AstraBundleConfig    `mapstructure:"astra-cql-store,omitempty"`
 	ScyllaCqlStore      request.ScyllaCqlStoreConfig `mapstructure:"scylla-cql-store,omitempty"`
 	CqlStoreType        string                       `mapstructure:"cql-store-type,omitempty"`
-	ResourceNamespace   string                       `mapstructure:"resource-namespace,omitempty"`
+	DeployNamespace     string                       `mapstructure:"deploy-namespace,omitempty"`
+	RuntimeNamespace    string                       `mapstructure:"runtime-namespace,omitempty"`
 	KubeConfigPath      string                       `mapstructure:"kube-config-path,omitempty"`
 	ShardKubeConfigPath string                       `mapstructure:"shard-kube-config-path,omitempty"`
 	LogLevel            string                       `mapstructure:"log-level,omitempty"`

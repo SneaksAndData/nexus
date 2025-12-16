@@ -177,10 +177,10 @@ scheduler:
   # Whole config can also be overridden by setting config.enabled=false and mounting a new appconfig.yaml to /app path in the container
   config:
     enabled: true
-    # Main resource namespace
-    # Override with: NEXUS__RESOURCE_NAMESPACE
-    resourceNamespace: "nexus"
-    
+    # Namespace to schedule algorithms runs in
+    # Override with: NEXUS__RUNTIME_NAMESPACE
+    runtimeNamespace: "nexus"
+
     # maximum size of a payload submitted to the scheduler
     # Override with: NEXUS__MAX_PAYLOAD_SIZE 
     maxPayloadSize: 500Mi

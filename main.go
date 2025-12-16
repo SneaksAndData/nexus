@@ -37,10 +37,10 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 	}
 
 	appServices = appServices.
-		WithCache(ctx, appConfig.ResourceNamespace).
-		WithRecorder(ctx, appConfig.ResourceNamespace).
-		WithShards(ctx, appConfig.ShardKubeConfigPath, appConfig.ResourceNamespace).
-		WithDefaultNamespace(appConfig.ResourceNamespace).
+		WithRuntimeNamespace(appConfig.RuntimeNamespace).
+		WithCache(ctx).
+		WithRecorder(ctx, appConfig.DeployNamespace).
+		WithShards(ctx, appConfig.ShardKubeConfigPath).
 		BuildScheduler(ctx)
 
 	// version 1
