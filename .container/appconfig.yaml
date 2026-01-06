@@ -11,8 +11,8 @@ s3-buffer:
   secret-access-key: ""
   region: ""
   endpoint: ""    
-runtime-namespace: nexus
-deploy-namespace: nexus-scheduler
+runtime-namespace: ""
+deploy-namespace: ""
 astra-cql-store: # can be read from environment
   secure-connection-bundle-base64: ""
   gateway-user: ""
