@@ -20,8 +20,7 @@ import (
 //		@Param			algorithmName	path		string	true	"Algorithm name"
 //		@Param			requestId	path		string	true	"Request identifier"
 //		@Success		200	{string}    string
-//		@Success		302	{string}    string
-//		@Failure		400	{string}	string
+//		@Failure		403	{string}	string
 //		@Failure		404	{string}	string
 //		@Failure		401	{string}	string
 //		@Router			/algorithm/v1/payload/{algorithmName}/requests/{requestId} [get]
