@@ -1,7 +1,10 @@
 s3-buffer:
+  payload-storage-path: s3://bucket/nexus/payloads
+  request-payload-proxy-configuration:
+    tenant-id: "test-tenant"
+    serve-path-template: "/data/v1/payloads/%s/%s"
+    sign-secret: "test-secret"
   buffer-config:
-    payload-storage-path: s3://bucket/nexus/payloads
-    payload-valid-for: 24h
     failure-rate-base-delay: 100ms
     failure-rate-max-delay: 1s
     rate-limit-elements-per-second: 10
@@ -20,6 +23,12 @@ astra-cql-store: # can be read from environment
 scylla-cql-store:
   hosts:
     - 127.0.0.1:9000
+keyspaces-cql-store:
+  hosts:
+    - keyspaces.aws.com
+  port: "9042"
+  ca-path: "/tmp/ca"
+  region: "us-east-1"
 cql-store-type: astra
 kube-config-path: "/tmp/nexus-test"
 shard-kube-config-path: "/tmp/shards"

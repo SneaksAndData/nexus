@@ -1,5 +1,9 @@
 s3-buffer:
   payload-storage-path: ""
+  request-payload-proxy-configuration:
+    tenant-id: ""
+    serve-path-template: ""
+    sign-secret: ""
   buffer-config:
     failure-rate-base-delay: 100ms
     failure-rate-max-delay: 1s

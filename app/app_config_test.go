@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/payload"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/store/cassandra"
 	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
@@ -17,6 +18,11 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 	return &SchedulerConfig{
 		S3Buffer: request.S3BufferConfig{
 			PayloadStoragePath: storagePath,
+			RequestPayloadProxyConfiguration: &payload.RequestPayloadProxyConfiguration{
+				TenantId:          "test-tenant",
+				ServePathTemplate: "/data/v1/payloads/%s/%s",
+				SignSecret:        "test-secret",
+			},
 			BufferConfig: &request.BufferConfig{
 				FailureRateMaxDelay:        time.Second * 1,
 				FailureRateBaseDelay:       time.Millisecond * 100,
@@ -42,9 +48,9 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 			LocalDC:  "",
 		},
 		KeyspacesCqlStore: cassandra.KeyspacesConfig{
-			Hosts:  []string{""},
+			Hosts:  []string{"keyspaces.aws.com"},
 			Port:   "9042",
-			CaPath: "",
+			CaPath: "/tmp/ca",
 			Region: "us-east-1",
 		},
 		CqlStoreType:        CqlStoreAstra,
