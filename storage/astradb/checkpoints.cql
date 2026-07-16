@@ -18,7 +18,6 @@ create table nexus.checkpoints
     api_version               text,
     job_uid                   text,
     parent                    text,
-    payload_valid_for         text,
     PRIMARY KEY ((algorithm, id))
 );
 

@@ -3,20 +3,21 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
-	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 	"os"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/store/cassandra"
+	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 )
 
 func getExpectedConfig(storagePath string) *SchedulerConfig {
 	return &SchedulerConfig{
 		S3Buffer: request.S3BufferConfig{
+			PayloadStoragePath: storagePath,
 			BufferConfig: &request.BufferConfig{
-				PayloadStoragePath:         storagePath,
-				PayloadValidFor:            time.Hour * 24,
 				FailureRateMaxDelay:        time.Second * 1,
 				FailureRateBaseDelay:       time.Millisecond * 100,
 				RateLimitElementsPerSecond: 10,
@@ -28,17 +29,23 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 			Endpoint:        "http://127.0.0.1:9000",
 			Region:          "us-east-1",
 		},
-		AstraCqlStore: request.AstraBundleConfig{
+		AstraCqlStore: cassandra.AstraBundleConfig{
 			SecureConnectionBundleBase64: "base64value",
 			GatewayUser:                  "user",
 			GatewayPassword:              "password",
 		},
-		ScyllaCqlStore: request.ScyllaCqlStoreConfig{
+		ScyllaCqlStore: cassandra.ScyllaConfig{
 			Hosts:    []string{"127.0.0.1:9000"},
 			Port:     "",
 			User:     "",
 			Password: "",
 			LocalDC:  "",
+		},
+		KeyspacesCqlStore: cassandra.KeyspacesConfig{
+			Hosts:  []string{""},
+			Port:   "9042",
+			CaPath: "",
+			Region: "us-east-1",
 		},
 		CqlStoreType:        CqlStoreAstra,
 		RuntimeNamespace:    "nexus",

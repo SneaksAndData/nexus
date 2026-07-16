@@ -3,6 +3,9 @@ package services
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/SneaksAndData/nexus-core/pkg/buildmeta"
 	coremodels "github.com/SneaksAndData/nexus-core/pkg/checkpoint/models"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
@@ -19,8 +22,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
-	"os"
-	"time"
 )
 
 const (
@@ -86,6 +87,7 @@ func (scheduler *RequestScheduler) Init(_ context.Context) (*RequestScheduler, e
 		scheduler.workerConfig.RateLimitElementsBurst,
 		scheduler.workerConfig.Workers,
 		scheduler.commit,
+		scheduler.handlerCommitFailure,
 		nil,
 	)
 
@@ -98,6 +100,7 @@ func (scheduler *RequestScheduler) Init(_ context.Context) (*RequestScheduler, e
 		scheduler.workerConfig.RateLimitElementsBurst,
 		scheduler.workerConfig.Workers,
 		scheduler.schedule,
+		scheduler.handleScheduleFailure,
 		scheduler.CommitActor,
 	)
 
@@ -110,6 +113,7 @@ func (scheduler *RequestScheduler) Init(_ context.Context) (*RequestScheduler, e
 		scheduler.workerConfig.RateLimitElementsBurst,
 		scheduler.workerConfig.Workers,
 		scheduler.lateSchedule,
+		scheduler.handleLateScheduleFailure,
 		scheduler.CommitActor,
 	)
 
@@ -248,6 +252,10 @@ func (scheduler *RequestScheduler) commit(output *coremodels.CheckpointedRequest
 	return output.Id, nil
 }
 
+func (scheduler *RequestScheduler) handlerCommitFailure(failed *coremodels.CheckpointedRequest) {
+	scheduler.logger.V(0).Info("could not update %s/%s to RUNNING/COMPLETED state - submission will not be accounted correctly", "template", failed.Algorithm, "requestId", failed.Id)
+}
+
 func (scheduler *RequestScheduler) getShardByName(shardName string) *shards.ShardClient {
 	for _, shard := range scheduler.shardClients {
 		if shard.Name == shardName {
@@ -290,6 +298,17 @@ func (scheduler *RequestScheduler) schedule(output *request.BufferOutput) (*core
 	return resultCheckpoint, nil
 }
 
+func (scheduler *RequestScheduler) handleScheduleFailure(output *request.BufferOutput) {
+	scheduler.logger.V(0).Info("failed to schedule request in a target shard, marking submission as failed")
+
+	failed := output.Checkpoint.DeepCopy()
+	failed.LifecycleStage = coremodels.LifecycleStageSchedulingFailed
+	failed.AlgorithmFailureCause = "Internal error when scheduling. Please try again later."
+	failed.AlgorithmFailureDetails = "Target shard cluster didn't accept the submission. Please review service logs for errors."
+
+	_ = scheduler.buffer.Update(failed)
+}
+
 func (scheduler *RequestScheduler) lateSchedule(submission *LateSubmission) (*coremodels.CheckpointedRequest, error) {
 	if submission == nil {
 		return nil, fmt.Errorf("no buffer entry provided")
@@ -319,6 +338,18 @@ func (scheduler *RequestScheduler) lateSchedule(submission *LateSubmission) (*co
 	resultCheckpoint.JobUid = string(submitted.UID)
 
 	return resultCheckpoint, nil
+}
+
+func (scheduler *RequestScheduler) handleLateScheduleFailure(submission *LateSubmission) {
+	scheduler.logger.V(0).Info("scheduling of a delayed request failed, will update lifecycle to failed", "request", submission.Checkpoint.Id, submission.Checkpoint.Algorithm)
+
+	failed := submission.Checkpoint.DeepCopy()
+	failed.LifecycleStage = coremodels.LifecycleStageSchedulingFailed
+
+	failed.AlgorithmFailureCause = "Internal error when scheduling. Please try again later."
+	failed.AlgorithmFailureDetails = "Target shard cluster didn't accept the submission. Please review service logs for errors."
+
+	_ = scheduler.buffer.Update(failed)
 }
 
 func (scheduler *RequestScheduler) ResolveParent(parentRequestId string, clusterName string) (*metav1.OwnerReference, error) {

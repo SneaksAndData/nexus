@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"errors"
+	"os"
+
 	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 	"github.com/SneaksAndData/nexus-core/pkg/signals"
 	"github.com/SneaksAndData/nexus-core/pkg/telemetry"
@@ -10,7 +12,6 @@ import (
 	"github.com/SneaksAndData/nexus/app"
 	"github.com/gin-gonic/gin"
 	"k8s.io/klog/v2"
-	"os"
 )
 
 func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engine {
@@ -31,6 +32,8 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 		appServices = appServices.WithAstraS3Buffer(ctx, &appConfig.S3Buffer, &appConfig.AstraCqlStore)
 	case app.CqlStoreScylla:
 		appServices = appServices.WithScyllaS3Buffer(ctx, &appConfig.S3Buffer, &appConfig.ScyllaCqlStore)
+	case app.CqlStoreKeyspaces:
+		appServices = appServices.WithKeyspacesS3Buffer(ctx, &appConfig.S3Buffer, &appConfig.KeyspacesCqlStore)
 	default:
 		klog.FromContext(ctx).Error(errors.New("unknown store type "+appConfig.CqlStoreType), "failed to initialize a CqlStore")
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)

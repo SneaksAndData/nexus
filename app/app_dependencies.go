@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/store/cassandra"
 	nexuscore "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned"
 	nexusscheme "github.com/SneaksAndData/nexus-core/pkg/generated/clientset/versioned/scheme"
 	"github.com/SneaksAndData/nexus-core/pkg/shards"
@@ -31,7 +33,7 @@ type ApplicationServices struct {
 	workerConfig     *models.PipelineWorkerConfig
 }
 
-func (appServices *ApplicationServices) WithAstraS3Buffer(ctx context.Context, config *request.S3BufferConfig, bundleConfig *request.AstraBundleConfig) *ApplicationServices {
+func (appServices *ApplicationServices) WithAstraS3Buffer(ctx context.Context, config *request.S3BufferConfig, bundleConfig *cassandra.AstraBundleConfig) *ApplicationServices {
 	if appServices.checkpointBuffer == nil {
 		appServices.checkpointBuffer = request.NewAstraS3Buffer(ctx, config, bundleConfig, map[string]string{})
 		appServices.workerConfig = models.FromBufferConfig(config.BufferConfig)
@@ -40,9 +42,18 @@ func (appServices *ApplicationServices) WithAstraS3Buffer(ctx context.Context, c
 	return appServices
 }
 
-func (appServices *ApplicationServices) WithScyllaS3Buffer(ctx context.Context, config *request.S3BufferConfig, scyllaConfig *request.ScyllaCqlStoreConfig) *ApplicationServices {
+func (appServices *ApplicationServices) WithScyllaS3Buffer(ctx context.Context, config *request.S3BufferConfig, scyllaConfig *cassandra.ScyllaConfig) *ApplicationServices {
 	if appServices.checkpointBuffer == nil {
 		appServices.checkpointBuffer = request.NewScyllaS3Buffer(ctx, config, scyllaConfig, map[string]string{})
+		appServices.workerConfig = models.FromBufferConfig(config.BufferConfig)
+	}
+
+	return appServices
+}
+
+func (appServices *ApplicationServices) WithKeyspacesS3Buffer(ctx context.Context, config *request.S3BufferConfig, keyspacesConfig *cassandra.KeyspacesConfig) *ApplicationServices {
+	if appServices.checkpointBuffer == nil {
+		appServices.checkpointBuffer = request.NewKeyspacesS3Buffer(ctx, config, keyspacesConfig, map[string]string{})
 		appServices.workerConfig = models.FromBufferConfig(config.BufferConfig)
 	}
 
@@ -77,6 +88,15 @@ func (appServices *ApplicationServices) WithKubeClients(ctx context.Context, kub
 func (appServices *ApplicationServices) WithShards(ctx context.Context, shardConfigPath string) *ApplicationServices {
 	if appServices.shardClients == nil {
 		logger := klog.FromContext(ctx)
+		if shardConfigPath == "" {
+			logger.V(0).Info("No shard config path provided - will use single-cluster mode. This is not recommended for production.")
+			singleClient, err := shards.InClusterShardClient(appServices.runtimeNamespace, logger)
+			if err != nil {
+				logger.Error(err, "unable to initialize in-cluster shard client")
+				klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+			}
+			appServices.shardClients = []*shards.ShardClient{singleClient}
+		}
 		var shardLoaderError error
 		appServices.shardClients, shardLoaderError = shards.LoadClients(shardConfigPath, appServices.runtimeNamespace, logger)
 		if shardLoaderError != nil {
