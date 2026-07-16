@@ -49,6 +49,7 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 
 	// version 1
 	apiV1 := router.Group("algorithm/v1")
+	dataV1 := router.Group("data/v1")
 
 	apiV1.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache(), appServices.Scheduler(), appServices.Logger(ctx)))
 	apiV1.POST("cancel/:algorithmName/requests/:requestId", v1.CancelRun(appServices.Scheduler(), appServices.Logger(ctx)))
@@ -56,7 +57,8 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 	apiV1.GET("results/tags/:requestTag", v1.GetRunResultsByTag(appServices.CheckpointBuffer(), appServices.Logger(ctx)))
 	apiV1.GET("metadata/:algorithmName/requests/:requestId", v1.GetRunMetadata(appServices.CheckpointBuffer()))
 	apiV1.GET("buffer/:algorithmName/requests/:requestId", v1.GetBufferedRunMetadata(appServices.CheckpointBuffer()))
-	apiV1.GET("payload/:algorithmName/requests/:requestId", v1.GetRunPayload(appServices.CheckpointBuffer()))
+
+	dataV1.GET("payloads/:algorithmName/requests/:requestId", v1.GetRunPayload(appServices.CheckpointBuffer()))
 
 	go func() {
 		appServices.Start(ctx)

@@ -1,9 +1,12 @@
 package v1
 
 import (
-	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
-	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/url"
+
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
+	"github.com/SneaksAndData/nexus-core/pkg/urlsign"
+	"github.com/gin-gonic/gin"
 )
 
 // GetRunPayload godoc
@@ -27,6 +30,17 @@ func GetRunPayload(buffer request.Buffer) gin.HandlerFunc {
 		// TODO: log errors
 		algorithmName := ctx.Param("algorithmName")
 		requestId := ctx.Param("requestId")
+		parsed, _ := url.Parse(ctx.Request.URL.String())
+
+		// TODO: add secret here
+		err := urlsign.Verify(*parsed, []byte{})
+
+		if err != nil {
+			ctx.String(http.StatusForbidden, `Invalid payload address: %s`, parsed.String())
+			return
+		}
+
+		// TODO: read serialization mode for request and return payload either from Cassandra or from S3
 
 		result, err := buffer.Get(requestId, algorithmName)
 
