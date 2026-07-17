@@ -58,7 +58,7 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 	apiV1.GET("metadata/:algorithmName/requests/:requestId", v1.GetRunMetadata(appServices.CheckpointBuffer()))
 	apiV1.GET("buffer/:algorithmName/requests/:requestId", v1.GetBufferedRunMetadata(appServices.CheckpointBuffer()))
 
-	dataV1.GET("payloads/:algorithmName/requests/:requestId", v1.GetRunPayload(appServices.CheckpointBuffer()))
+	dataV1.GET("payloads/:algorithmName/requests/:requestId", v1.GetRunPayload(appServices.CheckpointBuffer(), appServices.Logger(ctx)))
 
 	go func() {
 		appServices.Start(ctx)

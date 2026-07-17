@@ -239,15 +239,7 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "302": {
-                        "description": "Found",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "schema": {}
                     },
                     "400": {
                         "description": "Bad Request",
@@ -257,6 +249,12 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "string"
                         }
@@ -460,9 +458,6 @@ const docTemplate = `{
                 "parentRequest": {
                     "$ref": "#/definitions/models.AlgorithmRequestRef"
                 },
-                "payloadValidFor": {
-                    "type": "string"
-                },
                 "requestApiVersion": {
                     "type": "string"
                 },
@@ -540,9 +535,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.AlgorithmRequestRef"
                 },
                 "payload_uri": {
-                    "type": "string"
-                },
-                "payload_valid_for": {
                     "type": "string"
                 },
                 "received_at": {
@@ -664,7 +656,7 @@ const docTemplate = `{
                     ]
                 },
                 "prefix": {
-                    "description": "Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.\n+optional",
+                    "description": "Optional text to prepend to the name of each environment variable.\nMay consist of any printable ASCII characters except '='.\n+optional",
                     "type": "string"
                 },
                 "secretRef": {
@@ -681,7 +673,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
-                    "description": "Name of the environment variable. Must be a C_IDENTIFIER.",
+                    "description": "Name of the environment variable.\nMay consist of any printable ASCII characters except '='.",
                     "type": "string"
                 },
                 "value": {
@@ -717,6 +709,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "fileKeyRef": {
+                    "description": "FileKeyRef selects a key of the env file.\nRequires the EnvFiles feature gate to be enabled.\n\n+featureGate=EnvFiles\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.FileKeySelector"
+                        }
+                    ]
+                },
                 "resourceFieldRef": {
                     "description": "Selects a resource of the container: only resources limits and requests\n(limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.\n+optional",
                     "allOf": [
@@ -735,6 +735,40 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.FileKeySelector": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "description": "The key within the env file. An invalid key will prevent the pod from starting.\nThe keys defined within a source may consist of any printable ASCII characters except '='.\nDuring Alpha stage of the EnvFiles feature gate, the key size is limited to 128 characters.\n+required",
+                    "type": "string"
+                },
+                "optional": {
+                    "description": "Specify whether the file or its key must be defined. If the file or key\ndoes not exist, then the env var is not published.\nIf optional is set to true and the specified key does not exist,\nthe environment variable will not be set in the Pod's containers.\n\nIf optional is set to false and the specified key does not exist,\nan error will be returned during Pod creation.\n+optional\n+default=false",
+                    "type": "boolean"
+                },
+                "path": {
+                    "description": "The path within the volume from which to select the file.\nMust be relative and may not contain the '..' path or start with '..'.\n+required",
+                    "type": "string"
+                },
+                "volumeName": {
+                    "description": "The name of the volume mount containing the env file.\n+required",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.MountPropagationMode": {
+            "type": "string",
+            "enum": [
+                "None",
+                "HostToContainer",
+                "Bidirectional"
+            ],
+            "x-enum-varnames": [
+                "MountPropagationNone",
+                "MountPropagationHostToContainer",
+                "MountPropagationBidirectional"
+            ]
+        },
         "v1.NexusAlgorithmContainer": {
             "type": "object",
             "properties": {
@@ -752,10 +786,22 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.NexusAlgorithmPayloadConfiguration": {
+            "type": "object",
+            "properties": {
+                "payloadSerialization": {
+                    "$ref": "#/definitions/v1.PayloadSerializationMode"
+                },
+                "payloadValidFor": {
+                    "type": "string"
+                }
+            }
+        },
         "v1.NexusAlgorithmResources": {
             "type": "object",
             "properties": {
                 "cpuLimit": {
+                    "description": "Deprecated: Use Limits instead",
                     "type": "string"
                 },
                 "customResources": {
@@ -764,8 +810,18 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "memoryLimit": {
+                "defaultResourceQuota": {
                     "type": "string"
+                },
+                "limits": {
+                    "$ref": "#/definitions/v1.ResourceList"
+                },
+                "memoryLimit": {
+                    "description": "Deprecated: Use Limits instead",
+                    "type": "string"
+                },
+                "requests": {
+                    "$ref": "#/definitions/v1.ResourceList"
                 }
             }
         },
@@ -776,6 +832,12 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    }
+                },
+                "configurationFileMounts": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/v1.VolumeMount"
                     }
                 },
                 "deadlineSeconds": {
@@ -795,6 +857,18 @@ const docTemplate = `{
                 },
                 "maximumRetries": {
                     "type": "integer"
+                },
+                "secretFileMounts": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/v1.VolumeMount"
+                    }
+                },
+                "storageMounts": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/v1.VolumeMount"
+                    }
                 }
             }
         },
@@ -821,6 +895,9 @@ const docTemplate = `{
                 },
                 "errorHandlingBehaviour": {
                     "$ref": "#/definitions/v1.NexusErrorHandlingBehaviour"
+                },
+                "payloadConfiguration": {
+                    "$ref": "#/definitions/v1.NexusAlgorithmPayloadConfiguration"
                 },
                 "runtimeEnvironment": {
                     "$ref": "#/definitions/v1.NexusAlgorithmRuntimeEnvironment"
@@ -882,6 +959,30 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.PayloadSerializationMode": {
+            "type": "string",
+            "enum": [
+                "backend",
+                "s3"
+            ],
+            "x-enum-varnames": [
+                "SERIALIZE_TO_BACKEND",
+                "SERIALIZE_TO_S3"
+            ]
+        },
+        "v1.RecursiveReadOnlyMode": {
+            "type": "string",
+            "enum": [
+                "Disabled",
+                "IfPossible",
+                "Enabled"
+            ],
+            "x-enum-varnames": [
+                "RecursiveReadOnlyDisabled",
+                "RecursiveReadOnlyIfPossible",
+                "RecursiveReadOnlyEnabled"
+            ]
+        },
         "v1.ResourceFieldSelector": {
             "type": "object",
             "properties": {
@@ -901,6 +1002,12 @@ const docTemplate = `{
                     "description": "Required: resource to select",
                     "type": "string"
                 }
+            }
+        },
+        "v1.ResourceList": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/resource.Quantity"
             }
         },
         "v1.SecretEnvSource": {
@@ -930,6 +1037,47 @@ const docTemplate = `{
                 "optional": {
                     "description": "Specify whether the Secret or its key must be defined\n+optional",
                     "type": "boolean"
+                }
+            }
+        },
+        "v1.VolumeMount": {
+            "type": "object",
+            "properties": {
+                "mountPath": {
+                    "description": "Path within the container at which the volume should be mounted.  Must\nnot contain ':'.",
+                    "type": "string"
+                },
+                "mountPropagation": {
+                    "description": "mountPropagation determines how mounts are propagated from the host\nto container and the other way around.\nWhen not set, MountPropagationNone is used.\nThis field is beta in 1.10.\nWhen RecursiveReadOnly is set to IfPossible or to Enabled, MountPropagation must be None or unspecified\n(which defaults to None).\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.MountPropagationMode"
+                        }
+                    ]
+                },
+                "name": {
+                    "description": "This must match the Name of a Volume.",
+                    "type": "string"
+                },
+                "readOnly": {
+                    "description": "Mounted read-only if true, read-write otherwise (false or unspecified).\nDefaults to false.\n+optional",
+                    "type": "boolean"
+                },
+                "recursiveReadOnly": {
+                    "description": "RecursiveReadOnly specifies whether read-only mounts should be handled\nrecursively.\n\nIf ReadOnly is false, this field has no meaning and must be unspecified.\n\nIf ReadOnly is true, and this field is set to Disabled, the mount is not made\nrecursively read-only.  If this field is set to IfPossible, the mount is made\nrecursively read-only, if it is supported by the container runtime.  If this\nfield is set to Enabled, the mount is made recursively read-only if it is\nsupported by the container runtime, otherwise the pod will not be started and\nan error will be generated to indicate the reason.\n\nIf this field is set to IfPossible or Enabled, MountPropagation must be set to\nNone (or be unspecified, which defaults to None).\n\nIf this field is not specified, it is treated as an equivalent of Disabled.\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.RecursiveReadOnlyMode"
+                        }
+                    ]
+                },
+                "subPath": {
+                    "description": "Path within the volume from which the container's volume should be mounted.\nDefaults to \"\" (volume's root).\n+optional",
+                    "type": "string"
+                },
+                "subPathExpr": {
+                    "description": "Expanded path within the volume from which the container's volume should be mounted.\nBehaves similarly to SubPath but environment variable references $(VAR_NAME) are expanded using the container's environment.\nDefaults to \"\" (volume's root).\nSubPathExpr and SubPath are mutually exclusive.\n+optional",
+                    "type": "string"
                 }
             }
         }
