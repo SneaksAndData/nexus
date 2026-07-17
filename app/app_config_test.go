@@ -77,7 +77,7 @@ func Test_LoadConfigFromEnv(t *testing.T) {
 	keyId := "test-key-id"
 	host1 := "127.0.0.1:9042"
 	host2 := "127.0.0.2:9042"
-	_ = os.Setenv("NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH", storagePath)
+	_ = os.Setenv("NEXUS__S3_BUFFER__PAYLOAD_STORAGE_PATH", storagePath)
 	_ = os.Setenv("NEXUS__S3_BUFFER__ACCESS_KEY_ID", keyId)
 	_ = os.Setenv("NEXUS__SCYLLA_CQL_STORE__HOSTS", fmt.Sprintf("%s,%s", host1, host2))
 
