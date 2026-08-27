@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/payload"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	"github.com/SneaksAndData/nexus-core/pkg/urlsign"
 	"github.com/gin-gonic/gin"
@@ -26,15 +27,14 @@ import (
 //		@Failure		403	{string}	string
 //		@Failure		404	{string}	string
 //		@Failure		401	{string}	string
-//		@Router			/algorithm/v1/payload/{algorithmName}/requests/{requestId} [get]
-func GetRunPayload(buffer request.Buffer, logger klog.Logger) gin.HandlerFunc {
+//		@Router			/data/v1/payloads/{algorithmName}/requests/{requestId} [get]
+func GetRunPayload(buffer request.Buffer, proxyConfig *payload.RequestPayloadProxyConfiguration, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		algorithmName := ctx.Param("algorithmName")
 		requestId := ctx.Param("requestId")
 		parsed, _ := url.Parse(ctx.Request.URL.String())
 
-		// TODO: add secret here
-		err := urlsign.Verify(*parsed, []byte{})
+		err := urlsign.Verify(*parsed, []byte(proxyConfig.SignSecret))
 
 		if err != nil {
 			logger.V(0).Error(err, "Unauthorized payload url: %s", parsed.String())
