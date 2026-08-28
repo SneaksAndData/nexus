@@ -190,13 +190,25 @@ scheduler:
       processing:
         
         # Prefix to store payloads under
-        # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH
+        # Override with: NEXUS__S3_BUFFER__PAYLOAD_STORAGE_PATH
         payloadStoragePath: s3a://bucket/prefix
-        
-        # Default payload's presigned URL lifetime duration
-        # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_VALID_FOR
-        payloadValidFor: 24h
-        
+
+        # Payload proxy configuration. Payload proxy provides seamless access to algorithm payloads to both algorithms and external clients.
+        payloadProxy:
+          # Unique identifier for this Nexus deployment.
+          # Override with: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__TENANT_ID
+          tenantId: "00000000-0000-0000-0000-000000000000"
+
+          # Path template for proxied url signing.
+          # Override with: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__SERVE_PATH_TEMPLATE
+          servePathTemplate: "data/v1/payloads/%s/requests/%s"
+
+          # Secret to use for sign-secret value for signing proxied urls.
+          signSecretName: "nexus-sign-key"
+
+          # Secret key from `signSecretName` to use
+          signSecretKey: "key"
+
         # Failure backoff base delay. Example values: 5ms, 5s
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_BASE_DELAY
         failureRateBaseDelay: 100ms
@@ -262,10 +274,24 @@ scheduler:
       #    name: cassandra-credentials
       #    namespace: nexus
       #  data:
-      #    AstraDB specific setting, contains base64-encoded bundle zip. Leave empty for other Cassandra installations
       #    NEXUS__SCYLLA_CQL_STORE__HOSTS: 1.2.3.4,1.2.3.5
       #    NEXUS__SCYLLA_CQL_STORE__USER: user
       #    NEXUS__SCYLLA_CQL_STORE__PASSWORD: password
+      #  type: Opaque
+
+      # Example for Keyspaces:
+      #  apiVersion: v1
+      #  kind: Secret
+      #  metadata:
+      #    name: cassandra-credentials
+      #    namespace: nexus
+      #  data:
+      #    NEXUS__KEYSPACES_CQL_STORE__HOSTS: cassandra.us-east-1.amazonaws.com
+      #    NEXUS__KEYSPACES_CQL_STORE__PORT: 9142
+      #    NEXUS__KEYSPACES_CQL_STORE__REGION: us-east-1
+      #    NEXUS__KEYSPACES_CQL_STORE__CA_PATH: /opt/keyspaces/ca
+      #    KEYSPACES_AWS_ACCESS_KEY_ID: accessKeyId
+      #    KEYSPACES_AWS_SECRET_ACCESS_KEY: secret
       #  type: Opaque
       
       secretName: ""
@@ -280,8 +306,9 @@ scheduler:
     # Note that the user specified in the config must have Batch API and Nexus CRD permissions to both controller and shard clusters
     # in case of EKS you must assign appropriate permissions to the IAM role or user, since token will be fetched by aws-cli on-demand
     # You will need to specify a volumeMount for Shards yourself if you provide your own appconfig.yaml
+    # When provided as an empty string, algorithm runs will be spawned in the controller cluster. While useful for dev/test, this is NOT RECOMMENDED for production us.
     # Override with: NEXUS__SHARD_KUBE_CONFIG_PATH
-    shardKubeConfigPath: "/app/config/shards"
+    shardKubeConfigPath: ""
     
     # Logging level
     # Override with: NEXUS__LOG_LEVEL

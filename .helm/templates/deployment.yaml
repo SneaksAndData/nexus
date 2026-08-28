@@ -62,10 +62,12 @@ spec:
               value: {{ .Values.scheduler.config.runtimeNamespace | default .Release.Namespace }}
             - name: NEXUS__DEPLOY_NAMESPACE
               value: {{ .Release.Namespace }}
-            - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH
+            - name: NEXUS__S3_BUFFER__PAYLOAD_STORAGE_PATH
               value: {{ .Values.scheduler.config.s3Buffer.processing.payloadStoragePath }}
-            - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_VALID_FOR
-              value: {{ .Values.scheduler.config.s3Buffer.processing.payloadValidFor }}
+            - name: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__TENANT_ID
+              value: {{ .Values.scheduler.config.s3Buffer.processing.payloadProxy.tenantId }}
+            - name: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__SERVE_PATH_TEMPLATE
+              value: {{ .Values.scheduler.config.s3Buffer.processing.payloadProxy.servePathTemplate }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_BASE_DELAY
               value: {{ .Values.scheduler.config.s3Buffer.processing.failureRateBaseDelay }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_MAX_DELAY
@@ -129,11 +131,11 @@ spec:
           envFrom:
           {{- if .Values.scheduler.config.s3Buffer.s3Credentials.secretRefEnabled }}
             - secretRef:
-                name: {{ .Values.scheduler.config.s3Buffer.s3Credentials.secretName }}
+                name: {{ required "When s3Credentials.secretRefEnabled is true, you must provide a name of a valid Kubernetes Secret in the same namespace" .Values.scheduler.config.s3Buffer.s3Credentials.secretName }}
           {{- end }}            
           {{- if .Values.scheduler.config.cqlStore.secretRefEnabled }}
             - secretRef:
-                name: {{ .Values.scheduler.config.cqlStore.secretName }}
+                name: {{ required "When cqlStore.secretRefEnabled is true, you must provide a name of a valid Kubernetes Secret in the same namespace" .Values.scheduler.config.cqlStore.secretName }}
           {{- end }}
           {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
