@@ -699,47 +699,6 @@ paths:
       summary: Read a run metadata
       tags:
       - metadata
-  /algorithm/v1/payload/{algorithmName}/requests/{requestId}:
-    get:
-      description: Retrieves payload sent by the client for the provided run
-      parameters:
-      - description: Algorithm name
-        in: path
-        name: algorithmName
-        required: true
-        type: string
-      - description: Request identifier
-        in: path
-        name: requestId
-        required: true
-        type: string
-      produces:
-      - text/plain
-      - text/html
-      - application/octet-stream
-      responses:
-        "200":
-          description: OK
-          schema: {}
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "403":
-          description: Forbidden
-          schema:
-            type: string
-        "404":
-          description: Not Found
-          schema:
-            type: string
-      summary: Read a run payload
-      tags:
-      - payload
   /algorithm/v1/results/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves a result for the provided run
@@ -856,4 +815,45 @@ paths:
       summary: Create a new algorithm run
       tags:
       - run
+  /data/v1/payloads/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves payload sent by the client for the provided run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - text/plain
+      - text/html
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a run payload
+      tags:
+      - payload
 swagger: "2.0"

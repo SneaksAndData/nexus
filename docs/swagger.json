@@ -201,66 +201,6 @@
                 }
             }
         },
-        "/algorithm/v1/payload/{algorithmName}/requests/{requestId}": {
-            "get": {
-                "description": "Retrieves payload sent by the client for the provided run",
-                "produces": [
-                    "text/plain",
-                    "text/html",
-                    "application/octet-stream"
-                ],
-                "tags": [
-                    "payload"
-                ],
-                "summary": "Read a run payload",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Algorithm name",
-                        "name": "algorithmName",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Request identifier",
-                        "name": "requestId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {}
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/algorithm/v1/results/tags/{requestTag}": {
             "get": {
                 "description": "Read results of all runs with a matching tag",
@@ -426,6 +366,66 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/data/v1/payloads/{algorithmName}/requests/{requestId}": {
+            "get": {
+                "description": "Retrieves payload sent by the client for the provided run",
+                "produces": [
+                    "text/plain",
+                    "text/html",
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "payload"
+                ],
+                "summary": "Read a run payload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }
