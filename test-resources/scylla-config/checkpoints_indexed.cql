@@ -1,4 +1,4 @@
-create table nexus.checkpoints
+create table nexus_indexed.checkpoints
 (
     algorithm                 text,
     id                        text,
@@ -21,13 +21,13 @@ create table nexus.checkpoints
     PRIMARY KEY ((algorithm, id))
 );
 
-create index submission_tag ON nexus.checkpoints (tag);
+create index submission_tag ON nexus_indexed.checkpoints (tag);
 
-create index host ON nexus.checkpoints (received_by_host);
+create index host ON nexus_indexed.checkpoints (received_by_host);
 
-create index lifecycle_stage ON nexus.checkpoints (lifecycle_stage);
+create index lifecycle_stage ON nexus_indexed.checkpoints (lifecycle_stage);
 
-INSERT INTO nexus.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
+INSERT INTO nexus_indexed.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
                                algorithm_failure_details, received_by_host, received_at, sent_at, applied_configuration,
                                configuration_overrides, content_hash, last_modified, tag, api_version,
                                job_uid, parent)
@@ -36,7 +36,7 @@ VALUES ('test-algorithm', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'NEW', 'http:/
         '2023-10-01T12:30:00.000Z', '{}', '{}', 'new_hash', '2023-10-01T12:45:00.000Z',
         'new_tag', 'v1.0', 'd94c16c8-2c1e-4f3a-85d1-2d9c3b7f0a24', '{}');
 
-INSERT INTO nexus.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
+INSERT INTO nexus_indexed.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
                                algorithm_failure_details, received_by_host, received_at, sent_at, applied_configuration,
                                configuration_overrides, content_hash, last_modified, tag, api_version,
                                job_uid, parent)
@@ -45,7 +45,7 @@ VALUES ('test-algorithm', '2c7b6e8d-cc3c-4b5b-a3f6-5d7b9e2c7f2a', 'BUFFERED', 'h
         '2023-10-02T10:30:00.000Z', '{}', '{}', 'buffered_hash', '2023-10-02T10:45:00.000Z',
         'buffered_tag', 'v2.0', '1f7b6e8d-cc3c-4b5b-a3f6-5d7b9e2c7f2a', '{}');
 
-INSERT INTO nexus.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
+INSERT INTO nexus_indexed.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
                                algorithm_failure_details, received_by_host, received_at, sent_at, applied_configuration,
                                configuration_overrides, content_hash, last_modified, tag, api_version,
                                job_uid, parent)
@@ -54,7 +54,7 @@ VALUES ('test-algorithm', '8a0c8aa9-fc9d-4b2e-9c5c-2c8d7f1e7a3f', 'RUNNING', 'ht
         '2023-10-03T08:15:00.000Z', '{}', '{}', 'running_hash', '2023-10-03T08:30:00.000Z',
         'running_tag', 'v3.0', 'dfc7e9b5-8c3a-429b-9a33-d4a0a1f4b8d3', '{}');
 
-INSERT INTO nexus.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
+INSERT INTO nexus_indexed.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
                                algorithm_failure_details, received_by_host, received_at, sent_at, applied_configuration,
                                configuration_overrides, content_hash, last_modified, tag, api_version,
                                job_uid, parent)
@@ -63,7 +63,7 @@ VALUES ('test-algorithm', '550e8400-e29b-41d4-a716-446655440000', 'COMPLETED', '
         '2023-10-04T09:30:00.000Z', '{}', '{}', 'completed_hash', '2023-10-04T09:45:00.000Z',
         'completed_tag', 'v4.0', '395c9b92-c1f0-4e3b-9f43-7c5d4a3c7e9d', '{}');
 
-INSERT INTO nexus.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
+INSERT INTO nexus_indexed.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
                                algorithm_failure_details, received_by_host, received_at, sent_at, applied_configuration,
                                configuration_overrides, content_hash, last_modified, tag, api_version,
                                job_uid, parent)
@@ -72,7 +72,7 @@ VALUES ('test-algorithm', 'c3b7f1e7-9c5c-4b2e-8a0c-8aa9fc9d7f1e', 'FAILED', 'htt
         '2023-10-05T10:00:00.000Z', '2023-10-05T10:30:00.000Z', '{}', '{}', 'failed_hash',
         '2023-10-05T10:45:00.000Z', 'failed_tag', 'v5.0', '3e7b1c8d-4d1c-4f5b-a3f7-9e2c7f1e8a9c', '{}');
 
-INSERT INTO nexus.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
+INSERT INTO nexus_indexed.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
                                algorithm_failure_details, received_by_host, received_at, sent_at, applied_configuration,
                                configuration_overrides, content_hash, last_modified, tag, api_version,
                                job_uid, parent)
@@ -81,7 +81,7 @@ VALUES ('test-algorithm', '7f1e8a9c-4d1c-4f5b-a3f7-9c5b1e7b3c8d', 'SCHEDULING_FA
         '2023-10-06T11:00:00.000Z', '2023-10-06T11:30:00.000Z', '{}', '{}', 'scheduling_failed_hash',
         '2023-10-06T11:45:00.000Z', 'scheduling_failed_tag', 'v6.0', '1e7b3c8d-9f2c-4a0c-8b1c-7f1e9a3f4d5b', '{}');
 
-INSERT INTO nexus.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
+INSERT INTO nexus_indexed.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
                                algorithm_failure_details, received_by_host, received_at, sent_at, applied_configuration,
                                configuration_overrides, content_hash, last_modified, tag, api_version,
                                job_uid, parent)
@@ -90,7 +90,7 @@ VALUES ('test-algorithm', '9c5b1e7b-4d1c-4f5b-a3f7-1e7b3c8d8a9f', 'DEADLINE_EXCE
         '2023-10-07T12:00:00.000Z', '2023-10-07T12:30:00.000Z', '{}', '{}', 'deadline_exceeded_hash',
         '2023-10-07T12:45:00.000Z', 'deadline_exceeded_tag', 'v7.0', '3c8d8a9f-4a0c-8b1c-1e7b4d5b9f2c', '{}');
 
-INSERT INTO nexus.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
+INSERT INTO nexus_indexed.checkpoints (algorithm, id, lifecycle_stage, payload_uri, result_uri, algorithm_failure_cause,
                                algorithm_failure_details, received_by_host, received_at, sent_at, applied_configuration,
                                configuration_overrides, content_hash, last_modified, tag, api_version,
                                job_uid, parent)
