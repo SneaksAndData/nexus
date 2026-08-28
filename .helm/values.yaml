@@ -204,10 +204,8 @@ scheduler:
           servePathTemplate: "data/v1/payloads/%s/requests/%s"
 
           # Secret to use for sign-secret value for signing proxied urls.
+          # Must contain a key NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__SIGN_SECRET with a corresponding value
           signSecretName: "nexus-sign-key"
-
-          # Secret key from `signSecretName` to use
-          signSecretKey: "key"
 
         # Failure backoff base delay. Example values: 5ms, 5s
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_BASE_DELAY
@@ -248,9 +246,9 @@ scheduler:
         #   type: Opaque
         secretName: ""
     
-    cqlStore:
-      # type of CqlStore to use. Support options: `astra`, `scylla`
-      type: astra
+    checkpointStore:
+      # type of checkpointStore to use. Support options: `cassandra-astra`, `cassandra-scylla`, `cassandra-keyspaces`
+      type: cassandra-keyspaces
       # Enable mounting Cassandra credentials from a secret
       secretRefEnabled: true
       
@@ -293,6 +291,8 @@ scheduler:
       #    KEYSPACES_AWS_ACCESS_KEY_ID: accessKeyId
       #    KEYSPACES_AWS_SECRET_ACCESS_KEY: secret
       #  type: Opaque
+      #
+      # Helm chart will create a separate ConfigMap `nexus-keyspaces-ca` which contains public certificate you must use when `type` is `keyspaces`.
       
       secretName: ""
     
