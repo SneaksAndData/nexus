@@ -5,8 +5,8 @@ SCYLLA_IMAGE := "scylladb/scylla"
 MINIO_IMAGE  := "quay.io/minio/minio"
 
 # configurations
-SCYLLA_CONFIG := invocation_directory() / "test-resources/scylla-config"
 MANIFESTS := invocation_directory() / "test-resources/manifests"
+DBSCHEMA := invocation_directory() / "test-resources/e2e"
 
 # helm for Nexus
 NEXUS_CHART_NAME := "nexus"
@@ -21,7 +21,7 @@ NEXUS_CLUSTER_NAME := "nexus-controller-0"
 fresh: stop up
 
 # Start CI environment
-up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind crd build-image load-image deploy-chart
+up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind crd build-image load-image deploy-chart dbschema
 
 start-kind-cluster:
     kind create cluster --config=test-resources/kind.yaml --name {{NEXUS_CLUSTER_NAME}}
@@ -109,3 +109,6 @@ minio-kind:
 
 crd:
     helm upgrade --install --namespace nexus nexus-crd  oci://ghcr.io/sneaksanddata/helm/nexus-crd --version v1.0.0-4-gefa0d24
+
+dbschema:
+  docker run --rm -v {{DBSCHEMA}}:/opt/storage --network=host --entrypoint /opt/storage/prepare-db.sh scylladb/scylla:5.0.1
