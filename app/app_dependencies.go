@@ -96,12 +96,13 @@ func (appServices *ApplicationServices) WithShards(ctx context.Context, shardCon
 				klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 			}
 			appServices.shardClients = []*shards.ShardClient{singleClient}
-		}
-		var shardLoaderError error
-		appServices.shardClients, shardLoaderError = shards.LoadClients(shardConfigPath, appServices.runtimeNamespace, logger)
-		if shardLoaderError != nil {
-			logger.Error(shardLoaderError, "unable to initialize shard clients")
-			klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+		} else {
+			var shardLoaderError error
+			appServices.shardClients, shardLoaderError = shards.LoadClients(shardConfigPath, appServices.runtimeNamespace, logger)
+			if shardLoaderError != nil {
+				logger.Error(shardLoaderError, "unable to initialize shard clients")
+				klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+			}
 		}
 	}
 
