@@ -1,0 +1,10 @@
+apiVersion: science.sneaksanddata.com/v1
+kind: NexusAlgorithmWorkgroup
+metadata:
+  name: default
+  namespace: nexus
+spec:
+  affinity: {}
+  cluster: kind-nexus-controller-0
+  description: Default workgroup
+  tolerations: []

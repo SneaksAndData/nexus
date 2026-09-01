@@ -1,0 +1,69 @@
+apiVersion: science.sneaksanddata.com/v1
+kind: NexusAlgorithmTemplate
+metadata:
+  name: hello-world
+  namespace: nexus
+spec:
+  args:
+    - main.py
+    - '--sas-uri=%s'
+    - '--request-id=%s'
+  command: python
+  computeResources:
+    cpuLimit: 1000m
+    memoryLimit: 1000Mi
+    defaultResourceQuota: "0.1"
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  container:
+    image: nexus-hello
+    registry: ghcr.io/sneaksanddata
+    serviceAccountName: nexus
+    versionTag: 0.1.2
+  datadogIntegrationSettings:
+    mountDatadogSocket: true
+  errorHandlingBehaviour:
+    fatalExitCodes:
+      - 137
+    transientExitCodes:
+      - 139
+  runtimeEnvironment:
+    deadlineSeconds: 120
+    environmentVariables:
+      - name: DD_AGENT_HOST
+        valueFrom:
+          fieldRef:
+            fieldPath: status.hostIP
+      - name: PROTEUS__DD_SITE
+        value: datadoghq.eu
+      - name: NEXUS__ALGORITHM_NAME
+        value: nexus-hello
+      - name: NEXUS__SCHEDULER_URL
+        value: http://nexus.nexus.svc.cluster.local:8080
+      - name: NEXUS__RECEIVER_URL
+        value: http://dockerhost.nexus.svc.cluster.local:8081
+      - name: NEXUS__STORAGE_CLIENT_CLASS
+        value: adapta.storage.blob.s3_storage_client.S3StorageClient
+      - name: ALGORITHM_STORAGE__BASE_PATH
+        value: s3a://nexus/storage
+      - name: NEXUS__ALGORITHM_OUTPUT_PATH
+        value: s3a://nexus/result
+      - name: NEXUS__TELEMETRY_PATH
+        value: s3a://nexus/telemetry
+      - name: ALGORITHM_STORAGE_TYPE
+        value: S3
+      - name: PROTEUS__AWS_REGION
+        value: us-east-1
+      - name: PROTEUS__AWS_ENDPOINT
+        value: http://dockerhost.nexus.svc.cluster.local:9000
+      - name: PROTEUS__AWS_SECRET_ACCESS_KEY
+        value: minioadmin
+      - name: PROTEUS__AWS_ACCESS_KEY_ID
+        value: minioadmin
+    mappedEnvironmentVariables: []
+    maximumRetries: 1
+  workgroupRef:
+    group: science.sneaksanddata.com
+    kind: NexusAlgorithmWorkgroup
+    name: default

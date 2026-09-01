@@ -13,6 +13,8 @@ NEXUS_CHART_NAME := "nexus"
 NEXUS_CHART_PATH := "./.helm"
 NEXUS_CHART_IMAGE_NAME := "nexus-dev"
 NEXUS_CHART_IMAGE_TAG  := "latest"
+APP_VERSION := "0.0.0"
+BUILD_NUMBER := "1"
 
 # cluster
 NEXUS_CLUSTER_NAME := "nexus-controller-0"
@@ -21,7 +23,7 @@ NEXUS_CLUSTER_NAME := "nexus-controller-0"
 fresh: stop up
 
 # Start CI environment
-up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind dbschema crd build-image load-image deploy-chart
+up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind dbschema crd apply-manifests build-image load-image deploy-chart
 
 start-kind-cluster:
     kind create cluster --config=test-resources/kind.yaml --name {{NEXUS_CLUSTER_NAME}}
@@ -42,7 +44,11 @@ logs name="":
 
 # build the local Docker image
 build-image:
-    docker build -t {{NEXUS_CHART_IMAGE_NAME}}:{{NEXUS_CHART_IMAGE_TAG}} -f .container/Dockerfile .
+    docker build \
+        --build-arg APPVERSION={{APP_VERSION}} \
+        --build-arg BUILDNUMBER={{BUILD_NUMBER}} \
+        -t {{NEXUS_CHART_IMAGE_NAME}}:{{NEXUS_CHART_IMAGE_TAG}} \
+        -f .container/Dockerfile .
 
 # load image into the cluster
 load-image:
@@ -109,6 +115,11 @@ minio-kind:
 
 crd:
     helm upgrade --install --namespace nexus nexus-crd  oci://ghcr.io/sneaksanddata/helm/nexus-crd --version v1.0.0-4-gefa0d24
+
+apply-manifests:
+    kubectl apply -n nexus -f {{MANIFESTS}}/nexus-algorithm-sa.yaml
+    kubectl apply -n nexus -f {{MANIFESTS}}/hello-world-workgroup.yaml
+    kubectl apply -n nexus -f {{MANIFESTS}}/hello-world-algorithm.yaml
 
 dbschema:
   docker run --rm -v {{DBSCHEMA}}:/opt/storage --network=host --entrypoint /opt/storage/prepare-db.sh {{SCYLLA_IMAGE}}
