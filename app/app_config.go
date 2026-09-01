@@ -21,9 +21,9 @@ type SchedulerConfig struct {
 }
 
 const (
-	CqlStoreAstra     = "astra"
-	CqlStoreScylla    = "scylla"
-	CqlStoreKeyspaces = "keyspaces"
+	CqlStoreAstra     = "cassandra-astra"
+	CqlStoreScylla    = "cassandra-scylla"
+	CqlStoreKeyspaces = "cassandra-keyspaces"
 )
 
 func (c *SchedulerConfig) MaxPayloadSizeBytes() int64 { // coverage-ignore

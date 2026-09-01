@@ -20,18 +20,23 @@ astra-cql-store: # can be read from environment
   secure-connection-bundle-base64: ""
   gateway-user: ""
   gateway-password: ""
+  indexes-supported: true
+  keyspace: ""
 scylla-cql-store:
   hosts: []
   port: ""
   user: ""
   password: ""
   local-dc: ""
+  indexes-supported: true
+  keyspace: ""
 keyspaces-cql-store:
   hosts: []
   port: ""
   ca-path: ""
   region: ""
-cql-store-type: scylla
+  keyspace: ""
+cql-store-type: cassandra-scylla
 kube-config-path: ""
 shard-kube-config-path: ""
 max-payload-size: ""

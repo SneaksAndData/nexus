@@ -6,70 +6,25 @@ MINIO_IMAGE  := "quay.io/minio/minio"
 
 # configurations
 SCYLLA_CONFIG := invocation_directory() / "test-resources/scylla-config"
+MANIFESTS := invocation_directory() / "test-resources/manifests"
+
+# helm for Nexus
+NEXUS_CHART_NAME := "nexus"
+NEXUS_CHART_PATH := "./.helm"
+NEXUS_CHART_IMAGE_NAME := "nexus-dev"
+NEXUS_CHART_IMAGE_TAG  := "latest"
+
+# cluster
+NEXUS_CLUSTER_NAME := "nexus-controller-0"
 
 # Default recipe
 fresh: stop up
 
 # Start CI environment
-up: scylla minio prepare-buckets prepare-scylla start-kind-cluster shards-kubeconfig
-
-# Start ScyllaDB with health checks
-scylla:
-    @echo "🚀 Starting Scylla..."
-    docker run -d \
-      --name scylla \
-      -p 9042:9042 \
-      -p 10000:10000 \
-      --health-cmd "nodetool statusgossip | grep -q 'running'" \
-      --health-interval 5s \
-      --health-retries 10 \
-      {{SCYLLA_IMAGE}} \
-      --listen-address 127.0.0.1 \
-      --rpc-address 0.0.0.0 \
-      --broadcast-rpc-address 0.0.0.0 \
-      --smp 1 \
-      --developer-mode 1
-
-# Start Minio with health checks
-minio:
-    @echo "📦 Starting Minio..."
-    docker run -d \
-      --name minio \
-      -p 9000:9000 \
-      -p 9123:9123 \
-      --restart always \
-      --health-cmd "curl -f http://localhost:9000/minio/health/live" \
-      --health-interval 5s \
-      {{MINIO_IMAGE}} \
-      server /data --console-address :9123
-
-# Create Minio buckets using built-in health waiting
-prepare-buckets:
-    @echo "⏳ Waiting for Minio..."
-    until [ "$(docker inspect -f '{{ "{{" }}.State.Health.Status{{ "}}" }}' minio)" == "healthy" ]; do sleep 2; done
-    docker run --rm \
-      --network host \
-      --entrypoint "/bin/sh" \
-      {{MINIO_IMAGE}} \
-      -c "mc alias set e2e http://localhost:9000 minioadmin minioadmin && \
-          mc mb --ignore-existing e2e/tmp e2e/nexus"
-
-# Run Scylla initialization
-prepare-scylla:
-    @echo "⏳ Waiting for Scylla..."
-    until [ "$(docker inspect -f '{{ "{{" }}.State.Health.Status{{ "}}" }}' scylla)" == "healthy" ]; do sleep 2; done
-    docker run --rm \
-      --network host \
-      -v {{SCYLLA_CONFIG}}:/opt/storage \
-      --entrypoint /opt/storage/prepare-scylla.sh \
-      {{SCYLLA_IMAGE}}
+up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind crd build-image load-image deploy-chart
 
 start-kind-cluster:
-    kind create cluster --config=test-resources/kind.yaml --name nexus-shard-0
-
-shards-kubeconfig:
-    mkdir -p ./test-resources/kind && \
-    kind export kubeconfig --name nexus-shard-0 --kubeconfig ./test-resources/kind/kind-nexus-shard-0.kubeconfig
+    kind create cluster --config=test-resources/kind.yaml --name {{NEXUS_CLUSTER_NAME}}
 
 # Run all tests
 test:
@@ -79,9 +34,78 @@ test:
 stop:
     @echo "🧹 Cleaning up..."
     docker rm -f scylla minio 2>/dev/null || true
-    kind delete cluster --name nexus-shard-0
+    kind delete cluster --name {{NEXUS_CLUSTER_NAME}}
 
 # View logs
 logs name="":
     docker logs -f {{if name == "" { "scylla" } else { name }}}
 
+# build the local Docker image
+build-image:
+    docker build -t {{NEXUS_CHART_IMAGE_NAME}}:{{NEXUS_CHART_IMAGE_TAG}} -f .container/Dockerfile .
+
+# load image into the cluster
+load-image:
+    kind load docker-image {{NEXUS_CHART_IMAGE_NAME}}:{{NEXUS_CHART_IMAGE_TAG}} --name  {{NEXUS_CLUSTER_NAME}}
+
+create-namespace:
+    kubectl create namespace nexus --dry-run=client -o yaml | kubectl apply -f -
+
+# install chart
+deploy-chart:
+    kubectl create secret generic cassandra-credentials \
+        --namespace nexus \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__HOSTS="scylla.nexus.svc.cluster.local" \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__INDEXES_SUPPORTED="true" \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__USER="cassandra" \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__PASSWORD="cassandra" \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__KEYSPACE="nexus" --dry-run=client -o yaml | kubectl apply -f -
+
+    kubectl create secret generic nexus-s3 \
+        --namespace nexus \
+        --from-literal=NEXUS__S3_BUFFER__REGION="us-east-1" \
+        --from-literal=NEXUS__S3_BUFFER__ACCESS_KEY_ID="minioadmin" \
+        --from-literal=NEXUS__S3_BUFFER__SECRET_ACCESS_KEY="minioadmin" \
+        --from-literal=NEXUS__S3_BUFFER__ENDPOINT="http://minio.nexus.svc.cluster.local:9000" --dry-run=client -o yaml | kubectl apply -f -
+
+    kubectl create secret generic nexus-sign-key \
+        --namespace nexus \
+        --from-literal=NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__SIGN_SECRET="test" --dry-run=client -o yaml | kubectl apply -f -
+
+    helm upgrade --install --create-namespace --namespace nexus {{NEXUS_CHART_NAME}} {{NEXUS_CHART_PATH}} \
+        --set image.repository={{NEXUS_CHART_IMAGE_NAME}} \
+        --set image.tag={{NEXUS_CHART_IMAGE_TAG}} \
+        --set image.pullPolicy=Never \
+        --set scheduler.config.checkpointStore.type=cassandra-scylla \
+        --set scheduler.config.checkpointStore.secretName="cassandra-credentials" \
+        --set scheduler.config.s3Buffer.s3Credentials.secretName="nexus-s3"
+
+# cleanup
+remove-chart:
+    helm uninstall -n nexus {{NEXUS_CHART_NAME}}
+
+install-ingress-controller:
+    kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
+    kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=180s
+
+create-ingress:
+    # Create ingress rules for services
+    for i in $(seq 1 30); do \
+      kubectl apply -f {{MANIFESTS}}/ingress.yaml && break || \
+      (echo "Retry $i/30: failed to apply ingress, retrying in 1s..." && sleep 1); \
+    done; \
+    if [ $i -eq 30 ]; then \
+      echo "Failed to apply ingress after 30 attempts."; \
+      exit 1; \
+    fi
+
+scylla-kind:
+    kubectl apply -f {{MANIFESTS}}/scylladb.yaml
+    kubectl -n nexus rollout status deployment/scylla --timeout=180s
+
+minio-kind:
+    kubectl apply -f {{MANIFESTS}}/minio.yaml
+    kubectl -n nexus rollout status deployment/minio --timeout=180s
+
+crd:
+    helm upgrade --install --namespace nexus nexus-crd  oci://ghcr.io/sneaksanddata/helm/nexus-crd --version v1.0.0-4-gefa0d24

@@ -251,7 +251,7 @@ scheduler:
       type: cassandra-keyspaces
       # Enable mounting Cassandra credentials from a secret
       secretRefEnabled: true
-      
+
       # Example for AstraDB:
       #  apiVersion: v1
       #  kind: Secret
@@ -260,9 +260,11 @@ scheduler:
       #    namespace: nexus
       #  data:
       #    AstraDB specific setting, contains base64-encoded bundle zip. Leave empty for other Cassandra installations
-      #    NEXUS__CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64: base64value
-      #    NEXUS__CQL_STORE__GATEWAY_USER: user
-      #    NEXUS__CQL_STORE__GATEWAY_PASSWORD: password
+      #    NEXUS__ASTRA_CQL_STORE__SECURE_CONNECTION_BUNDLE_BASE64: base64value
+      #    NEXUS__ASTRA_CQL_STORE__GATEWAY_USER: user
+      #    NEXUS__ASTRA_CQL_STORE__GATEWAY_PASSWORD: password
+      #    NEXUS__ASTRA_CQL_STORE__INDEXES_SUPPORTED: true
+      #    NEXUS__ASTRA_CQL_STORE__KEYSPACE: nexus
       #  type: Opaque
 
       # Example for Scylla:
@@ -275,6 +277,8 @@ scheduler:
       #    NEXUS__SCYLLA_CQL_STORE__HOSTS: 1.2.3.4,1.2.3.5
       #    NEXUS__SCYLLA_CQL_STORE__USER: user
       #    NEXUS__SCYLLA_CQL_STORE__PASSWORD: password
+      #    NEXUS__SCYLLA_CQL_STORE__INDEXES_SUPPORTED: true
+      #    NEXUS__SCYLLA_CQL_STORE__KEYSPACE: nexus
       #  type: Opaque
 
       # Example for Keyspaces:
@@ -288,13 +292,14 @@ scheduler:
       #    NEXUS__KEYSPACES_CQL_STORE__PORT: 9142
       #    NEXUS__KEYSPACES_CQL_STORE__REGION: us-east-1
       #    NEXUS__KEYSPACES_CQL_STORE__CA_PATH: /opt/keyspaces/ca
+      #    NEXUS__KEYSPACES_CQL_STORE__KEYSPACE: nexus
       #    KEYSPACES_AWS_ACCESS_KEY_ID: accessKeyId
       #    KEYSPACES_AWS_SECRET_ACCESS_KEY: secret
       #  type: Opaque
       #
       # Helm chart will create a separate ConfigMap `nexus-keyspaces-ca` which contains public certificate you must use when `type` is `keyspaces`.
       
-      secretName: ""
+      secretName:
     
     # optional path to kubeconfig for the controller cluster
     # defaults to in-cluster config

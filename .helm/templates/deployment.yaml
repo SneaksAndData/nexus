@@ -127,12 +127,11 @@ spec:
           {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-        {{- if .Values.extraEnvFrom }}
           envFrom:
           {{- if .Values.scheduler.config.s3Buffer.s3Credentials.secretRefEnabled }}
             - secretRef:
                 name: {{ required "When s3Credentials.secretRefEnabled is true, you must provide a name of a valid Kubernetes Secret in the same namespace" .Values.scheduler.config.s3Buffer.s3Credentials.secretName }}
-          {{- end }}            
+          {{- end }}
           {{- if .Values.scheduler.config.checkpointStore.secretRefEnabled }}
             - secretRef:
                 name: {{ required "When cqlStore.secretRefEnabled is true, you must provide a name of a valid Kubernetes Secret in the same namespace" .Values.scheduler.config.checkpointStore.secretName }}
@@ -143,6 +142,7 @@ spec:
             - configMapRef:
                 name: nexus-keyspaces-ca
           {{- end }}
+        {{- if .Values.extraEnvFrom }}
           {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
           {{- end }}

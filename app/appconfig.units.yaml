@@ -20,16 +20,21 @@ astra-cql-store: # can be read from environment
   secure-connection-bundle-base64: base64value
   gateway-user: user
   gateway-password: password
+  indexes-supported: true
+  keyspace: "nexus"
 scylla-cql-store:
   hosts:
     - 127.0.0.1:9000
+  indexes-supported: true
+  keyspace: "nexus"
 keyspaces-cql-store:
   hosts:
     - keyspaces.aws.com
   port: "9042"
   ca-path: "/tmp/ca"
   region: "us-east-1"
-cql-store-type: astra
+  keyspace: "nexus"
+cql-store-type: cassandra-astra
 kube-config-path: "/tmp/nexus-test"
 shard-kube-config-path: "/tmp/shards"
 max-payload-size: 500Mi
