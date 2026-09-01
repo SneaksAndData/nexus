@@ -21,7 +21,7 @@ NEXUS_CLUSTER_NAME := "nexus-controller-0"
 fresh: stop up
 
 # Start CI environment
-up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind crd build-image load-image deploy-chart dbschema
+up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind dbschema crd build-image load-image deploy-chart
 
 start-kind-cluster:
     kind create cluster --config=test-resources/kind.yaml --name {{NEXUS_CLUSTER_NAME}}
@@ -111,4 +111,4 @@ crd:
     helm upgrade --install --namespace nexus nexus-crd  oci://ghcr.io/sneaksanddata/helm/nexus-crd --version v1.0.0-4-gefa0d24
 
 dbschema:
-  docker run --rm -v {{DBSCHEMA}}:/opt/storage --network=host --entrypoint /opt/storage/prepare-db.sh scylladb/scylla:5.0.1
+  docker run --rm -v {{DBSCHEMA}}:/opt/storage --network=host --entrypoint /opt/storage/prepare-db.sh {{SCYLLA_IMAGE}}
