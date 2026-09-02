@@ -25,3 +25,4 @@ kube-config-path: "/tmp/test_cube"
 shard-kube-config-path: "/tmp/shards"
 max-payload-size: 500Mi
 log-level: debug
+external-hostname: "localhost"

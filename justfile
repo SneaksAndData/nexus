@@ -23,7 +23,7 @@ NEXUS_CLUSTER_NAME := "nexus-controller-0"
 fresh: stop up
 
 # Start CI environment
-up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind dbschema crd apply-manifests build-image load-image deploy-chart
+up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind crd apply-manifests build-image load-image dbschema deploy-chart
 
 start-kind-cluster:
     kind create cluster --config=test-resources/kind.yaml --name {{NEXUS_CLUSTER_NAME}}
@@ -84,7 +84,8 @@ deploy-chart:
         --set image.pullPolicy=Never \
         --set scheduler.config.checkpointStore.type=cassandra-scylla \
         --set scheduler.config.checkpointStore.secretName="cassandra-credentials" \
-        --set scheduler.config.s3Buffer.s3Credentials.secretName="nexus-s3"
+        --set scheduler.config.s3Buffer.s3Credentials.secretName="nexus-s3" \
+        --set scheduler.config.externalHostname="nexus.nexus.svc.cluster.local:8080"
 
 # cleanup
 remove-chart:
@@ -123,3 +124,4 @@ apply-manifests:
 
 dbschema:
   docker run --rm -v {{DBSCHEMA}}:/opt/storage --network=host --entrypoint /opt/storage/prepare-db.sh {{SCYLLA_IMAGE}}
+# /data/v1/payloads/hello-world/requests/5a3c4f9b-fd94-48d4-99cd-d9d7cbf6cfd1?chk=ZTM5YjVkOTg%3D&from=1788351261&sig=oq4NaMfFWZHlvN7il99AZRzt9ssbaWATKSONvvi05Qw&tid=00000000-0000-0000-0000-000000000000&to=1788437661

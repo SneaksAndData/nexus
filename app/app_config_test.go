@@ -65,6 +65,7 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 		ShardKubeConfigPath: "/tmp/shards",
 		MaxPayloadSize:      "500Mi",
 		LogLevel:            "debug",
+		ExternalHostname:    "test-hostname.svc.local",
 	}
 }
 

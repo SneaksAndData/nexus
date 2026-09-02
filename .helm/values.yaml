@@ -177,6 +177,11 @@ scheduler:
   # Whole config can also be overridden by setting config.enabled=false and mounting a new appconfig.yaml to /app path in the container
   config:
     enabled: true
+
+    # Hostname used on the public interface. When running behind reverse proxy, this is a load balancer address.
+    # Override with: NEXUS__EXTERNAL_HOSTNAME
+    externalHostname: "localhost"
+
     # Namespace to schedule algorithms runs in
     # Override with: NEXUS__RUNTIME_NAMESPACE
     runtimeNamespace: ""

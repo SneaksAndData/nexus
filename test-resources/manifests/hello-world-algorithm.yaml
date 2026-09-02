@@ -9,6 +9,9 @@ spec:
     - '--sas-uri=%s'
     - '--request-id=%s'
   command: python
+  payloadConfiguration:
+    payloadValidFor: 24h
+    payloadSerialization: backend
   computeResources:
     cpuLimit: 1000m
     memoryLimit: 1000Mi

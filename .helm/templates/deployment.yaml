@@ -62,6 +62,8 @@ spec:
               value: {{ .Values.scheduler.config.runtimeNamespace | default .Release.Namespace }}
             - name: NEXUS__DEPLOY_NAMESPACE
               value: {{ .Release.Namespace }}
+            - name: NEXUS__EXTERNAL_HOSTNAME
+              value: {{ .Values.scheduler.config.externalHostname }}
             - name: NEXUS__S3_BUFFER__PAYLOAD_STORAGE_PATH
               value: {{ .Values.scheduler.config.s3Buffer.processing.payloadStoragePath }}
             - name: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__TENANT_ID

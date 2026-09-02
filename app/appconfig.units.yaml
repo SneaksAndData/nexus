@@ -39,3 +39,4 @@ kube-config-path: "/tmp/nexus-test"
 shard-kube-config-path: "/tmp/shards"
 max-payload-size: 500Mi
 log-level: debug
+external-hostname: test.svc.local
