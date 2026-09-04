@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -31,8 +32,9 @@ type requestResultResponse struct {
 type runMetadataResponse struct {
 	Id             string `json:"id"`
 	Algorithm      string `json:"algorithm"`
-	LifecycleStage string `json:"lifecycleStage"`
+	LifecycleStage string `json:"lifecycle_stage"`
 	Tag            string `json:"tag"`
+	PayloadUri     string `json:"payload_uri"`
 }
 
 type taggedResultResponse struct {
@@ -154,25 +156,41 @@ func Test_Smoke_GetRunMetadata(t *testing.T) {
 	requestId := createTestRun(t, client, tag)
 
 	getURL := fmt.Sprintf("%s/algorithm/v1/metadata/%s/requests/%s", baseURL, algorithmName, requestId)
-	resp, err := client.Get(getURL)
-	if err != nil {
-		t.Fatalf("failed to execute GET request to %s: %v", getURL, err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		t.Fatalf("expected status %d (OK), got %d: %s", http.StatusOK, resp.StatusCode, string(body))
-	}
-
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("failed to read response body: %v", err)
-	}
 
 	var meta runMetadataResponse
-	if err := json.Unmarshal(bodyBytes, &meta); err != nil {
-		t.Fatalf("failed to unmarshal metadata JSON: %v, body: %s", err, string(bodyBytes))
+	deadline := time.Now().Add(10 * time.Second)
+
+	for {
+		resp, err := client.Get(getURL)
+		if err != nil {
+			t.Fatalf("failed to execute GET request to %s: %v", getURL, err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(resp.Body)
+			_ = resp.Body.Close()
+			t.Fatalf("expected status %d (OK), got %d: %s", http.StatusOK, resp.StatusCode, string(body))
+		}
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			t.Fatalf("failed to read response body: %v", err)
+		}
+
+		if err := json.Unmarshal(bodyBytes, &meta); err != nil {
+			t.Fatalf("failed to unmarshal metadata JSON: %v, body: %s", err, string(bodyBytes))
+		}
+
+		if meta.PayloadUri != "" {
+			break
+		}
+
+		if time.Now().After(deadline) {
+			t.Fatalf("timed out waiting for request %s to reach BUFFERED stage (payload_uri is empty, stage: %s)", requestId, meta.LifecycleStage)
+		}
+
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	if meta.Id != requestId {
@@ -181,6 +199,34 @@ func Test_Smoke_GetRunMetadata(t *testing.T) {
 
 	if meta.Algorithm != algorithmName {
 		t.Fatalf("expected metadata algorithm %s, got %s", algorithmName, meta.Algorithm)
+	}
+
+	// Verify that the payloadUri works when hostname is replaced with localhost:5555/scheduler (baseURL)
+	parsedPayloadURI, err := url.Parse(meta.PayloadUri)
+	if err != nil {
+		t.Fatalf("failed to parse payload_uri '%s': %v", meta.PayloadUri, err)
+	}
+
+	payloadURL := fmt.Sprintf("%s%s", baseURL, parsedPayloadURI.RequestURI())
+	payloadResp, err := client.Get(payloadURL)
+	if err != nil {
+		t.Fatalf("failed to execute GET request to payload URL %s: %v", payloadURL, err)
+	}
+	defer func() { _ = payloadResp.Body.Close() }()
+
+	if payloadResp.StatusCode != http.StatusOK {
+		pBody, _ := io.ReadAll(payloadResp.Body)
+		t.Fatalf("expected status %d (OK) from payload URL %s, got %d: %s", http.StatusOK, payloadURL, payloadResp.StatusCode, string(pBody))
+	}
+
+	payloadBody, err := io.ReadAll(payloadResp.Body)
+	if err != nil {
+		t.Fatalf("failed to read payload response body: %v", err)
+	}
+
+	var payloadData map[string]interface{}
+	if err := json.Unmarshal(payloadBody, &payloadData); err != nil {
+		t.Fatalf("failed to unmarshal payload JSON: %v, body: %s", err, string(payloadBody))
 	}
 }
 
