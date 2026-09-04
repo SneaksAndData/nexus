@@ -178,10 +178,6 @@ scheduler:
   config:
     enabled: true
 
-    # Hostname used on the public interface. When running behind reverse proxy, this is a load balancer address.
-    # Override with: NEXUS__EXTERNAL_HOSTNAME
-    externalHostname: "localhost"
-
     # Namespace to schedule algorithms runs in
     # Override with: NEXUS__RUNTIME_NAMESPACE
     runtimeNamespace: ""
@@ -206,11 +202,19 @@ scheduler:
 
           # Path template for proxied url signing.
           # Override with: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__SERVE_PATH_TEMPLATE
-          servePathTemplate: "data/v1/payloads/%s/requests/%s"
+          servePathTemplate: "/data/v1/payloads/%s/requests/%s"
 
           # Secret to use for sign-secret value for signing proxied urls.
           # Must contain a key NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__SIGN_SECRET with a corresponding value
           signSecretName: "nexus-sign-key"
+
+          # External hostname for the scheduler. When using reverse proxy, DNS name the proxy serves for the app.
+          # Override with NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__EXTERNAL_NAME
+          externalName: "localhost"
+
+          # Allow insecure payload serving under `http`.
+          # Override with NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__INSECURE
+          insecure: false
 
         # Failure backoff base delay. Example values: 5ms, 5s
         # Override with: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_BASE_DELAY

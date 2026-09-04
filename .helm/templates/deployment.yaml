@@ -62,14 +62,16 @@ spec:
               value: {{ .Values.scheduler.config.runtimeNamespace | default .Release.Namespace }}
             - name: NEXUS__DEPLOY_NAMESPACE
               value: {{ .Release.Namespace }}
-            - name: NEXUS__EXTERNAL_HOSTNAME
-              value: {{ .Values.scheduler.config.externalHostname }}
             - name: NEXUS__S3_BUFFER__PAYLOAD_STORAGE_PATH
               value: {{ .Values.scheduler.config.s3Buffer.processing.payloadStoragePath }}
             - name: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__TENANT_ID
               value: {{ .Values.scheduler.config.s3Buffer.processing.payloadProxy.tenantId }}
             - name: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__SERVE_PATH_TEMPLATE
               value: {{ .Values.scheduler.config.s3Buffer.processing.payloadProxy.servePathTemplate }}
+            - name: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__EXTERNAL_NAME
+              value: {{ .Values.scheduler.config.s3Buffer.processing.payloadProxy.externalName }}
+            - name: NEXUS__S3_BUFFER__REQUEST_PAYLOAD_PROXY_CONFIGURATION__INSECURE
+              value: {{ .Values.scheduler.config.s3Buffer.processing.payloadProxy.insecure | quote }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_BASE_DELAY
               value: {{ .Values.scheduler.config.s3Buffer.processing.failureRateBaseDelay }}
             - name: NEXUS__S3_BUFFER__BUFFER_CONFIG__FAILURE_RATE_MAX_DELAY

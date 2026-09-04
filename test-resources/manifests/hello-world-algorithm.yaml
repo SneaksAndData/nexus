@@ -11,7 +11,7 @@ spec:
   command: python
   payloadConfiguration:
     payloadValidFor: 24h
-    payloadSerialization: backend
+    payloadSerializationMode: backend
   computeResources:
     cpuLimit: 1000m
     memoryLimit: 1000Mi

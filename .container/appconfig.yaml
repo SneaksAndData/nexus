@@ -4,6 +4,8 @@ s3-buffer:
     tenant-id: ""
     serve-path-template: ""
     sign-secret: ""
+    external-name: ""
+    insecure: false
   buffer-config:
     failure-rate-base-delay: 100ms
     failure-rate-max-delay: 1s
@@ -41,4 +43,3 @@ kube-config-path: ""
 shard-kube-config-path: ""
 max-payload-size: ""
 log-level: ""
-external-hostname: ""

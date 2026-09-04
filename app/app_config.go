@@ -18,7 +18,6 @@ type SchedulerConfig struct {
 	ShardKubeConfigPath string                      `mapstructure:"shard-kube-config-path,omitempty"`
 	LogLevel            string                      `mapstructure:"log-level,omitempty"`
 	MaxPayloadSize      string                      `mapstructure:"max-payload-size,omitempty"`
-	ExternalHostname    string                      `mapstructure:"external-hostname,omitempty"`
 }
 
 const (

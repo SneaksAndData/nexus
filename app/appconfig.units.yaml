@@ -4,6 +4,8 @@ s3-buffer:
     tenant-id: "test-tenant"
     serve-path-template: "/data/v1/payloads/%s/%s"
     sign-secret: "test-secret"
+    external-name: localhost
+    insecure: true
   buffer-config:
     failure-rate-base-delay: 100ms
     failure-rate-max-delay: 1s
@@ -39,4 +41,3 @@ kube-config-path: "/tmp/nexus-test"
 shard-kube-config-path: "/tmp/shards"
 max-payload-size: 500Mi
 log-level: debug
-external-hostname: test.svc.local

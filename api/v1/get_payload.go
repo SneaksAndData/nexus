@@ -2,7 +2,6 @@ package v1
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -29,11 +28,11 @@ import (
 //		@Failure		404	{string}	string
 //		@Failure		401	{string}	string
 //		@Router			/data/v1/payloads/{algorithmName}/requests/{requestId} [get]
-func GetRunPayload(buffer request.Buffer, proxyConfig *payload.RequestPayloadProxyConfiguration, externalHostname string, logger klog.Logger) gin.HandlerFunc {
+func GetRunPayload(buffer request.Buffer, proxyConfig *payload.RequestPayloadProxyConfiguration, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		algorithmName := ctx.Param("algorithmName")
 		requestId := ctx.Param("requestId")
-		parsed, _ := url.Parse(fmt.Sprintf("http://%s/%s", externalHostname, ctx.Request.URL.String()))
+		parsed, _ := url.Parse(ctx.Request.URL.String())
 
 		err := urlsign.Verify(*parsed, []byte(proxyConfig.SignSecret))
 

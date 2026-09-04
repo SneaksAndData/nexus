@@ -85,7 +85,8 @@ deploy-chart:
         --set scheduler.config.checkpointStore.type=cassandra-scylla \
         --set scheduler.config.checkpointStore.secretName="cassandra-credentials" \
         --set scheduler.config.s3Buffer.s3Credentials.secretName="nexus-s3" \
-        --set scheduler.config.externalHostname="nexus.nexus.svc.cluster.local:8080"
+        --set scheduler.config.s3Buffer.processing.payloadProxy.externalName="nexus.nexus.svc.cluster.local:8080" \
+        --set scheduler.config.s3Buffer.processing.payloadProxy.insecure="true"
 
 # cleanup
 remove-chart:
@@ -115,7 +116,7 @@ minio-kind:
     kubectl -n nexus rollout status deployment/minio --timeout=180s
 
 crd:
-    helm upgrade --install --namespace nexus nexus-crd  oci://ghcr.io/sneaksanddata/helm/nexus-crd --version v1.0.0-4-gefa0d24
+    helm upgrade --install --namespace nexus nexus-crd  oci://ghcr.io/sneaksanddata/helm/nexus-crd --version v1.0.0-5-gdec1dd3
 
 apply-manifests:
     kubectl apply -n nexus -f {{MANIFESTS}}/nexus-algorithm-sa.yaml

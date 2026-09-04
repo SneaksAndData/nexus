@@ -22,6 +22,8 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 				TenantId:          "test-tenant",
 				ServePathTemplate: "/data/v1/payloads/%s/%s",
 				SignSecret:        "test-secret",
+				ExternalName:      "localhost",
+				Insecure:          true,
 			},
 			BufferConfig: &request.BufferConfig{
 				FailureRateMaxDelay:        time.Second * 1,
@@ -65,7 +67,6 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 		ShardKubeConfigPath: "/tmp/shards",
 		MaxPayloadSize:      "500Mi",
 		LogLevel:            "debug",
-		ExternalHostname:    "test-hostname.svc.local",
 	}
 }
 
