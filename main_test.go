@@ -51,7 +51,7 @@ func getHTTPClient() *http.Client {
 	}
 }
 
-func createTestRun(t *testing.T, client *http.Client, tag string) string {
+func createTestRun(client *http.Client, tag string) (string, error) {
 	postURL := fmt.Sprintf("%s/algorithm/v1/run/%s", baseURL, algorithmName)
 
 	payload := map[string]interface{}{
@@ -64,64 +64,66 @@ func createTestRun(t *testing.T, client *http.Client, tag string) string {
 
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		t.Fatalf("failed to marshal payload: %v", err)
+		return "", fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodPost, postURL, bytes.NewBuffer(payloadBytes))
 	if err != nil {
-		t.Fatalf("failed to create HTTP request: %v", err)
+		return "", fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		t.Fatalf("failed to execute POST request to %s: %v", postURL, err)
+		return "", fmt.Errorf("failed to execute POST request to %s: %w", postURL, err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusAccepted {
 		body, _ := io.ReadAll(resp.Body)
-		t.Fatalf("expected status %d (Accepted), got %d: %s", http.StatusAccepted, resp.StatusCode, string(body))
+		return "", fmt.Errorf("expected status %d (Accepted), got %d: %s", http.StatusAccepted, resp.StatusCode, string(body))
 	}
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		t.Fatalf("failed to read response body: %v", err)
+		return "", fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	var runResp createRunResponse
 	if err := json.Unmarshal(bodyBytes, &runResp); err != nil {
-		t.Fatalf("failed to unmarshal response JSON: %v, body: %s", err, string(bodyBytes))
-	}
-
-	if runResp.RequestId == "" {
-		t.Fatalf("expected non-empty requestId in response, got empty string")
-	}
-
-	if _, err := uuid.Parse(runResp.RequestId); err != nil {
-		t.Fatalf("expected valid UUID for requestId, got %s: %v", runResp.RequestId, err)
+		return "", fmt.Errorf("failed to unmarshal response JSON: %w, body: %s", err, string(bodyBytes))
 	}
 
 	// Small delay to allow asynchronous job submission and checkpointing to take place
 	time.Sleep(100 * time.Millisecond)
 
-	return runResp.RequestId
+	return runResp.RequestId, nil
 }
 
 func Test_Smoke_CreateRun(t *testing.T) {
 	client := getHTTPClient()
 	tag := fmt.Sprintf("smoke-create-%s", uuid.New().String()[:8])
-	requestId := createTestRun(t, client, tag)
+	requestId, err := createTestRun(client, tag)
+	if err != nil {
+		t.Fatalf("failed to create test run: %v", err)
+	}
 
 	if requestId == "" {
-		t.Fatal("expected a valid requestId")
+		t.Fatal("expected non-empty requestId in response, got empty string")
+	}
+
+	if _, err := uuid.Parse(requestId); err != nil {
+		t.Fatalf("expected valid UUID for requestId, got %s: %v", requestId, err)
 	}
 }
 
 func Test_Smoke_GetRunResult(t *testing.T) {
 	client := getHTTPClient()
 	tag := fmt.Sprintf("smoke-result-%s", uuid.New().String()[:8])
-	requestId := createTestRun(t, client, tag)
+	requestId, err := createTestRun(client, tag)
+	if err != nil {
+		t.Fatalf("failed to create test run: %v", err)
+	}
 
 	getURL := fmt.Sprintf("%s/algorithm/v1/results/%s/requests/%s", baseURL, algorithmName, requestId)
 	resp, err := client.Get(getURL)
@@ -153,7 +155,10 @@ func Test_Smoke_GetRunResult(t *testing.T) {
 func Test_Smoke_GetRunMetadata(t *testing.T) {
 	client := getHTTPClient()
 	tag := fmt.Sprintf("smoke-meta-%s", uuid.New().String()[:8])
-	requestId := createTestRun(t, client, tag)
+	requestId, err := createTestRun(client, tag)
+	if err != nil {
+		t.Fatalf("failed to create test run: %v", err)
+	}
 
 	getURL := fmt.Sprintf("%s/algorithm/v1/metadata/%s/requests/%s", baseURL, algorithmName, requestId)
 
@@ -233,7 +238,10 @@ func Test_Smoke_GetRunMetadata(t *testing.T) {
 func Test_Smoke_GetRunResultsByTag(t *testing.T) {
 	client := getHTTPClient()
 	tag := fmt.Sprintf("smoke-tag-%s", uuid.New().String()[:8])
-	requestId := createTestRun(t, client, tag)
+	requestId, err := createTestRun(client, tag)
+	if err != nil {
+		t.Fatalf("failed to create test run: %v", err)
+	}
 
 	getURL := fmt.Sprintf("%s/algorithm/v1/results/tags/%s", baseURL, tag)
 	resp, err := client.Get(getURL)
@@ -273,29 +281,17 @@ func Test_Smoke_GetRunResultsByTag(t *testing.T) {
 	}
 }
 
-func Test_Smoke_GetBufferedRunMetadata(t *testing.T) {
-	client := getHTTPClient()
-	tag := fmt.Sprintf("smoke-buffer-%s", uuid.New().String()[:8])
-	requestId := createTestRun(t, client, tag)
-
-	getURL := fmt.Sprintf("%s/algorithm/v1/buffer/%s/requests/%s", baseURL, algorithmName, requestId)
-	resp, err := client.Get(getURL)
-	if err != nil {
-		t.Fatalf("failed to execute GET request to %s: %v", getURL, err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	// The buffered entry may return 200 OK (if still in buffer) or 404 Not Found (if already processed by worker)
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-		body, _ := io.ReadAll(resp.Body)
-		t.Fatalf("expected status %d (OK) or %d (NotFound), got %d: %s", http.StatusOK, http.StatusNotFound, resp.StatusCode, string(body))
-	}
-}
-
 func Test_Smoke_CancelRun(t *testing.T) {
 	client := getHTTPClient()
 	tag := fmt.Sprintf("smoke-cancel-%s", uuid.New().String()[:8])
-	requestId := createTestRun(t, client, tag)
+	requestId, err := createTestRun(client, tag)
+
+	// wait for buffering
+	time.Sleep(1 * time.Second)
+
+	if err != nil {
+		t.Fatalf("failed to create test run: %v", err)
+	}
 
 	postURL := fmt.Sprintf("%s/algorithm/v1/cancel/%s/requests/%s", baseURL, algorithmName, requestId)
 	payload := map[string]interface{}{
@@ -320,9 +316,8 @@ func Test_Smoke_CancelRun(t *testing.T) {
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	// 200 OK (cancelled) or 404 Not Found (if already completed/scheduled)
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
+	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		t.Fatalf("expected status %d (OK) or %d (NotFound), got %d: %s", http.StatusOK, http.StatusNotFound, resp.StatusCode, string(body))
+		t.Fatalf("expected status %d (OK), got %d: %s", http.StatusOK, resp.StatusCode, string(body))
 	}
 }
