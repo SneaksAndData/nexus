@@ -9,8 +9,6 @@ definitions:
         $ref: '#/definitions/v1.NexusAlgorithmSpec'
       parentRequest:
         $ref: '#/definitions/models.AlgorithmRequestRef'
-      payloadValidFor:
-        type: string
       requestApiVersion:
         type: string
       tag:
@@ -64,8 +62,6 @@ definitions:
       parent:
         $ref: '#/definitions/models.AlgorithmRequestRef'
       payload_uri:
-        type: string
-      payload_valid_for:
         type: string
       received_at:
         type: string
@@ -172,7 +168,8 @@ definitions:
           +optional
       prefix:
         description: |-
-          Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.
+          Optional text to prepend to the name of each environment variable.
+          May consist of any printable ASCII characters except '='.
           +optional
         type: string
       secretRef:
@@ -185,7 +182,9 @@ definitions:
   v1.EnvVar:
     properties:
       name:
-        description: Name of the environment variable. Must be a C_IDENTIFIER.
+        description: |-
+          Name of the environment variable.
+          May consist of any printable ASCII characters except '='.
         type: string
       value:
         description: |-
@@ -222,6 +221,15 @@ definitions:
           Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`,
           spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
           +optional
+      fileKeyRef:
+        allOf:
+        - $ref: '#/definitions/v1.FileKeySelector'
+        description: |-
+          FileKeyRef selects a key of the env file.
+          Requires the EnvFiles feature gate to be enabled.
+
+          +featureGate=EnvFiles
+          +optional
       resourceFieldRef:
         allOf:
         - $ref: '#/definitions/v1.ResourceFieldSelector'
@@ -236,6 +244,49 @@ definitions:
           Selects a key of a secret in the pod's namespace
           +optional
     type: object
+  v1.FileKeySelector:
+    properties:
+      key:
+        description: |-
+          The key within the env file. An invalid key will prevent the pod from starting.
+          The keys defined within a source may consist of any printable ASCII characters except '='.
+          During Alpha stage of the EnvFiles feature gate, the key size is limited to 128 characters.
+          +required
+        type: string
+      optional:
+        description: |-
+          Specify whether the file or its key must be defined. If the file or key
+          does not exist, then the env var is not published.
+          If optional is set to true and the specified key does not exist,
+          the environment variable will not be set in the Pod's containers.
+
+          If optional is set to false and the specified key does not exist,
+          an error will be returned during Pod creation.
+          +optional
+          +default=false
+        type: boolean
+      path:
+        description: |-
+          The path within the volume from which to select the file.
+          Must be relative and may not contain the '..' path or start with '..'.
+          +required
+        type: string
+      volumeName:
+        description: |-
+          The name of the volume mount containing the env file.
+          +required
+        type: string
+    type: object
+  v1.MountPropagationMode:
+    enum:
+    - None
+    - HostToContainer
+    - Bidirectional
+    type: string
+    x-enum-varnames:
+    - MountPropagationNone
+    - MountPropagationHostToContainer
+    - MountPropagationBidirectional
   v1.NexusAlgorithmContainer:
     properties:
       image:
@@ -247,22 +298,41 @@ definitions:
       versionTag:
         type: string
     type: object
+  v1.NexusAlgorithmPayloadConfiguration:
+    properties:
+      payloadSerialization:
+        $ref: '#/definitions/v1.PayloadSerializationMode'
+      payloadValidFor:
+        type: string
+    type: object
   v1.NexusAlgorithmResources:
     properties:
       cpuLimit:
+        description: 'Deprecated: Use Limits instead'
         type: string
       customResources:
         additionalProperties:
           type: string
         type: object
-      memoryLimit:
+      defaultResourceQuota:
         type: string
+      limits:
+        $ref: '#/definitions/v1.ResourceList'
+      memoryLimit:
+        description: 'Deprecated: Use Limits instead'
+        type: string
+      requests:
+        $ref: '#/definitions/v1.ResourceList'
     type: object
   v1.NexusAlgorithmRuntimeEnvironment:
     properties:
       annotations:
         additionalProperties:
           type: string
+        type: object
+      configurationFileMounts:
+        additionalProperties:
+          $ref: '#/definitions/v1.VolumeMount'
         type: object
       deadlineSeconds:
         type: integer
@@ -276,6 +346,14 @@ definitions:
         type: array
       maximumRetries:
         type: integer
+      secretFileMounts:
+        additionalProperties:
+          $ref: '#/definitions/v1.VolumeMount'
+        type: object
+      storageMounts:
+        additionalProperties:
+          $ref: '#/definitions/v1.VolumeMount'
+        type: object
     type: object
   v1.NexusAlgorithmSpec:
     properties:
@@ -293,6 +371,8 @@ definitions:
         $ref: '#/definitions/v1.NexusDatadogIntegrationSettings'
       errorHandlingBehaviour:
         $ref: '#/definitions/v1.NexusErrorHandlingBehaviour'
+      payloadConfiguration:
+        $ref: '#/definitions/v1.NexusAlgorithmPayloadConfiguration'
       runtimeEnvironment:
         $ref: '#/definitions/v1.NexusAlgorithmRuntimeEnvironment'
       workgroupRef:
@@ -334,6 +414,24 @@ definitions:
         description: Path of the field to select in the specified API version.
         type: string
     type: object
+  v1.PayloadSerializationMode:
+    enum:
+    - backend
+    - s3
+    type: string
+    x-enum-varnames:
+    - SERIALIZE_TO_BACKEND
+    - SERIALIZE_TO_S3
+  v1.RecursiveReadOnlyMode:
+    enum:
+    - Disabled
+    - IfPossible
+    - Enabled
+    type: string
+    x-enum-varnames:
+    - RecursiveReadOnlyDisabled
+    - RecursiveReadOnlyIfPossible
+    - RecursiveReadOnlyEnabled
   v1.ResourceFieldSelector:
     properties:
       containerName:
@@ -350,6 +448,10 @@ definitions:
       resource:
         description: 'Required: resource to select'
         type: string
+    type: object
+  v1.ResourceList:
+    additionalProperties:
+      $ref: '#/definitions/resource.Quantity'
     type: object
   v1.SecretEnvSource:
     properties:
@@ -394,6 +496,69 @@ definitions:
           Specify whether the Secret or its key must be defined
           +optional
         type: boolean
+    type: object
+  v1.VolumeMount:
+    properties:
+      mountPath:
+        description: |-
+          Path within the container at which the volume should be mounted.  Must
+          not contain ':'.
+        type: string
+      mountPropagation:
+        allOf:
+        - $ref: '#/definitions/v1.MountPropagationMode'
+        description: |-
+          mountPropagation determines how mounts are propagated from the host
+          to container and the other way around.
+          When not set, MountPropagationNone is used.
+          This field is beta in 1.10.
+          When RecursiveReadOnly is set to IfPossible or to Enabled, MountPropagation must be None or unspecified
+          (which defaults to None).
+          +optional
+      name:
+        description: This must match the Name of a Volume.
+        type: string
+      readOnly:
+        description: |-
+          Mounted read-only if true, read-write otherwise (false or unspecified).
+          Defaults to false.
+          +optional
+        type: boolean
+      recursiveReadOnly:
+        allOf:
+        - $ref: '#/definitions/v1.RecursiveReadOnlyMode'
+        description: |-
+          RecursiveReadOnly specifies whether read-only mounts should be handled
+          recursively.
+
+          If ReadOnly is false, this field has no meaning and must be unspecified.
+
+          If ReadOnly is true, and this field is set to Disabled, the mount is not made
+          recursively read-only.  If this field is set to IfPossible, the mount is made
+          recursively read-only, if it is supported by the container runtime.  If this
+          field is set to Enabled, the mount is made recursively read-only if it is
+          supported by the container runtime, otherwise the pod will not be started and
+          an error will be generated to indicate the reason.
+
+          If this field is set to IfPossible or Enabled, MountPropagation must be set to
+          None (or be unspecified, which defaults to None).
+
+          If this field is not specified, it is treated as an equivalent of Disabled.
+          +optional
+      subPath:
+        description: |-
+          Path within the volume from which the container's volume should be mounted.
+          Defaults to "" (volume's root).
+          +optional
+        type: string
+      subPathExpr:
+        description: |-
+          Expanded path within the volume from which the container's volume should be mounted.
+          Behaves similarly to SubPath but environment variable references $(VAR_NAME) are expanded using the container's environment.
+          Defaults to "" (volume's root).
+          SubPathExpr and SubPath are mutually exclusive.
+          +optional
+        type: string
     type: object
 info:
   contact:
@@ -534,48 +699,6 @@ paths:
       summary: Read a run metadata
       tags:
       - metadata
-  /algorithm/v1/payload/{algorithmName}/requests/{requestId}:
-    get:
-      description: Retrieves payload sent by the client for the provided run
-      parameters:
-      - description: Algorithm name
-        in: path
-        name: algorithmName
-        required: true
-        type: string
-      - description: Request identifier
-        in: path
-        name: requestId
-        required: true
-        type: string
-      produces:
-      - text/plain
-      - text/html
-      - application/octet-stream
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "302":
-          description: Found
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Not Found
-          schema:
-            type: string
-      summary: Read a run payload
-      tags:
-      - payload
   /algorithm/v1/results/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves a result for the provided run
@@ -692,4 +815,45 @@ paths:
       summary: Create a new algorithm run
       tags:
       - run
+  /data/v1/payloads/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves payload sent by the client for the provided run
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - text/plain
+      - text/html
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a run payload
+      tags:
+      - payload
 swagger: "2.0"

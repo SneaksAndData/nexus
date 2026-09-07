@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.24-bookworm AS build-stage
+FROM --platform=$BUILDPLATFORM golang:1.26-bookworm AS build-stage
 
 ARG TARGETOS 
 ARG TARGETARCH
@@ -9,13 +9,14 @@ WORKDIR /app
 
 COPY . ./
 
-
-RUN go install github.com/DataDog/orchestrion@v1.6.1 \
+# puts deps into a cached layer
+RUN go install github.com/DataDog/orchestrion@v1.11.0 \
     && orchestrion pin \
     && go mod tidy \
     && go mod verify \
-    && go mod vendor \
-    && CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOFLAGS="${GOFLAGS} '-toolexec=orchestrion toolexec'" go build -ldflags "-X github.com/SneaksAndData/nexus-core/pkg/buildmeta.AppVersion=$APPVERSION -X github.com/SneaksAndData/nexus-core/pkg/buildmeta.BuildNumber=$BUILDNUMBER" -o /app -v ./...
+    && go mod vendor
+
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOFLAGS="${GOFLAGS} '-toolexec=orchestrion toolexec'" go build -ldflags "-X github.com/SneaksAndData/nexus-core/pkg/buildmeta.AppVersion=$APPVERSION -X github.com/SneaksAndData/nexus-core/pkg/buildmeta.BuildNumber=$BUILDNUMBER" -o /app -v ./...
 
 FROM --platform=$BUILDPLATFORM public.ecr.aws/amazonlinux/amazonlinux:2 AS aws-cli-stage
 

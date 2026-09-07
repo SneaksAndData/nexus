@@ -2,6 +2,9 @@ package services
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	v1 "github.com/SneaksAndData/nexus-core/pkg/apis/science/v1"
 	coremodels "github.com/SneaksAndData/nexus-core/pkg/checkpoint/models"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
@@ -19,8 +22,6 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/ktesting"
-	"testing"
-	"time"
 )
 
 type schedulerFixture struct {
@@ -48,7 +49,6 @@ func newFakeRequest() *coremodels.AlgorithmRequest {
 		RequestApiVersion:   "",
 		Tag:                 "",
 		ParentRequest:       nil,
-		PayloadValidFor:     "24h",
 	}
 }
 

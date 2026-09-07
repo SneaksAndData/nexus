@@ -3,20 +3,29 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
-	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 	"os"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/payload"
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/store/cassandra"
+	nexusconf "github.com/SneaksAndData/nexus-core/pkg/configurations"
 )
 
 func getExpectedConfig(storagePath string) *SchedulerConfig {
 	return &SchedulerConfig{
 		S3Buffer: request.S3BufferConfig{
+			PayloadStoragePath: storagePath,
+			RequestPayloadProxyConfiguration: &payload.RequestPayloadProxyConfiguration{
+				TenantId:          "test-tenant",
+				ServePathTemplate: "/data/v1/payloads/%s/%s",
+				SignSecret:        "test-secret",
+				ExternalName:      "localhost",
+				Insecure:          true,
+			},
 			BufferConfig: &request.BufferConfig{
-				PayloadStoragePath:         storagePath,
-				PayloadValidFor:            time.Hour * 24,
 				FailureRateMaxDelay:        time.Second * 1,
 				FailureRateBaseDelay:       time.Millisecond * 100,
 				RateLimitElementsPerSecond: 10,
@@ -28,17 +37,28 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 			Endpoint:        "http://127.0.0.1:9000",
 			Region:          "us-east-1",
 		},
-		AstraCqlStore: request.AstraBundleConfig{
+		AstraCqlStore: cassandra.AstraBundleConfig{
 			SecureConnectionBundleBase64: "base64value",
 			GatewayUser:                  "user",
 			GatewayPassword:              "password",
+			IndexesSupported:             true,
+			Keyspace:                     "nexus",
 		},
-		ScyllaCqlStore: request.ScyllaCqlStoreConfig{
-			Hosts:    []string{"127.0.0.1:9000"},
-			Port:     "",
-			User:     "",
-			Password: "",
-			LocalDC:  "",
+		ScyllaCqlStore: cassandra.ScyllaConfig{
+			Hosts:            []string{"127.0.0.1:9000"},
+			Port:             "",
+			User:             "",
+			Password:         "",
+			LocalDC:          "",
+			IndexesSupported: true,
+			Keyspace:         "nexus",
+		},
+		KeyspacesCqlStore: cassandra.KeyspacesConfig{
+			Hosts:    []string{"keyspaces.aws.com"},
+			Port:     "9042",
+			CaPath:   "/tmp/ca",
+			Region:   "us-east-1",
+			Keyspace: "nexus",
 		},
 		CqlStoreType:        CqlStoreAstra,
 		RuntimeNamespace:    "nexus",
@@ -64,7 +84,7 @@ func Test_LoadConfigFromEnv(t *testing.T) {
 	keyId := "test-key-id"
 	host1 := "127.0.0.1:9042"
 	host2 := "127.0.0.2:9042"
-	_ = os.Setenv("NEXUS__S3_BUFFER__BUFFER_CONFIG__PAYLOAD_STORAGE_PATH", storagePath)
+	_ = os.Setenv("NEXUS__S3_BUFFER__PAYLOAD_STORAGE_PATH", storagePath)
 	_ = os.Setenv("NEXUS__S3_BUFFER__ACCESS_KEY_ID", keyId)
 	_ = os.Setenv("NEXUS__SCYLLA_CQL_STORE__HOSTS", fmt.Sprintf("%s,%s", host1, host2))
 

@@ -3,6 +3,9 @@ package services
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/SneaksAndData/nexus-core/pkg/buildmeta"
 	coremodels "github.com/SneaksAndData/nexus-core/pkg/checkpoint/models"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
@@ -19,8 +22,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
-	"os"
-	"time"
 )
 
 const (
@@ -71,7 +72,7 @@ func (scheduler *RequestScheduler) Init(_ context.Context) (*RequestScheduler, e
 		AddFunc: scheduler.OnEvent,
 	})
 
-	if eventErr != nil {
+	if eventErr != nil { // coverage-ignore
 		return nil, eventErr
 	}
 
@@ -86,6 +87,7 @@ func (scheduler *RequestScheduler) Init(_ context.Context) (*RequestScheduler, e
 		scheduler.workerConfig.RateLimitElementsBurst,
 		scheduler.workerConfig.Workers,
 		scheduler.commit,
+		scheduler.handlerCommitFailure,
 		nil,
 	)
 
@@ -98,6 +100,7 @@ func (scheduler *RequestScheduler) Init(_ context.Context) (*RequestScheduler, e
 		scheduler.workerConfig.RateLimitElementsBurst,
 		scheduler.workerConfig.Workers,
 		scheduler.schedule,
+		scheduler.handleScheduleFailure,
 		scheduler.CommitActor,
 	)
 
@@ -110,6 +113,7 @@ func (scheduler *RequestScheduler) Init(_ context.Context) (*RequestScheduler, e
 		scheduler.workerConfig.RateLimitElementsBurst,
 		scheduler.workerConfig.Workers,
 		scheduler.lateSchedule,
+		scheduler.handleLateScheduleFailure,
 		scheduler.CommitActor,
 	)
 
@@ -153,7 +157,7 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 	}
 
 	// skip pods that no longer exist in informer cache
-	if pod == nil {
+	if pod == nil { // coverage-ignore
 		return
 	}
 
@@ -248,6 +252,10 @@ func (scheduler *RequestScheduler) commit(output *coremodels.CheckpointedRequest
 	return output.Id, nil
 }
 
+func (scheduler *RequestScheduler) handlerCommitFailure(failed *coremodels.CheckpointedRequest) { // coverage-ignore
+	scheduler.logger.V(0).Info("could not update %s/%s to RUNNING/COMPLETED state - submission will not be accounted correctly", "template", failed.Algorithm, "requestId", failed.Id)
+}
+
 func (scheduler *RequestScheduler) getShardByName(shardName string) *shards.ShardClient {
 	for _, shard := range scheduler.shardClients {
 		if shard.Name == shardName {
@@ -255,11 +263,11 @@ func (scheduler *RequestScheduler) getShardByName(shardName string) *shards.Shar
 		}
 	}
 
-	return nil
+	return nil // coverage-ignore
 }
 
 func (scheduler *RequestScheduler) schedule(output *request.BufferOutput) (*coremodels.CheckpointedRequest, error) {
-	if output == nil {
+	if output == nil { // coverage-ignore
 		return nil, fmt.Errorf("buffer has not provided any data to schedule")
 	}
 
@@ -276,7 +284,7 @@ func (scheduler *RequestScheduler) schedule(output *request.BufferOutput) (*core
 
 	if shard := scheduler.getShardByName(output.Workgroup.Cluster); shard != nil {
 		submitted, submitErr = shard.SendJob(shard.Namespace, &job)
-	} else {
+	} else { // coverage-ignore
 		return nil, fmt.Errorf("shard API server %s not configured", output.Workgroup.Cluster)
 	}
 
@@ -288,6 +296,17 @@ func (scheduler *RequestScheduler) schedule(output *request.BufferOutput) (*core
 	resultCheckpoint.JobUid = string(submitted.UID)
 
 	return resultCheckpoint, nil
+}
+
+func (scheduler *RequestScheduler) handleScheduleFailure(output *request.BufferOutput) {
+	scheduler.logger.V(0).Info("failed to schedule request in a target shard, marking submission as failed")
+
+	failed := output.Checkpoint.DeepCopy()
+	failed.LifecycleStage = coremodels.LifecycleStageSchedulingFailed
+	failed.AlgorithmFailureCause = "Internal error when scheduling. Please try again later."
+	failed.AlgorithmFailureDetails = "Target shard cluster didn't accept the submission. Please review service logs for errors."
+
+	_ = scheduler.buffer.Update(failed)
 }
 
 func (scheduler *RequestScheduler) lateSchedule(submission *LateSubmission) (*coremodels.CheckpointedRequest, error) {
@@ -321,11 +340,23 @@ func (scheduler *RequestScheduler) lateSchedule(submission *LateSubmission) (*co
 	return resultCheckpoint, nil
 }
 
+func (scheduler *RequestScheduler) handleLateScheduleFailure(submission *LateSubmission) {
+	scheduler.logger.V(0).Info("scheduling of a delayed request failed, will update lifecycle to failed", "request", submission.Checkpoint.Id, submission.Checkpoint.Algorithm)
+
+	failed := submission.Checkpoint.DeepCopy()
+	failed.LifecycleStage = coremodels.LifecycleStageSchedulingFailed
+
+	failed.AlgorithmFailureCause = "Internal error when scheduling. Please try again later."
+	failed.AlgorithmFailureDetails = "Target shard cluster didn't accept the submission. Please review service logs for errors."
+
+	_ = scheduler.buffer.Update(failed)
+}
+
 func (scheduler *RequestScheduler) ResolveParent(parentRequestId string, clusterName string) (*metav1.OwnerReference, error) {
 	if shard := scheduler.getShardByName(clusterName); shard != nil {
 		job, err := shard.FindJob(parentRequestId, scheduler.jobNamespace)
 
-		if err != nil {
+		if err != nil { // coverage-ignore
 			return nil, err
 		}
 
@@ -335,9 +366,9 @@ func (scheduler *RequestScheduler) ResolveParent(parentRequestId string, cluster
 			Name:       job.Name,
 			UID:        job.UID,
 		}, nil
-	} else {
-		return nil, fmt.Errorf("no shard matches provided name '%s'", clusterName)
 	}
+
+	return nil, fmt.Errorf("no shard matches provided name '%s'", clusterName)
 }
 
 func (scheduler *RequestScheduler) CancelRun(requestId string, algorithmName string, initiator string, reason string, policy metav1.DeletionPropagation) (exists bool, err error) {
@@ -345,7 +376,7 @@ func (scheduler *RequestScheduler) CancelRun(requestId string, algorithmName str
 		if _, err := shard.FindJob(requestId, scheduler.jobNamespace); err == nil {
 
 			checkpoint, err := scheduler.buffer.Get(requestId, algorithmName)
-			if err != nil {
+			if err != nil { // coverage-ignore
 				return true, err
 			}
 
@@ -355,7 +386,7 @@ func (scheduler *RequestScheduler) CancelRun(requestId string, algorithmName str
 			cancelled.AlgorithmFailureDetails = fmt.Sprintf("Run cancelled, reason: '%s'", reason)
 			err = scheduler.buffer.Update(cancelled)
 
-			if err != nil {
+			if err != nil { // coverage-ignore
 				return true, err
 			}
 

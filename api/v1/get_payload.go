@@ -1,9 +1,15 @@
 package v1
 
 import (
-	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
+	"net/url"
+
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/payload"
+	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
+	"github.com/SneaksAndData/nexus-core/pkg/urlsign"
+	"github.com/gin-gonic/gin"
+	"k8s.io/klog/v2"
 )
 
 // GetRunPayload godoc
@@ -16,21 +22,30 @@ import (
 //	 	@Produce        octet-stream
 //		@Param			algorithmName	path		string	true	"Algorithm name"
 //		@Param			requestId	path		string	true	"Request identifier"
-//		@Success		200	{string}    string
-//		@Success		302	{string}    string
+//		@Success		200	{object}    interface{}
 //		@Failure		400	{string}	string
+//		@Failure		403	{string}	string
 //		@Failure		404	{string}	string
 //		@Failure		401	{string}	string
-//		@Router			/algorithm/v1/payload/{algorithmName}/requests/{requestId} [get]
-func GetRunPayload(buffer request.Buffer) gin.HandlerFunc {
+//		@Router			/data/v1/payloads/{algorithmName}/requests/{requestId} [get]
+func GetRunPayload(buffer request.Buffer, proxyConfig *payload.RequestPayloadProxyConfiguration, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// TODO: log errors
 		algorithmName := ctx.Param("algorithmName")
 		requestId := ctx.Param("requestId")
+		parsed, _ := url.Parse(ctx.Request.URL.String())
 
-		result, err := buffer.Get(requestId, algorithmName)
+		err := urlsign.Verify(*parsed, []byte(proxyConfig.SignSecret))
 
 		if err != nil {
+			logger.V(0).Error(err, "Unauthorized payload url: %s", parsed.String())
+			ctx.String(http.StatusForbidden, `Invalid payload address: %s`, parsed.String())
+			return
+		}
+
+		result, err := buffer.GetPersisted(requestId, algorithmName)
+
+		if err != nil {
+			logger.V(0).Error(err, "Failure when reading a persisted payload", "requestId", requestId, "algorithmName", algorithmName)
 			ctx.String(http.StatusBadRequest, `Failed to find a run for %s`, requestId)
 			return
 		}
@@ -40,11 +55,15 @@ func GetRunPayload(buffer request.Buffer) gin.HandlerFunc {
 			return
 		}
 
-		if result.PayloadUri == "" {
-			ctx.String(http.StatusExpectationFailed, `Specified request %s does not have a serialized payload`, requestId)
+		var payloadObj interface{}
+		err = json.Unmarshal(result, &payloadObj)
+
+		if err != nil {
+			logger.V(0).Error(err, "Failure when parsing a persisted payload", "requestId", requestId, "algorithmName", algorithmName)
+			ctx.String(http.StatusBadRequest, `Failed to parse payload: %s`, result)
 			return
 		}
 
-		ctx.Redirect(http.StatusFound, result.PayloadUri)
+		ctx.JSON(http.StatusOK, payloadObj)
 	}
 }

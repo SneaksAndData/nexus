@@ -1,7 +1,12 @@
 s3-buffer:
+  payload-storage-path: s3://bucket/nexus/payloads
+  request-payload-proxy-configuration:
+    tenant-id: "test-tenant"
+    serve-path-template: "/data/v1/payloads/%s/requests/%s"
+    sign-secret: "test-secret"
+    external-name: localhost
+    insecure: true
   buffer-config:
-    payload-storage-path: s3a://bucket/nexus/payloads
-    payload-valid-for: 24h
     failure-rate-base-delay: 100ms
     failure-rate-max-delay: 1s
     rate-limit-elements-per-second: 10

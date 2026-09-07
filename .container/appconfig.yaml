@@ -1,7 +1,12 @@
 s3-buffer:
+  payload-storage-path: ""
+  request-payload-proxy-configuration:
+    tenant-id: ""
+    serve-path-template: ""
+    sign-secret: ""
+    external-name: ""
+    insecure: false
   buffer-config:
-    payload-storage-path: ""
-    payload-valid-for: 24h
     failure-rate-base-delay: 100ms
     failure-rate-max-delay: 1s
     rate-limit-elements-per-second: 10
@@ -17,13 +22,23 @@ astra-cql-store: # can be read from environment
   secure-connection-bundle-base64: ""
   gateway-user: ""
   gateway-password: ""
+  indexes-supported: true
+  keyspace: ""
 scylla-cql-store:
   hosts: []
   port: ""
   user: ""
   password: ""
   local-dc: ""
-cql-store-type: scylla
+  indexes-supported: true
+  keyspace: ""
+keyspaces-cql-store:
+  hosts: []
+  port: ""
+  ca-path: ""
+  region: ""
+  keyspace: ""
+cql-store-type: cassandra-scylla
 kube-config-path: ""
 shard-kube-config-path: ""
 max-payload-size: ""

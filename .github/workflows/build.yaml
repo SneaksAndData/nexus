@@ -19,7 +19,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.*'
+          go-version: '1.26.*'
           
       - name: Check Format
         run: gofmt -d ./
@@ -37,9 +37,15 @@ jobs:
         run: go build -v ./...
         
       - name: Lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.1.0
+          version: v2.12.2
+
+      - name: Setup just
+        uses: extractions/setup-just@v3
+
+      - name: Setup integration tests
+        run: just up
           
       - name: Test
         env:
