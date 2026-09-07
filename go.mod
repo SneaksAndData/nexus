@@ -3,7 +3,7 @@ module github.com/SneaksAndData/nexus
 go 1.26.0
 
 require (
-	github.com/SneaksAndData/nexus-core v1.4.5-0.20260907121042-9345af41adbe
+	github.com/SneaksAndData/nexus-core v1.4.5-0.20260907122709-3a20cbfb2857
 	github.com/aws/smithy-go v1.27.2
 	github.com/gin-gonic/gin v1.12.0
 	github.com/google/uuid v1.6.0
