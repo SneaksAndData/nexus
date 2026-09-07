@@ -52,7 +52,14 @@ func getHTTPClient() *http.Client {
 }
 
 func createTestRun(client *http.Client, tag string) (string, error) {
+	return createTestRunWithDryRun(client, tag, false)
+}
+
+func createTestRunWithDryRun(client *http.Client, tag string, dryRun bool) (string, error) {
 	postURL := fmt.Sprintf("%s/algorithm/v1/run/%s", baseURL, algorithmName)
+	if dryRun {
+		postURL = fmt.Sprintf("%s?dryRun=true", postURL)
+	}
 
 	payload := map[string]interface{}{
 		"algorithmParameters": map[string]interface{}{
@@ -114,6 +121,60 @@ func Test_Smoke_CreateRun(t *testing.T) {
 
 	if _, err := uuid.Parse(requestId); err != nil {
 		t.Fatalf("expected valid UUID for requestId, got %s: %v", requestId, err)
+	}
+}
+
+func Test_Smoke_CreateRun_DryRun(t *testing.T) {
+	client := getHTTPClient()
+	tag := fmt.Sprintf("smoke-dryrun-%s", uuid.New().String()[:8])
+	requestId, err := createTestRunWithDryRun(client, tag, true)
+	if err != nil {
+		t.Fatalf("failed to create dry run test run: %v", err)
+	}
+
+	if requestId == "" {
+		t.Fatal("expected non-empty requestId in response, got empty string")
+	}
+
+	if _, err := uuid.Parse(requestId); err != nil {
+		t.Fatalf("expected valid UUID for requestId, got %s: %v", requestId, err)
+	}
+
+	getURL := fmt.Sprintf("%s/algorithm/v1/results/%s/requests/%s", baseURL, algorithmName, requestId)
+	var result requestResultResponse
+	deadline := time.Now().Add(10 * time.Second)
+
+	for {
+		resp, err := client.Get(getURL)
+		if err != nil {
+			t.Fatalf("failed to execute GET request to %s: %v", getURL, err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(resp.Body)
+			_ = resp.Body.Close()
+			t.Fatalf("expected status %d (OK), got %d: %s", http.StatusOK, resp.StatusCode, string(body))
+		}
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			t.Fatalf("failed to read response body: %v", err)
+		}
+
+		if err := json.Unmarshal(bodyBytes, &result); err != nil {
+			t.Fatalf("failed to unmarshal result JSON: %v, body: %s", err, string(bodyBytes))
+		}
+
+		if result.Status == "COMPLETED" {
+			break
+		}
+
+		if time.Now().After(deadline) {
+			t.Fatalf("timed out waiting for dry run request %s to reach COMPLETED stage (status: %s)", requestId, result.Status)
+		}
+
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 

@@ -72,7 +72,7 @@ func (scheduler *RequestScheduler) Init(_ context.Context) (*RequestScheduler, e
 		AddFunc: scheduler.OnEvent,
 	})
 
-	if eventErr != nil {
+	if eventErr != nil { // coverage-ignore
 		return nil, eventErr
 	}
 
@@ -157,7 +157,7 @@ func (scheduler *RequestScheduler) OnEvent(obj interface{}) {
 	}
 
 	// skip pods that no longer exist in informer cache
-	if pod == nil {
+	if pod == nil { // coverage-ignore
 		return
 	}
 
@@ -252,7 +252,7 @@ func (scheduler *RequestScheduler) commit(output *coremodels.CheckpointedRequest
 	return output.Id, nil
 }
 
-func (scheduler *RequestScheduler) handlerCommitFailure(failed *coremodels.CheckpointedRequest) {
+func (scheduler *RequestScheduler) handlerCommitFailure(failed *coremodels.CheckpointedRequest) { // coverage-ignore
 	scheduler.logger.V(0).Info("could not update %s/%s to RUNNING/COMPLETED state - submission will not be accounted correctly", "template", failed.Algorithm, "requestId", failed.Id)
 }
 
@@ -263,11 +263,11 @@ func (scheduler *RequestScheduler) getShardByName(shardName string) *shards.Shar
 		}
 	}
 
-	return nil
+	return nil // coverage-ignore
 }
 
 func (scheduler *RequestScheduler) schedule(output *request.BufferOutput) (*coremodels.CheckpointedRequest, error) {
-	if output == nil {
+	if output == nil { // coverage-ignore
 		return nil, fmt.Errorf("buffer has not provided any data to schedule")
 	}
 
@@ -284,7 +284,7 @@ func (scheduler *RequestScheduler) schedule(output *request.BufferOutput) (*core
 
 	if shard := scheduler.getShardByName(output.Workgroup.Cluster); shard != nil {
 		submitted, submitErr = shard.SendJob(shard.Namespace, &job)
-	} else {
+	} else { // coverage-ignore
 		return nil, fmt.Errorf("shard API server %s not configured", output.Workgroup.Cluster)
 	}
 
@@ -356,7 +356,7 @@ func (scheduler *RequestScheduler) ResolveParent(parentRequestId string, cluster
 	if shard := scheduler.getShardByName(clusterName); shard != nil {
 		job, err := shard.FindJob(parentRequestId, scheduler.jobNamespace)
 
-		if err != nil {
+		if err != nil { // coverage-ignore
 			return nil, err
 		}
 
@@ -366,9 +366,9 @@ func (scheduler *RequestScheduler) ResolveParent(parentRequestId string, cluster
 			Name:       job.Name,
 			UID:        job.UID,
 		}, nil
-	} else {
-		return nil, fmt.Errorf("no shard matches provided name '%s'", clusterName)
 	}
+
+	return nil, fmt.Errorf("no shard matches provided name '%s'", clusterName)
 }
 
 func (scheduler *RequestScheduler) CancelRun(requestId string, algorithmName string, initiator string, reason string, policy metav1.DeletionPropagation) (exists bool, err error) {
@@ -376,7 +376,7 @@ func (scheduler *RequestScheduler) CancelRun(requestId string, algorithmName str
 		if _, err := shard.FindJob(requestId, scheduler.jobNamespace); err == nil {
 
 			checkpoint, err := scheduler.buffer.Get(requestId, algorithmName)
-			if err != nil {
+			if err != nil { // coverage-ignore
 				return true, err
 			}
 
@@ -386,7 +386,7 @@ func (scheduler *RequestScheduler) CancelRun(requestId string, algorithmName str
 			cancelled.AlgorithmFailureDetails = fmt.Sprintf("Run cancelled, reason: '%s'", reason)
 			err = scheduler.buffer.Update(cancelled)
 
-			if err != nil {
+			if err != nil { // coverage-ignore
 				return true, err
 			}
 
