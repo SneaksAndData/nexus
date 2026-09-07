@@ -20,3 +20,10 @@ create table nexus.checkpoints
     parent                    text,
     PRIMARY KEY ((algorithm, id))
 );
+
+create index submission_tag ON nexus.checkpoints (tag);
+
+create index host ON nexus.checkpoints (received_by_host);
+
+create index lifecycle_stage ON nexus.checkpoints (lifecycle_stage);
+

@@ -36,6 +36,7 @@ coverage.xml
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+coverdir/
 
 # Dependency directories (remove the comment below to include it)
 vendor/
