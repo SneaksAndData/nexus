@@ -23,7 +23,7 @@ spec:
     image: nexus-hello
     registry: ghcr.io/sneaksanddata
     serviceAccountName: nexus
-    versionTag: 0.1.2
+    versionTag: 0.1.3-4-gafebf38
   datadogIntegrationSettings:
     mountDatadogSocket: true
   errorHandlingBehaviour:
