@@ -30,13 +30,26 @@ start-kind-cluster:
 
 # Run all tests
 test:
-    go test -v ./...
+    APPLICATION_ENVIRONMENT=units go test -v ./...
+
+# Run all tests with coverage across both indexed and non-indexed store configurations
+test-all:
+    mkdir -p "$PWD/coverdir"
+    @echo "==> Running tests with INDEXES_SUPPORTED=true"
+    APPLICATION_ENVIRONMENT=units go test -v ./... -coverprofile="$PWD/coverdir/cover-indexed.out" -covermode=atomic -coverpkg=./...
+    @echo "==> Switching to INDEXES_SUPPORTED=false"
+    just switch-store-indexes "false"
+    @echo "==> Running tests with INDEXES_SUPPORTED=false"
+    APPLICATION_ENVIRONMENT=units go test -v ./... -coverprofile="$PWD/coverdir/cover-bare.out" -covermode=atomic -coverpkg=./...
+    @echo "==> Merging coverage profiles into cover.out"
+    go run github.com/wadey/gocovmerge@latest "$PWD/coverdir/cover-indexed.out" "$PWD/coverdir/cover-bare.out" > "$PWD/cover.out"
 
 # Cleanup CI environment
 stop:
     @echo "🧹 Cleaning up..."
     docker rm -f scylla minio 2>/dev/null || true
     kind delete cluster --name {{NEXUS_CLUSTER_NAME}}
+    rm -f cover-indexed.out cover-bare.out cover.out
 
 # View logs
 logs name="":
@@ -58,11 +71,11 @@ create-namespace:
     kubectl create namespace nexus --dry-run=client -o yaml | kubectl apply -f -
 
 # install chart
-deploy-chart:
+deploy-chart indexes="true":
     kubectl create secret generic cassandra-credentials \
         --namespace nexus \
         --from-literal=NEXUS__SCYLLA_CQL_STORE__HOSTS="scylla.nexus.svc.cluster.local" \
-        --from-literal=NEXUS__SCYLLA_CQL_STORE__INDEXES_SUPPORTED="true" \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__INDEXES_SUPPORTED="{{indexes}}" \
         --from-literal=NEXUS__SCYLLA_CQL_STORE__USER="cassandra" \
         --from-literal=NEXUS__SCYLLA_CQL_STORE__PASSWORD="cassandra" \
         --from-literal=NEXUS__SCYLLA_CQL_STORE__KEYSPACE="nexus" --dry-run=client -o yaml | kubectl apply -f -
@@ -87,6 +100,18 @@ deploy-chart:
         --set scheduler.config.s3Buffer.s3Credentials.secretName="nexus-s3" \
         --set scheduler.config.s3Buffer.processing.payloadProxy.externalName="nexus.nexus.svc.cluster.local:8080" \
         --set scheduler.config.s3Buffer.processing.payloadProxy.insecure="true"
+
+# switch Cassandra store index mode and rollout deployment
+switch-store-indexes indexes="false":
+    kubectl create secret generic cassandra-credentials \
+        --namespace nexus \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__HOSTS="scylla.nexus.svc.cluster.local" \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__INDEXES_SUPPORTED="{{indexes}}" \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__USER="cassandra" \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__PASSWORD="cassandra" \
+        --from-literal=NEXUS__SCYLLA_CQL_STORE__KEYSPACE="nexus" --dry-run=client -o yaml | kubectl apply -f -
+    kubectl rollout restart deployment/{{NEXUS_CHART_NAME}} -n nexus
+    kubectl rollout status deployment/{{NEXUS_CHART_NAME}} -n nexus --timeout=120s
 
 # cleanup
 remove-chart:

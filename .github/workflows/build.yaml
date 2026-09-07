@@ -50,8 +50,8 @@ jobs:
       - name: Test
         env:
           APPLICATION_ENVIRONMENT: units
-        run: go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
-        
+        run: just test-all
+
       - name: Check Coverage
         id: coverage
         uses: vladopajic/go-test-coverage@v2
