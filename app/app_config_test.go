@@ -59,6 +59,7 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 			CaPath:   "/tmp/ca",
 			Region:   "us-east-1",
 			Keyspace: "nexus",
+			UseIRSA:  false,
 		},
 		CqlStoreType:        CqlStoreAstra,
 		RuntimeNamespace:    "nexus",

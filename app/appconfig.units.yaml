@@ -36,6 +36,7 @@ keyspaces-cql-store:
   ca-path: "/tmp/ca"
   region: "us-east-1"
   keyspace: "nexus"
+  use-irsa: false
 cql-store-type: cassandra-astra
 kube-config-path: "/tmp/nexus-test"
 shard-kube-config-path: "/tmp/shards"

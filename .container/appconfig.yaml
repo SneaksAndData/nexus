@@ -38,6 +38,7 @@ keyspaces-cql-store:
   ca-path: ""
   region: ""
   keyspace: ""
+  use-irsa: false
 cql-store-type: cassandra-scylla
 kube-config-path: ""
 shard-kube-config-path: ""
