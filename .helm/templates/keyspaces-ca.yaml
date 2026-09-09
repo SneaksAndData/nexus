@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nexus-keyspaces-ca
+  name: {{ template "app.name" . }}-keyspaces-ca
 data:
   ca: |
     -----BEGIN CERTIFICATE-----

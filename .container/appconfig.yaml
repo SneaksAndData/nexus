@@ -34,7 +34,7 @@ scylla-cql-store:
   keyspace: ""
 keyspaces-cql-store:
   hosts: []
-  port: ""
+  port: 9142
   ca-path: ""
   region: ""
   keyspace: ""

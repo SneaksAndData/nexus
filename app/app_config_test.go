@@ -55,7 +55,7 @@ func getExpectedConfig(storagePath string) *SchedulerConfig {
 		},
 		KeyspacesCqlStore: cassandra.KeyspacesConfig{
 			Hosts:    []string{"keyspaces.aws.com"},
-			Port:     "9042",
+			Port:     9042,
 			CaPath:   "/tmp/ca",
 			Region:   "us-east-1",
 			Keyspace: "nexus",

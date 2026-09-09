@@ -142,16 +142,17 @@ spec:
           {{- end }}
             - secretRef:
                 name: {{ required "A sign key secret name (s3Buffer.processing.payloadProxy.signSecretName) was not provided" .Values.scheduler.config.s3Buffer.processing.payloadProxy.signSecretName }}
-          {{ if eq .Values.scheduler.config.checkpointStore.type "cassandra-keyspaces" }}
-            - configMapRef:
-                name: nexus-keyspaces-ca
+          {{- if .Values.extraEnvFrom }}
+            {{- with .Values.extraEnvFrom }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
-        {{- if .Values.extraEnvFrom }}
-          {{- with .Values.extraEnvFrom }}
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-        {{- end }}
           volumeMounts:
+        {{- if eq .Values.scheduler.config.checkpointStore.type "cassandra-keyspaces" }}
+          - name: keyspaces-certificates
+            mountPath: /opt/keyspaces/ca
+            subPath: ca
+        {{- end }}
         {{- if .Values.scheduler.config.shardKubeConfigPath }}
           - name: shards-kube-config
             mountPath: {{ .Values.scheduler.config.shardKubeConfigPath }}
@@ -169,6 +170,11 @@ spec:
           {{- toYaml . | nindent 12 }}
         {{- end }}
       volumes:
+       {{- if eq .Values.scheduler.config.checkpointStore.type "cassandra-keyspaces" }}
+        - name: keyspaces-certificates
+          configMap:
+            name: {{ include "app.name" . }}-keyspaces-ca
+       {{- end }}
        {{- if .Values.scheduler.config.shardKubeConfigPath }}
         - name: shards-kube-config
           secret:

@@ -32,7 +32,7 @@ scylla-cql-store:
 keyspaces-cql-store:
   hosts:
     - keyspaces.aws.com
-  port: "9042"
+  port: 9042
   ca-path: "/tmp/ca"
   region: "us-east-1"
   keyspace: "nexus"
