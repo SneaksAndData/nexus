@@ -149,9 +149,9 @@ spec:
           {{- end }}
           volumeMounts:
         {{- if eq .Values.scheduler.config.checkpointStore.type "cassandra-keyspaces" }}
-            - name: keyspaces-certificates
-              mountPath: /opt/keyspaces/ca
-              subPath: ca
+          - name: keyspaces-certificates
+            mountPath: /opt/keyspaces/ca
+            subPath: ca
         {{- end }}
         {{- if .Values.scheduler.config.shardKubeConfigPath }}
           - name: shards-kube-config
