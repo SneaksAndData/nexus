@@ -142,11 +142,11 @@ spec:
           {{- end }}
             - secretRef:
                 name: {{ required "A sign key secret name (s3Buffer.processing.payloadProxy.signSecretName) was not provided" .Values.scheduler.config.s3Buffer.processing.payloadProxy.signSecretName }}
-        {{- if .Values.extraEnvFrom }}
-          {{- with .Values.extraEnvFrom }}
-            {{- toYaml . | nindent 12 }}
+          {{- if .Values.extraEnvFrom }}
+            {{- with .Values.extraEnvFrom }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
-        {{- end }}
           volumeMounts:
         {{- if eq .Values.scheduler.config.checkpointStore.type "cassandra-keyspaces" }}
             - name: keyspaces-certificates
