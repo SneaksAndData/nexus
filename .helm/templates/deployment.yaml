@@ -173,7 +173,7 @@ spec:
        {{- if eq .Values.scheduler.config.checkpointStore.type "cassandra-keyspaces" }}
         - name: keyspaces-certificates
           configMap:
-            name: {{ template "app.name" . }}-keyspaces-ca
+            name: {{ include "app.name" . }}-keyspaces-ca
        {{- end }}
        {{- if .Values.scheduler.config.shardKubeConfigPath }}
         - name: shards-kube-config
