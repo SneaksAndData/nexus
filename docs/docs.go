@@ -208,6 +208,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/algorithm/v1/payload/{algorithmName}/requests/{requestId}": {
+            "get": {
+                "description": "Retrieves payload sent by the client for the provided run (legacy)",
+                "produces": [
+                    "text/plain",
+                    "text/html",
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "payload"
+                ],
+                "summary": "Read a run payload (legacy)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "302": {
+                        "description": "Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/algorithm/v1/results/tags/{requestTag}": {
             "get": {
                 "description": "Read results of all runs with a matching tag",
@@ -789,10 +851,16 @@ const docTemplate = `{
         "v1.NexusAlgorithmPayloadConfiguration": {
             "type": "object",
             "properties": {
-                "payloadSerialization": {
-                    "$ref": "#/definitions/v1.PayloadSerializationMode"
+                "payloadSerializationMode": {
+                    "description": "+kubebuilder:default:=\"s3\"\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.PayloadSerializationMode"
+                        }
+                    ]
                 },
                 "payloadValidFor": {
+                    "description": "+kubebuilder:default:=\"24h\"\n+optional",
                     "type": "string"
                 }
             }
@@ -811,6 +879,7 @@ const docTemplate = `{
                     }
                 },
                 "defaultResourceQuota": {
+                    "description": "+kubebuilder:default:=\"0.1\"\n+optional",
                     "type": "string"
                 },
                 "limits": {
@@ -897,7 +966,12 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.NexusErrorHandlingBehaviour"
                 },
                 "payloadConfiguration": {
-                    "$ref": "#/definitions/v1.NexusAlgorithmPayloadConfiguration"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusAlgorithmPayloadConfiguration"
+                        }
+                    ]
                 },
                 "runtimeEnvironment": {
                     "$ref": "#/definitions/v1.NexusAlgorithmRuntimeEnvironment"

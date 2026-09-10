@@ -300,9 +300,16 @@ definitions:
     type: object
   v1.NexusAlgorithmPayloadConfiguration:
     properties:
-      payloadSerialization:
-        $ref: '#/definitions/v1.PayloadSerializationMode'
+      payloadSerializationMode:
+        allOf:
+        - $ref: '#/definitions/v1.PayloadSerializationMode'
+        description: |-
+          +kubebuilder:default:="s3"
+          +optional
       payloadValidFor:
+        description: |-
+          +kubebuilder:default:="24h"
+          +optional
         type: string
     type: object
   v1.NexusAlgorithmResources:
@@ -315,6 +322,9 @@ definitions:
           type: string
         type: object
       defaultResourceQuota:
+        description: |-
+          +kubebuilder:default:="0.1"
+          +optional
         type: string
       limits:
         $ref: '#/definitions/v1.ResourceList'
@@ -372,7 +382,9 @@ definitions:
       errorHandlingBehaviour:
         $ref: '#/definitions/v1.NexusErrorHandlingBehaviour'
       payloadConfiguration:
-        $ref: '#/definitions/v1.NexusAlgorithmPayloadConfiguration'
+        allOf:
+        - $ref: '#/definitions/v1.NexusAlgorithmPayloadConfiguration'
+        description: +optional
       runtimeEnvironment:
         $ref: '#/definitions/v1.NexusAlgorithmRuntimeEnvironment'
       workgroupRef:
@@ -699,6 +711,48 @@ paths:
       summary: Read a run metadata
       tags:
       - metadata
+  /algorithm/v1/payload/{algorithmName}/requests/{requestId}:
+    get:
+      description: Retrieves payload sent by the client for the provided run (legacy)
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      produces:
+      - text/plain
+      - text/html
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "302":
+          description: Found
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Read a run payload (legacy)
+      tags:
+      - payload
   /algorithm/v1/results/{algorithmName}/requests/{requestId}:
     get:
       description: Retrieves a result for the provided run
