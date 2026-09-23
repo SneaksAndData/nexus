@@ -15,7 +15,7 @@
   },
   "servers": [
     {
-      "url": "/algorithm/v1"
+      "url": "/"
     }
   ],
   "paths": {
@@ -994,6 +994,11 @@
           "200": {
             "description": "OK",
             "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              },
               "text/plain": {
                 "schema": {
                   "type": "object"
@@ -1009,6 +1014,11 @@
           "400": {
             "description": "Bad Request",
             "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -1024,6 +1034,11 @@
           "401": {
             "description": "Unauthorized",
             "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -1039,6 +1054,11 @@
           "403": {
             "description": "Forbidden",
             "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -1054,6 +1074,11 @@
           "404": {
             "description": "Not Found",
             "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "text/plain": {
                 "schema": {
                   "type": "string"

@@ -17,6 +17,7 @@ import (
 //	@Summary		Read a run payload
 //	@Description	Retrieves payload sent by the client for the provided run
 //	@Tags			payload
+//	@Produce		json
 //	@Produce		plain
 //	@Produce		html
 //	@Param			algorithmName	path		string	true	"Algorithm name"

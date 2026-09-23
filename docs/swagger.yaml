@@ -1,4 +1,3 @@
-basePath: /algorithm/v1
 definitions:
   models.AlgorithmRequest:
     properties:
@@ -954,6 +953,7 @@ paths:
         required: true
         type: string
       produces:
+      - application/json
       - text/plain
       - text/html
       responses:

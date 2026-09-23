@@ -13,7 +13,6 @@
         },
         "version": "1.0"
     },
-    "basePath": "/algorithm/v1",
     "paths": {
         "/algorithm/v1/buffer/{algorithmName}/requests/{requestId}": {
             "get": {
@@ -501,6 +500,7 @@
             "get": {
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
+                    "application/json",
                     "text/plain",
                     "text/html"
                 ],

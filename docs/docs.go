@@ -508,6 +508,7 @@ const docTemplate = `{
             "get": {
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
+                    "application/json",
                     "text/plain",
                     "text/html"
                 ],
@@ -1261,7 +1262,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "/algorithm/v1",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Nexus Scheduler API",
 	Description:      "Nexus Scheduler API specification. All Nexus supported clients conform to this spec.",

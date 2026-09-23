@@ -90,8 +90,6 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @BasePath  /algorithm/v1
 func main() {
 	ctx := signals.SetupSignalHandler()
 	appConfig := nexusconf.LoadConfig[app.SchedulerConfig](ctx)
