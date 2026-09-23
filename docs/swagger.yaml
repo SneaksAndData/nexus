@@ -97,23 +97,6 @@ definitions:
       status:
         type: string
     type: object
-  resource.Quantity:
-    properties:
-      Format:
-        enum:
-        - DecimalExponent
-        - BinarySI
-        - DecimalSI
-        type: string
-        x-enum-comments:
-          BinarySI: e.g., 12Mi (12 * 2^20)
-          DecimalExponent: e.g., 12e6
-          DecimalSI: e.g., 12M  (12 * 10^6)
-        x-enum-varnames:
-        - DecimalExponent
-        - BinarySI
-        - DecimalSI
-    type: object
   v1.ConfigMapEnvSource:
     properties:
       name:
@@ -478,18 +461,17 @@ definitions:
           +optional
         type: string
       divisor:
-        allOf:
-        - $ref: '#/definitions/resource.Quantity'
         description: |-
           Specifies the output format of the exposed resources, defaults to "1"
           +optional
+        type: string
       resource:
         description: 'Required: resource to select'
         type: string
     type: object
   v1.ResourceList:
     additionalProperties:
-      $ref: '#/definitions/resource.Quantity'
+      type: string
     type: object
   v1.SecretEnvSource:
     properties:

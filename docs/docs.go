@@ -715,29 +715,6 @@ const docTemplate = `{
                 }
             }
         },
-        "resource.Quantity": {
-            "type": "object",
-            "properties": {
-                "Format": {
-                    "type": "string",
-                    "enum": [
-                        "DecimalExponent",
-                        "BinarySI",
-                        "DecimalSI"
-                    ],
-                    "x-enum-comments": {
-                        "BinarySI": "e.g., 12Mi (12 * 2^20)",
-                        "DecimalExponent": "e.g., 12e6",
-                        "DecimalSI": "e.g., 12M  (12 * 10^6)"
-                    },
-                    "x-enum-varnames": [
-                        "DecimalExponent",
-                        "BinarySI",
-                        "DecimalSI"
-                    ]
-                }
-            }
-        },
         "v1.ConfigMapEnvSource": {
             "type": "object",
             "properties": {
@@ -1166,11 +1143,7 @@ const docTemplate = `{
                 },
                 "divisor": {
                     "description": "Specifies the output format of the exposed resources, defaults to \"1\"\n+optional",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/resource.Quantity"
-                        }
-                    ]
+                    "type": "string"
                 },
                 "resource": {
                     "description": "Required: resource to select",
@@ -1181,7 +1154,7 @@ const docTemplate = `{
         "v1.ResourceList": {
             "type": "object",
             "additionalProperties": {
-                "$ref": "#/definitions/resource.Quantity"
+                "type": "string"
             }
         },
         "v1.SecretEnvSource": {

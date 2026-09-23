@@ -1246,29 +1246,6 @@
           }
         }
       },
-      "resource.Quantity": {
-        "type": "object",
-        "properties": {
-          "Format": {
-            "type": "string",
-            "enum": [
-              "DecimalExponent",
-              "BinarySI",
-              "DecimalSI"
-            ],
-            "x-enum-varnames": [
-              "DecimalExponent",
-              "BinarySI",
-              "DecimalSI"
-            ],
-            "x-enum-comments": {
-              "BinarySI": "e.g., 12Mi (12 * 2^20)",
-              "DecimalExponent": "e.g., 12e6",
-              "DecimalSI": "e.g., 12M  (12 * 10^6)"
-            }
-          }
-        }
-      },
       "v1.ConfigMapEnvSource": {
         "type": "object",
         "properties": {
@@ -1713,13 +1690,8 @@
             "description": "Container name: required for volumes, optional for env vars\n+optional"
           },
           "divisor": {
-            "type": "object",
-            "description": "Specifies the output format of the exposed resources, defaults to \"1\"\n+optional",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/resource.Quantity"
-              }
-            ]
+            "type": "string",
+            "description": "Specifies the output format of the exposed resources, defaults to \"1\"\n+optional"
           },
           "resource": {
             "type": "string",
@@ -1730,7 +1702,7 @@
       "v1.ResourceList": {
         "type": "object",
         "additionalProperties": {
-          "$ref": "#/components/schemas/resource.Quantity"
+          "type": "string"
         }
       },
       "v1.SecretEnvSource": {
