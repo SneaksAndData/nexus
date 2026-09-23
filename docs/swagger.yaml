@@ -801,9 +801,9 @@ paths:
       - application/octet-stream
       responses:
         "200":
-          description: OK
+          description: Returns the raw payload stream
           schema:
-            type: string
+            type: file
         "302":
           description: Found
           schema:
@@ -956,7 +956,6 @@ paths:
       produces:
       - text/plain
       - text/html
-      - application/octet-stream
       responses:
         "200":
           description: OK

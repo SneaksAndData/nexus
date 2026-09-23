@@ -300,9 +300,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Returns the raw payload stream",
                         "schema": {
-                            "type": "string"
+                            "type": "file"
                         }
                     },
                     "302": {
@@ -509,8 +509,7 @@ const docTemplate = `{
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
                     "text/plain",
-                    "text/html",
-                    "application/octet-stream"
+                    "text/html"
                 ],
                 "tags": [
                     "payload"

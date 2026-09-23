@@ -10,20 +10,20 @@ import (
 // Deprecated: To be removed in 1.3
 // GetRunPayloadLegacy godoc
 //
-//		@Summary		Read a run payload (legacy)
-//		@Description	Retrieves payload sent by the client for the provided run (legacy)
-//		@Tags			payload
-//		@Produce		plain
-//		@Produce		html
-//	 	@Produce        octet-stream
-//		@Param			algorithmName	path		string	true	"Algorithm name"
-//		@Param			requestId	path		string	true	"Request identifier"
-//		@Success		200	{string}    string
-//		@Success		302	{string}    string
-//		@Failure		400	{string}	string
-//		@Failure		404	{string}	string
-//		@Failure		401	{string}	string
-//		@Router			/algorithm/v1/payload/{algorithmName}/requests/{requestId} [get]
+//			@Summary		Read a run payload (legacy)
+//			@Description	Retrieves payload sent by the client for the provided run (legacy)
+//			@Tags			payload
+//			@Produce		plain
+//			@Produce		html
+//		 	@Produce        octet-stream
+//			@Param			algorithmName	path		string	true	"Algorithm name"
+//			@Param			requestId	path		string	true	"Request identifier"
+//	        @Success		200	{file}      string  "Returns the raw payload stream"
+//			@Success		302	{string}    string
+//			@Failure		400	{string}	string
+//			@Failure		404	{string}	string
+//			@Failure		401	{string}	string
+//			@Router			/algorithm/v1/payload/{algorithmName}/requests/{requestId} [get]
 func GetRunPayloadLegacy(buffer request.Buffer) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		algorithmName := ctx.Param("algorithmName")

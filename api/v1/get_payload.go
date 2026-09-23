@@ -14,20 +14,19 @@ import (
 
 // GetRunPayload godoc
 //
-//		@Summary		Read a run payload
-//		@Description	Retrieves payload sent by the client for the provided run
-//		@Tags			payload
-//		@Produce		plain
-//		@Produce		html
-//	 	@Produce        octet-stream
-//		@Param			algorithmName	path		string	true	"Algorithm name"
-//		@Param			requestId	path		string	true	"Request identifier"
-//		@Success		200	{object}    interface{}
-//		@Failure		400	{string}	string
-//		@Failure		403	{string}	string
-//		@Failure		404	{string}	string
-//		@Failure		401	{string}	string
-//		@Router			/data/v1/payloads/{algorithmName}/requests/{requestId} [get]
+//	@Summary		Read a run payload
+//	@Description	Retrieves payload sent by the client for the provided run
+//	@Tags			payload
+//	@Produce		plain
+//	@Produce		html
+//	@Param			algorithmName	path		string	true	"Algorithm name"
+//	@Param			requestId	path		string	true	"Request identifier"
+//	@Success		200	{object}    interface{}
+//	@Failure		400	{string}	string
+//	@Failure		403	{string}	string
+//	@Failure		404	{string}	string
+//	@Failure		401	{string}	string
+//	@Router			/data/v1/payloads/{algorithmName}/requests/{requestId} [get]
 func GetRunPayload(buffer request.Buffer, proxyConfig *payload.RequestPayloadProxyConfiguration, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		algorithmName := ctx.Param("algorithmName")
