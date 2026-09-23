@@ -23,7 +23,7 @@ import (
 //	@Success		200	{array}     string
 //	@Failure		400	{string}	string
 //	@Failure		401	{string}	string
-//	@Router			/algorithm/v1/metadata/tags/{algorithmName}/requests/{requestId} [get]
+//	@Router			/algorithm/v1/metadata/tags/{algorithmName}/requests/{requestId} [post]
 func UpdateRunTag(buffer request.Buffer, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		algorithmName := ctx.Param("algorithmName")

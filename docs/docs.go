@@ -153,7 +153,7 @@ const docTemplate = `{
             }
         },
         "/algorithm/v1/metadata/tags/{algorithmName}/requests/{requestId}": {
-            "get": {
+            "post": {
                 "description": "Updates the specified run with a new client tag. Useful for performing a status reset on client side.",
                 "produces": [
                     "application/json",
