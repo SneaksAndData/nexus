@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Deprecated: To be removed in 1.3
 // GetRunPayloadLegacy godoc
 //
 //		@Summary		Read a run payload (legacy)

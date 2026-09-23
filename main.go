@@ -53,10 +53,12 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 
 	apiV1.POST("run/:algorithmName", v1.CreateRun(appServices.CheckpointBuffer(), appServices.Cache(), appServices.Scheduler(), appServices.Logger(ctx)))
 	apiV1.POST("cancel/:algorithmName/requests/:requestId", v1.CancelRun(appServices.Scheduler(), appServices.Logger(ctx)))
-	apiV1.GET("results/:algorithmName/requests/:requestId", v1.GetRunResult(appServices.CheckpointBuffer()))
+	apiV1.POST("metadata/tags/:algorithmName/requests/:requestId", v1.UpdateRunTag(appServices.CheckpointBuffer(), appServices.Logger(ctx)))
+
+	apiV1.GET("results/:algorithmName/requests/:requestId", v1.GetRunResult(appServices.CheckpointBuffer(), appServices.Logger(ctx)))
 	apiV1.GET("results/tags/:requestTag", v1.GetRunResultsByTag(appServices.CheckpointBuffer(), appServices.Logger(ctx)))
 	apiV1.GET("metadata/:algorithmName/requests/:requestId", v1.GetRunMetadata(appServices.CheckpointBuffer()))
-	apiV1.GET("buffer/:algorithmName/requests/:requestId", v1.GetBufferedRunMetadata(appServices.CheckpointBuffer()))
+	apiV1.GET("buffer/:algorithmName/requests/:requestId", v1.GetBufferedRunMetadata(appServices.CheckpointBuffer(), appServices.Logger(ctx)))
 
 	apiV1.GET("payload/:algorithmName/requests/:requestId", v1.GetRunPayloadLegacy(appServices.CheckpointBuffer()))
 
@@ -83,7 +85,7 @@ func setupRouter(ctx context.Context, appConfig *app.SchedulerConfig) *gin.Engin
 // @version         1.0
 // @description     Nexus Scheduler API specification. All Nexus supported clients conform to this spec.
 
-// @contact.name   ESD Support
+// @contact.name   ECCO Data & AI
 // @contact.email  esdsupport@ecco.com
 
 // @license.name  Apache 2.0

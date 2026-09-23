@@ -1,10 +1,12 @@
 package v1
 
 import (
+	"net/http"
+
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	"github.com/SneaksAndData/nexus/api/v1/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
+	"k8s.io/klog/v2"
 )
 
 // GetRunResult godoc
@@ -22,15 +24,15 @@ import (
 //	@Failure		404	{object}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1/results/{algorithmName}/requests/{requestId} [get]
-func GetRunResult(buffer request.Buffer) gin.HandlerFunc {
+func GetRunResult(buffer request.Buffer, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// TODO: log errors
 		algorithmName := ctx.Param("algorithmName")
 		requestId := ctx.Param("requestId")
 
 		result, err := buffer.Get(requestId, algorithmName)
 
 		if err != nil {
+			logger.V(0).Error(err, "Failed to read result for a requested run", "requestId", requestId, "algorithmName", algorithmName)
 			ctx.String(http.StatusBadRequest, `Failed to read results for %s`, requestId)
 			return
 		}

@@ -294,6 +294,7 @@ definitions:
       registry:
         type: string
       serviceAccountName:
+        description: +optional
         type: string
       versionTag:
         type: string
@@ -315,7 +316,9 @@ definitions:
   v1.NexusAlgorithmResources:
     properties:
       cpuLimit:
-        description: 'Deprecated: Use Limits instead'
+        description: |-
+          Deprecated: Use Limits instead
+          +optional
         type: string
       customResources:
         additionalProperties:
@@ -327,12 +330,22 @@ definitions:
           +optional
         type: string
       limits:
-        $ref: '#/definitions/v1.ResourceList'
+        allOf:
+        - $ref: '#/definitions/v1.ResourceList'
+        description: |-
+          +kubebuilder:default:={cpu: "1000m"}
+          +optional
       memoryLimit:
-        description: 'Deprecated: Use Limits instead'
+        description: |-
+          Deprecated: Use Limits instead
+          +optional
         type: string
       requests:
-        $ref: '#/definitions/v1.ResourceList'
+        allOf:
+        - $ref: '#/definitions/v1.ResourceList'
+        description: |-
+          +kubebuilder:default:={cpu: "100m"}
+          +optional
     type: object
   v1.NexusAlgorithmRuntimeEnvironment:
     properties:
@@ -368,27 +381,40 @@ definitions:
   v1.NexusAlgorithmSpec:
     properties:
       args:
+        description: +optional
         items:
           type: string
         type: array
       command:
         type: string
       computeResources:
-        $ref: '#/definitions/v1.NexusAlgorithmResources'
+        allOf:
+        - $ref: '#/definitions/v1.NexusAlgorithmResources'
+        description: +optional
       container:
         $ref: '#/definitions/v1.NexusAlgorithmContainer'
       datadogIntegrationSettings:
-        $ref: '#/definitions/v1.NexusDatadogIntegrationSettings'
+        allOf:
+        - $ref: '#/definitions/v1.NexusDatadogIntegrationSettings'
+        description: +optional
       errorHandlingBehaviour:
-        $ref: '#/definitions/v1.NexusErrorHandlingBehaviour'
+        allOf:
+        - $ref: '#/definitions/v1.NexusErrorHandlingBehaviour'
+        description: +optional
       payloadConfiguration:
         allOf:
         - $ref: '#/definitions/v1.NexusAlgorithmPayloadConfiguration'
-        description: +optional
+        description: |-
+          +kubebuilder:default:={payloadValidFor: "24h", payloadSerializationMode: "s3"}
+          +optional
       runtimeEnvironment:
-        $ref: '#/definitions/v1.NexusAlgorithmRuntimeEnvironment'
+        allOf:
+        - $ref: '#/definitions/v1.NexusAlgorithmRuntimeEnvironment'
+        description: +optional
       workgroupRef:
-        $ref: '#/definitions/v1.NexusAlgorithmWorkgroupRef'
+        allOf:
+        - $ref: '#/definitions/v1.NexusAlgorithmWorkgroupRef'
+        description: +optional
     type: object
   v1.NexusAlgorithmWorkgroupRef:
     properties:
@@ -402,6 +428,7 @@ definitions:
   v1.NexusDatadogIntegrationSettings:
     properties:
       mountDatadogSocket:
+        description: +optional
         type: boolean
     type: object
   v1.NexusErrorHandlingBehaviour:
@@ -575,7 +602,7 @@ definitions:
 info:
   contact:
     email: esdsupport@ecco.com
-    name: ESD Support
+    name: ECCO Data & AI
   description: Nexus Scheduler API specification. All Nexus supported clients conform
     to this spec.
   license:
@@ -709,6 +736,49 @@ paths:
           schema:
             type: string
       summary: Read a run metadata
+      tags:
+      - metadata
+  /algorithm/v1/metadata/tags/{algorithmName}/requests/{requestId}:
+    get:
+      description: Updates the specified run with a new client tag. Useful for performing
+        a status reset on client side.
+      parameters:
+      - description: Algorithm name
+        in: path
+        name: algorithmName
+        required: true
+        type: string
+      - description: Request identifier
+        in: path
+        name: requestId
+        required: true
+        type: string
+      - description: New client tag to assign
+        in: body
+        name: newTag
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      - text/plain
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: Assign a new client tag
       tags:
       - metadata
   /algorithm/v1/payload/{algorithmName}/requests/{requestId}:

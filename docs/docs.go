@@ -10,7 +10,7 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "ESD Support",
+            "name": "ECCO Data \u0026 AI",
             "email": "esdsupport@ecco.com"
         },
         "license": {
@@ -145,6 +145,68 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/algorithm/v1/metadata/tags/{algorithmName}/requests/{requestId}": {
+            "get": {
+                "description": "Updates the specified run with a new client tag. Useful for performing a status reset on client side.",
+                "produces": [
+                    "application/json",
+                    "text/plain",
+                    "text/html"
+                ],
+                "tags": [
+                    "metadata"
+                ],
+                "summary": "Assign a new client tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New client tag to assign",
+                        "name": "newTag",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
@@ -841,6 +903,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "serviceAccountName": {
+                    "description": "+optional",
                     "type": "string"
                 },
                 "versionTag": {
@@ -869,7 +932,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cpuLimit": {
-                    "description": "Deprecated: Use Limits instead",
+                    "description": "Deprecated: Use Limits instead\n+optional",
                     "type": "string"
                 },
                 "customResources": {
@@ -883,14 +946,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "limits": {
-                    "$ref": "#/definitions/v1.ResourceList"
+                    "description": "+kubebuilder:default:={cpu: \"1000m\"}\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.ResourceList"
+                        }
+                    ]
                 },
                 "memoryLimit": {
-                    "description": "Deprecated: Use Limits instead",
+                    "description": "Deprecated: Use Limits instead\n+optional",
                     "type": "string"
                 },
                 "requests": {
-                    "$ref": "#/definitions/v1.ResourceList"
+                    "description": "+kubebuilder:default:={cpu: \"100m\"}\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.ResourceList"
+                        }
+                    ]
                 }
             }
         },
@@ -945,6 +1018,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "args": {
+                    "description": "+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -954,19 +1028,34 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "computeResources": {
-                    "$ref": "#/definitions/v1.NexusAlgorithmResources"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusAlgorithmResources"
+                        }
+                    ]
                 },
                 "container": {
                     "$ref": "#/definitions/v1.NexusAlgorithmContainer"
                 },
                 "datadogIntegrationSettings": {
-                    "$ref": "#/definitions/v1.NexusDatadogIntegrationSettings"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusDatadogIntegrationSettings"
+                        }
+                    ]
                 },
                 "errorHandlingBehaviour": {
-                    "$ref": "#/definitions/v1.NexusErrorHandlingBehaviour"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusErrorHandlingBehaviour"
+                        }
+                    ]
                 },
                 "payloadConfiguration": {
-                    "description": "+optional",
+                    "description": "+kubebuilder:default:={payloadValidFor: \"24h\", payloadSerializationMode: \"s3\"}\n+optional",
                     "allOf": [
                         {
                             "$ref": "#/definitions/v1.NexusAlgorithmPayloadConfiguration"
@@ -974,10 +1063,20 @@ const docTemplate = `{
                     ]
                 },
                 "runtimeEnvironment": {
-                    "$ref": "#/definitions/v1.NexusAlgorithmRuntimeEnvironment"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusAlgorithmRuntimeEnvironment"
+                        }
+                    ]
                 },
                 "workgroupRef": {
-                    "$ref": "#/definitions/v1.NexusAlgorithmWorkgroupRef"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusAlgorithmWorkgroupRef"
+                        }
+                    ]
                 }
             }
         },
@@ -999,6 +1098,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "mountDatadogSocket": {
+                    "description": "+optional",
                     "type": "boolean"
                 }
             }
