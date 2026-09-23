@@ -4,7 +4,7 @@
     "title": "Nexus Scheduler API",
     "description": "Nexus Scheduler API specification. All Nexus supported clients conform to this spec.",
     "contact": {
-      "name": "ESD Support",
+      "name": "ECCO Data & AI",
       "email": "esdsupport@ecco.com"
     },
     "license": {
@@ -273,6 +273,118 @@
         "x-codegen-request-body-name": "payload"
       }
     },
+    "/algorithm/v1/metadata/tags/{algorithmName}/requests/{requestId}": {
+      "post": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Assign a new client tag",
+        "description": "Updates the specified run with a new client tag. Useful for performing a status reset on client side.",
+        "parameters": [
+          {
+            "name": "algorithmName",
+            "in": "path",
+            "description": "Algorithm name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "description": "Request identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "New client tag to assign",
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "newTag"
+      }
+    },
     "/algorithm/v1/metadata/{algorithmName}/requests/{requestId}": {
       "get": {
         "tags": [
@@ -389,8 +501,8 @@
         "tags": [
           "payload"
         ],
-        "summary": "Read a run payload",
-        "description": "Retrieves payload sent by the client for the provided run",
+        "summary": "Read a run payload (legacy)",
+        "description": "Retrieves payload sent by the client for the provided run (legacy)",
         "parameters": [
           {
             "name": "algorithmName",
@@ -847,6 +959,137 @@
         },
         "x-codegen-request-body-name": "payload"
       }
+    },
+    "/data/v1/payloads/{algorithmName}/requests/{requestId}": {
+      "get": {
+        "tags": [
+          "payload"
+        ],
+        "summary": "Read a run payload",
+        "description": "Retrieves payload sent by the client for the provided run",
+        "parameters": [
+          {
+            "name": "algorithmName",
+            "in": "path",
+            "description": "Algorithm name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "description": "Request identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "object"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "object"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -866,9 +1109,6 @@
           },
           "parentRequest": {
             "$ref": "#/components/schemas/models.AlgorithmRequestRef"
-          },
-          "payloadValidFor": {
-            "type": "string"
           },
           "requestApiVersion": {
             "type": "string"
@@ -947,9 +1187,6 @@
             "$ref": "#/components/schemas/models.AlgorithmRequestRef"
           },
           "payload_uri": {
-            "type": "string"
-          },
-          "payload_valid_for": {
             "type": "string"
           },
           "received_at": {
@@ -1073,7 +1310,7 @@
           },
           "prefix": {
             "type": "string",
-            "description": "Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.\n+optional"
+            "description": "Optional text to prepend to the name of each environment variable.\nMay consist of any printable ASCII characters except '='.\n+optional"
           },
           "secretRef": {
             "type": "object",
@@ -1091,7 +1328,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Name of the environment variable. Must be a C_IDENTIFIER."
+            "description": "Name of the environment variable.\nMay consist of any printable ASCII characters except '='."
           },
           "value": {
             "type": "string",
@@ -1129,6 +1366,15 @@
               }
             ]
           },
+          "fileKeyRef": {
+            "type": "object",
+            "description": "FileKeyRef selects a key of the env file.\nRequires the EnvFiles feature gate to be enabled.\n\n+featureGate=EnvFiles\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.FileKeySelector"
+              }
+            ]
+          },
           "resourceFieldRef": {
             "type": "object",
             "description": "Selects a resource of the container: only resources limits and requests\n(limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.\n+optional",
@@ -1149,6 +1395,40 @@
           }
         }
       },
+      "v1.FileKeySelector": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The key within the env file. An invalid key will prevent the pod from starting.\nThe keys defined within a source may consist of any printable ASCII characters except '='.\nDuring Alpha stage of the EnvFiles feature gate, the key size is limited to 128 characters.\n+required"
+          },
+          "optional": {
+            "type": "boolean",
+            "description": "Specify whether the file or its key must be defined. If the file or key\ndoes not exist, then the env var is not published.\nIf optional is set to true and the specified key does not exist,\nthe environment variable will not be set in the Pod's containers.\n\nIf optional is set to false and the specified key does not exist,\nan error will be returned during Pod creation.\n+optional\n+default=false"
+          },
+          "path": {
+            "type": "string",
+            "description": "The path within the volume from which to select the file.\nMust be relative and may not contain the '..' path or start with '..'.\n+required"
+          },
+          "volumeName": {
+            "type": "string",
+            "description": "The name of the volume mount containing the env file.\n+required"
+          }
+        }
+      },
+      "v1.MountPropagationMode": {
+        "type": "string",
+        "enum": [
+          "None",
+          "HostToContainer",
+          "Bidirectional"
+        ],
+        "x-enum-varnames": [
+          "MountPropagationNone",
+          "MountPropagationHostToContainer",
+          "MountPropagationBidirectional"
+        ]
+      },
       "v1.NexusAlgorithmContainer": {
         "type": "object",
         "properties": {
@@ -1159,10 +1439,29 @@
             "type": "string"
           },
           "serviceAccountName": {
-            "type": "string"
+            "type": "string",
+            "description": "+optional"
           },
           "versionTag": {
             "type": "string"
+          }
+        }
+      },
+      "v1.NexusAlgorithmPayloadConfiguration": {
+        "type": "object",
+        "properties": {
+          "payloadSerializationMode": {
+            "type": "object",
+            "description": "+kubebuilder:default:=\"s3\"\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.PayloadSerializationMode"
+              }
+            ]
+          },
+          "payloadValidFor": {
+            "type": "string",
+            "description": "+kubebuilder:default:=\"24h\"\n+optional"
           }
         }
       },
@@ -1170,7 +1469,8 @@
         "type": "object",
         "properties": {
           "cpuLimit": {
-            "type": "string"
+            "type": "string",
+            "description": "Deprecated: Use Limits instead\n+optional"
           },
           "customResources": {
             "type": "object",
@@ -1178,8 +1478,31 @@
               "type": "string"
             }
           },
+          "defaultResourceQuota": {
+            "type": "string",
+            "description": "+kubebuilder:default:=\"0.1\"\n+optional"
+          },
+          "limits": {
+            "type": "object",
+            "description": "+kubebuilder:default:={cpu: \"1000m\"}\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.ResourceList"
+              }
+            ]
+          },
           "memoryLimit": {
-            "type": "string"
+            "type": "string",
+            "description": "Deprecated: Use Limits instead\n+optional"
+          },
+          "requests": {
+            "type": "object",
+            "description": "+kubebuilder:default:={cpu: \"100m\"}\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.ResourceList"
+              }
+            ]
           }
         }
       },
@@ -1190,6 +1513,12 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
+            }
+          },
+          "configurationFileMounts": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/v1.VolumeMount"
             }
           },
           "deadlineSeconds": {
@@ -1209,6 +1538,18 @@
           },
           "maximumRetries": {
             "type": "integer"
+          },
+          "secretFileMounts": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/v1.VolumeMount"
+            }
+          },
+          "storageMounts": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/v1.VolumeMount"
+            }
           }
         }
       },
@@ -1217,6 +1558,7 @@
         "properties": {
           "args": {
             "type": "array",
+            "description": "+optional",
             "items": {
               "type": "string"
             }
@@ -1225,22 +1567,61 @@
             "type": "string"
           },
           "computeResources": {
-            "$ref": "#/components/schemas/v1.NexusAlgorithmResources"
+            "type": "object",
+            "description": "+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.NexusAlgorithmResources"
+              }
+            ]
           },
           "container": {
             "$ref": "#/components/schemas/v1.NexusAlgorithmContainer"
           },
           "datadogIntegrationSettings": {
-            "$ref": "#/components/schemas/v1.NexusDatadogIntegrationSettings"
+            "type": "object",
+            "description": "+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.NexusDatadogIntegrationSettings"
+              }
+            ]
           },
           "errorHandlingBehaviour": {
-            "$ref": "#/components/schemas/v1.NexusErrorHandlingBehaviour"
+            "type": "object",
+            "description": "+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.NexusErrorHandlingBehaviour"
+              }
+            ]
+          },
+          "payloadConfiguration": {
+            "type": "object",
+            "description": "+kubebuilder:default:={payloadValidFor: \"24h\", payloadSerializationMode: \"s3\"}\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.NexusAlgorithmPayloadConfiguration"
+              }
+            ]
           },
           "runtimeEnvironment": {
-            "$ref": "#/components/schemas/v1.NexusAlgorithmRuntimeEnvironment"
+            "type": "object",
+            "description": "+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.NexusAlgorithmRuntimeEnvironment"
+              }
+            ]
           },
           "workgroupRef": {
-            "$ref": "#/components/schemas/v1.NexusAlgorithmWorkgroupRef"
+            "type": "object",
+            "description": "+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.NexusAlgorithmWorkgroupRef"
+              }
+            ]
           }
         }
       },
@@ -1262,7 +1643,8 @@
         "type": "object",
         "properties": {
           "mountDatadogSocket": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "+optional"
           }
         }
       },
@@ -1296,6 +1678,30 @@
           }
         }
       },
+      "v1.PayloadSerializationMode": {
+        "type": "string",
+        "enum": [
+          "backend",
+          "s3"
+        ],
+        "x-enum-varnames": [
+          "SERIALIZE_TO_BACKEND",
+          "SERIALIZE_TO_S3"
+        ]
+      },
+      "v1.RecursiveReadOnlyMode": {
+        "type": "string",
+        "enum": [
+          "Disabled",
+          "IfPossible",
+          "Enabled"
+        ],
+        "x-enum-varnames": [
+          "RecursiveReadOnlyDisabled",
+          "RecursiveReadOnlyIfPossible",
+          "RecursiveReadOnlyEnabled"
+        ]
+      },
       "v1.ResourceFieldSelector": {
         "type": "object",
         "properties": {
@@ -1316,6 +1722,12 @@
             "type": "string",
             "description": "Required: resource to select"
           }
+        }
+      },
+      "v1.ResourceList": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/resource.Quantity"
         }
       },
       "v1.SecretEnvSource": {
@@ -1345,6 +1757,49 @@
           "optional": {
             "type": "boolean",
             "description": "Specify whether the Secret or its key must be defined\n+optional"
+          }
+        }
+      },
+      "v1.VolumeMount": {
+        "type": "object",
+        "properties": {
+          "mountPath": {
+            "type": "string",
+            "description": "Path within the container at which the volume should be mounted.  Must\nnot contain ':'."
+          },
+          "mountPropagation": {
+            "type": "object",
+            "description": "mountPropagation determines how mounts are propagated from the host\nto container and the other way around.\nWhen not set, MountPropagationNone is used.\nThis field is beta in 1.10.\nWhen RecursiveReadOnly is set to IfPossible or to Enabled, MountPropagation must be None or unspecified\n(which defaults to None).\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.MountPropagationMode"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "This must match the Name of a Volume."
+          },
+          "readOnly": {
+            "type": "boolean",
+            "description": "Mounted read-only if true, read-write otherwise (false or unspecified).\nDefaults to false.\n+optional"
+          },
+          "recursiveReadOnly": {
+            "type": "object",
+            "description": "RecursiveReadOnly specifies whether read-only mounts should be handled\nrecursively.\n\nIf ReadOnly is false, this field has no meaning and must be unspecified.\n\nIf ReadOnly is true, and this field is set to Disabled, the mount is not made\nrecursively read-only.  If this field is set to IfPossible, the mount is made\nrecursively read-only, if it is supported by the container runtime.  If this\nfield is set to Enabled, the mount is made recursively read-only if it is\nsupported by the container runtime, otherwise the pod will not be started and\nan error will be generated to indicate the reason.\n\nIf this field is set to IfPossible or Enabled, MountPropagation must be set to\nNone (or be unspecified, which defaults to None).\n\nIf this field is not specified, it is treated as an equivalent of Disabled.\n+optional",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/v1.RecursiveReadOnlyMode"
+              }
+            ]
+          },
+          "subPath": {
+            "type": "string",
+            "description": "Path within the volume from which the container's volume should be mounted.\nDefaults to \"\" (volume's root).\n+optional"
+          },
+          "subPathExpr": {
+            "type": "string",
+            "description": "Expanded path within the volume from which the container's volume should be mounted.\nBehaves similarly to SubPath but environment variable references $(VAR_NAME) are expanded using the container's environment.\nDefaults to \"\" (volume's root).\nSubPathExpr and SubPath are mutually exclusive.\n+optional"
           }
         }
       }
