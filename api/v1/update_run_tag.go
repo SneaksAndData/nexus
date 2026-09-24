@@ -14,6 +14,7 @@ import (
 //	@Summary		Assign a new client tag
 //	@Description	Updates the specified run with a new client tag. Useful for performing a status reset on client side.
 //	@Tags			metadata
+//	@Accept			json
 //	@Produce		json
 //	@Produce		plain
 //	@Produce		html
