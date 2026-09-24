@@ -77,7 +77,6 @@
                     "application/json"
                 ],
                 "produces": [
-                    "application/json",
                     "text/plain",
                     "text/html"
                 ],
@@ -151,7 +150,6 @@
                     "application/json"
                 ],
                 "produces": [
-                    "application/json",
                     "text/plain",
                     "text/html"
                 ],
@@ -180,7 +178,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.TagUpdateRequest"
                         }
                     }
                 ],
@@ -188,10 +186,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -689,6 +684,14 @@
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TagUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "newTag": {
                     "type": "string"
                 }
             }

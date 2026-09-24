@@ -85,7 +85,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "produces": [
-                    "application/json",
                     "text/plain",
                     "text/html"
                 ],
@@ -159,7 +158,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "produces": [
-                    "application/json",
                     "text/plain",
                     "text/html"
                 ],
@@ -188,7 +186,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.TagUpdateRequest"
                         }
                     }
                 ],
@@ -196,10 +194,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -697,6 +692,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TagUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "newTag": {
                     "type": "string"
                 }
             }
