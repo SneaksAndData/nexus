@@ -24,6 +24,9 @@ const (
 	getRunMetadataURLTemplate   = "%s/algorithm/v1/metadata/%s/requests/%s"
 	getTaggedResultsURLTemplate = "%s/algorithm/v1/results/tags/%s"
 	cancelRunURLTemplate        = "%s/algorithm/v1/cancel/%s/requests/%s"
+	updateRunTagURLTemplate     = "%s/algorithm/v1/metadata/tags/%s/requests/%s"
+
+	defaultTimeout = 10 * time.Second
 )
 
 type createRunResponse struct {
@@ -112,12 +115,12 @@ func createTestRunWithDryRun(client *http.Client, tag string, dryRun bool) (stri
 	return runResp.RequestId, nil
 }
 
-func waitForCondition(condition wait.ConditionWithContextFunc) error {
-	return wait.PollUntilContextTimeout(context.Background(), 100*time.Millisecond, 10*time.Second, true, condition)
+func waitForCondition(timeout time.Duration, condition wait.ConditionWithContextFunc) error {
+	return wait.PollUntilContextTimeout(context.Background(), 100*time.Millisecond, timeout, true, condition)
 }
 
-func waitFor20x(client *http.Client, getURL string, target interface{}, ready func() bool) error {
-	return waitForCondition(func(ctx context.Context) (bool, error) {
+func waitFor20x(client *http.Client, getURL string, target interface{}, ready func() bool, timeout time.Duration) error {
+	return waitForCondition(timeout, func(ctx context.Context) (bool, error) {
 		resp, err := client.Get(getURL)
 		if err != nil {
 			return false, err
@@ -188,7 +191,7 @@ func Test_Smoke_CreateRun_DryRun(t *testing.T) {
 
 	err = waitFor20x(client, getURL, &result, func() bool {
 		return result.Status == "COMPLETED"
-	})
+	}, defaultTimeout)
 	if err != nil {
 		t.Fatalf("timed out waiting for dry run request %s to reach COMPLETED stage (status: %s): %v", requestId, result.Status, err)
 	}
@@ -209,7 +212,7 @@ func Test_Smoke_GetRunResult(t *testing.T) {
 	getURL := fmt.Sprintf(getRunResultURLTemplate, baseURL, algorithmName, requestId)
 	var result requestResultResponse
 
-	err = waitFor20x(client, getURL, &result, nil)
+	err = waitFor20x(client, getURL, &result, nil, defaultTimeout)
 	if err != nil {
 		t.Fatalf("timed out waiting for run result for %s: %v", requestId, err)
 	}
@@ -232,7 +235,7 @@ func Test_Smoke_GetRunMetadata(t *testing.T) {
 
 	err = waitFor20x(client, getURL, &meta, func() bool {
 		return meta.PayloadUri != ""
-	})
+	}, defaultTimeout)
 	if err != nil {
 		t.Fatalf("timed out waiting for request %s to reach BUFFERED stage (payload_uri is empty, stage: %s): %v", requestId, meta.LifecycleStage, err)
 	}
@@ -292,7 +295,7 @@ func Test_Smoke_GetRunResultsByTag(t *testing.T) {
 			}
 		}
 		return false
-	})
+	}, defaultTimeout)
 	if err != nil {
 		t.Fatalf("timed out waiting to find requestId %s in tagged results for tag %s (got: %v): %v", requestId, tag, taggedResults, err)
 	}
@@ -332,7 +335,7 @@ func Test_Smoke_CancelRun(t *testing.T) {
 		t.Fatalf("failed to marshal payload: %v", err)
 	}
 
-	err = waitForCondition(func(ctx context.Context) (bool, error) {
+	err = waitForCondition(defaultTimeout, func(ctx context.Context) (bool, error) {
 		req, err := http.NewRequest(http.MethodPost, postURL, bytes.NewBuffer(payloadBytes))
 		if err != nil {
 			return false, fmt.Errorf("failed to create HTTP request: %w", err)
@@ -358,5 +361,99 @@ func Test_Smoke_CancelRun(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatalf("timed out waiting to cancel run %s: %v", requestId, err)
+	}
+}
+
+func Test_Smoke_UpdateRunTag(t *testing.T) {
+	client := getHTTPClient()
+	initialTag := fmt.Sprintf("smoke-update-tag-init-%s", uuid.New().String()[:8])
+	requestId, err := createTestRunWithDryRun(client, initialTag, true)
+	if err != nil {
+		t.Fatalf("failed to create dry run test run: %v", err)
+	}
+
+	resultURL := fmt.Sprintf(getRunResultURLTemplate, baseURL, algorithmName, requestId)
+	var result requestResultResponse
+
+	err = waitFor20x(client, resultURL, &result, func() bool {
+		return result.Status == "COMPLETED"
+	}, defaultTimeout)
+	if err != nil {
+		t.Fatalf("timed out waiting for dry run request %s to reach COMPLETED stage (status: %s): %v", requestId, result.Status, err)
+	}
+
+	newTag := fmt.Sprintf("smoke-update-tag-new-%s", uuid.New().String()[:8])
+	postURL := fmt.Sprintf(updateRunTagURLTemplate, baseURL, algorithmName, requestId)
+	payload := map[string]interface{}{
+		"newTag": newTag,
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatalf("failed to marshal payload: %v", err)
+	}
+
+	err = waitForCondition(defaultTimeout, func(ctx context.Context) (bool, error) {
+		req, err := http.NewRequest(http.MethodPost, postURL, bytes.NewBuffer(payloadBytes))
+		if err != nil {
+			return false, fmt.Errorf("failed to create HTTP request: %w", err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := client.Do(req)
+		if err != nil {
+			return false, fmt.Errorf("failed to execute POST request to %s: %w", postURL, err)
+		}
+		defer func() { _ = resp.Body.Close() }()
+
+		if resp.StatusCode == http.StatusNotFound {
+			return false, nil
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(resp.Body)
+			return false, fmt.Errorf("expected status %d (OK), got %d: %s", http.StatusOK, resp.StatusCode, string(body))
+		}
+
+		return true, nil
+	})
+	if err != nil {
+		t.Fatalf("timed out waiting to update run tag for %s: %v", requestId, err)
+	}
+
+	getURL := fmt.Sprintf(getRunMetadataURLTemplate, baseURL, algorithmName, requestId)
+	var meta runMetadataResponse
+
+	err = waitFor20x(client, getURL, &meta, func() bool {
+		return meta.Tag == newTag
+	}, defaultTimeout)
+	if err != nil {
+		t.Fatalf("timed out waiting for request %s to have updated tag %s (got: %s): %v", requestId, newTag, meta.Tag, err)
+	}
+
+	if meta.Tag != newTag {
+		t.Fatalf("expected metadata tag %s, got %s", newTag, meta.Tag)
+	}
+
+	getTaggedURL := fmt.Sprintf(getTaggedResultsURLTemplate, baseURL, newTag)
+	var taggedResults []taggedResultResponse
+
+	err = waitFor20x(client, getTaggedURL, &taggedResults, func() bool {
+		return len(taggedResults) == 1 && taggedResults[0].RequestId == requestId
+	}, defaultTimeout)
+	if err != nil {
+		t.Fatalf("timed out waiting for tagged results for updated tag %s (got: %v): %v", newTag, taggedResults, err)
+	}
+
+	if len(taggedResults) != 1 {
+		t.Fatalf("expected exactly 1 tagged result for tag %s, got %d: %v", newTag, len(taggedResults), taggedResults)
+	}
+
+	if taggedResults[0].RequestId != requestId {
+		t.Fatalf("expected requestId %s, got %s", requestId, taggedResults[0].RequestId)
+	}
+
+	if taggedResults[0].AlgorithmName != algorithmName {
+		t.Fatalf("expected algorithmName %s, got %s", algorithmName, taggedResults[0].AlgorithmName)
 	}
 }

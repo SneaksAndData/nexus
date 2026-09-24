@@ -10,7 +10,7 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "ESD Support",
+            "name": "ECCO Data \u0026 AI",
             "email": "esdsupport@ecco.com"
         },
         "license": {
@@ -152,6 +152,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/algorithm/v1/metadata/tags/{algorithmName}/requests/{requestId}": {
+            "post": {
+                "description": "Updates the specified run with a new client tag. Useful for performing a status reset on client side.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/plain",
+                    "text/html"
+                ],
+                "tags": [
+                    "metadata"
+                ],
+                "summary": "Assign a new client tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Algorithm name",
+                        "name": "algorithmName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request identifier",
+                        "name": "requestId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New client tag to assign",
+                        "name": "newTag",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/algorithm/v1/metadata/{algorithmName}/requests/{requestId}": {
             "get": {
                 "description": "Retrieves checkpointed metadata for a run",
@@ -238,9 +303,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Returns the raw payload stream",
                         "schema": {
-                            "type": "string"
+                            "type": "file"
                         }
                     },
                     "302": {
@@ -446,9 +511,9 @@ const docTemplate = `{
             "get": {
                 "description": "Retrieves payload sent by the client for the provided run",
                 "produces": [
+                    "application/json",
                     "text/plain",
-                    "text/html",
-                    "application/octet-stream"
+                    "text/html"
                 ],
                 "tags": [
                     "payload"
@@ -473,7 +538,10 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {}
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -653,29 +721,6 @@ const docTemplate = `{
                 }
             }
         },
-        "resource.Quantity": {
-            "type": "object",
-            "properties": {
-                "Format": {
-                    "type": "string",
-                    "enum": [
-                        "DecimalExponent",
-                        "BinarySI",
-                        "DecimalSI"
-                    ],
-                    "x-enum-comments": {
-                        "BinarySI": "e.g., 12Mi (12 * 2^20)",
-                        "DecimalExponent": "e.g., 12e6",
-                        "DecimalSI": "e.g., 12M  (12 * 10^6)"
-                    },
-                    "x-enum-varnames": [
-                        "DecimalExponent",
-                        "BinarySI",
-                        "DecimalSI"
-                    ]
-                }
-            }
-        },
         "v1.ConfigMapEnvSource": {
             "type": "object",
             "properties": {
@@ -841,6 +886,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "serviceAccountName": {
+                    "description": "+optional",
                     "type": "string"
                 },
                 "versionTag": {
@@ -869,7 +915,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cpuLimit": {
-                    "description": "Deprecated: Use Limits instead",
+                    "description": "Deprecated: Use Limits instead\n+optional",
                     "type": "string"
                 },
                 "customResources": {
@@ -883,14 +929,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "limits": {
-                    "$ref": "#/definitions/v1.ResourceList"
+                    "description": "+kubebuilder:default:={cpu: \"1000m\"}\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.ResourceList"
+                        }
+                    ]
                 },
                 "memoryLimit": {
-                    "description": "Deprecated: Use Limits instead",
+                    "description": "Deprecated: Use Limits instead\n+optional",
                     "type": "string"
                 },
                 "requests": {
-                    "$ref": "#/definitions/v1.ResourceList"
+                    "description": "+kubebuilder:default:={cpu: \"100m\"}\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.ResourceList"
+                        }
+                    ]
                 }
             }
         },
@@ -945,6 +1001,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "args": {
+                    "description": "+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -954,19 +1011,34 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "computeResources": {
-                    "$ref": "#/definitions/v1.NexusAlgorithmResources"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusAlgorithmResources"
+                        }
+                    ]
                 },
                 "container": {
                     "$ref": "#/definitions/v1.NexusAlgorithmContainer"
                 },
                 "datadogIntegrationSettings": {
-                    "$ref": "#/definitions/v1.NexusDatadogIntegrationSettings"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusDatadogIntegrationSettings"
+                        }
+                    ]
                 },
                 "errorHandlingBehaviour": {
-                    "$ref": "#/definitions/v1.NexusErrorHandlingBehaviour"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusErrorHandlingBehaviour"
+                        }
+                    ]
                 },
                 "payloadConfiguration": {
-                    "description": "+optional",
+                    "description": "+kubebuilder:default:={payloadValidFor: \"24h\", payloadSerializationMode: \"s3\"}\n+optional",
                     "allOf": [
                         {
                             "$ref": "#/definitions/v1.NexusAlgorithmPayloadConfiguration"
@@ -974,10 +1046,20 @@ const docTemplate = `{
                     ]
                 },
                 "runtimeEnvironment": {
-                    "$ref": "#/definitions/v1.NexusAlgorithmRuntimeEnvironment"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusAlgorithmRuntimeEnvironment"
+                        }
+                    ]
                 },
                 "workgroupRef": {
-                    "$ref": "#/definitions/v1.NexusAlgorithmWorkgroupRef"
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.NexusAlgorithmWorkgroupRef"
+                        }
+                    ]
                 }
             }
         },
@@ -999,6 +1081,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "mountDatadogSocket": {
+                    "description": "+optional",
                     "type": "boolean"
                 }
             }
@@ -1066,11 +1149,7 @@ const docTemplate = `{
                 },
                 "divisor": {
                     "description": "Specifies the output format of the exposed resources, defaults to \"1\"\n+optional",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/resource.Quantity"
-                        }
-                    ]
+                    "type": "string"
                 },
                 "resource": {
                     "description": "Required: resource to select",
@@ -1081,7 +1160,7 @@ const docTemplate = `{
         "v1.ResourceList": {
             "type": "object",
             "additionalProperties": {
-                "$ref": "#/definitions/resource.Quantity"
+                "type": "string"
             }
         },
         "v1.SecretEnvSource": {
@@ -1162,7 +1241,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "/algorithm/v1",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Nexus Scheduler API",
 	Description:      "Nexus Scheduler API specification. All Nexus supported clients conform to this spec.",

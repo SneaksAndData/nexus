@@ -4,6 +4,8 @@ import (
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/models"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
 	"github.com/gin-gonic/gin"
+	"k8s.io/klog/v2"
+
 	"net/http"
 )
 
@@ -22,7 +24,7 @@ import (
 //	@Failure		404	{string}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1/buffer/{algorithmName}/requests/{requestId} [get]
-func GetBufferedRunMetadata(buffer request.Buffer) gin.HandlerFunc {
+func GetBufferedRunMetadata(buffer request.Buffer, logger klog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		algorithmName := ctx.Param("algorithmName")
 		requestId := ctx.Param("requestId")
@@ -33,6 +35,7 @@ func GetBufferedRunMetadata(buffer request.Buffer) gin.HandlerFunc {
 		})
 
 		if err != nil {
+			logger.V(0).Error(err, "Failed to read buffered run metadata", "requestId", requestId, "algorithmName", algorithmName)
 			ctx.String(http.StatusBadRequest, `Failed to read buffered metadata for %s`, requestId)
 			return
 		}

@@ -1,0 +1,1 @@
+replace k8s.io/apimachinery/pkg/api/resource.Quantity string
