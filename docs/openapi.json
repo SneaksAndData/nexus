@@ -172,11 +172,6 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -192,11 +187,6 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -212,11 +202,6 @@
           "401": {
             "description": "Unauthorized",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -232,11 +217,6 @@
           "404": {
             "description": "Not Found",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -252,11 +232,6 @@
           "500": {
             "description": "Internal Server Error",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -305,7 +280,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string"
+                "$ref": "#/components/schemas/models.TagUpdateRequest"
               }
             }
           },
@@ -315,28 +290,14 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              },
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "type": "string"
                 }
               },
               "text/html": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "type": "string"
                 }
               }
             }
@@ -344,11 +305,6 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -364,11 +320,6 @@
           "401": {
             "description": "Unauthorized",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
               "text/plain": {
                 "schema": {
                   "type": "string"
@@ -1225,6 +1176,14 @@
             "type": "string"
           },
           "status": {
+            "type": "string"
+          }
+        }
+      },
+      "models.TagUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "newTag": {
             "type": "string"
           }
         }

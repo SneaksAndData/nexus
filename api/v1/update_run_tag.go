@@ -15,13 +15,12 @@ import (
 //	@Description	Updates the specified run with a new client tag. Useful for performing a status reset on client side.
 //	@Tags			metadata
 //	@Accept			json
-//	@Produce		json
 //	@Produce		plain
 //	@Produce		html
-//	@Param			algorithmName	path		string	true	"Algorithm name"
-//	@Param			requestId		path		string	true	"Request identifier"
-//	@Param			newTag			body		string	true	"New client tag to assign"
-//	@Success		200	{array}     string
+//	@Param			algorithmName	path		string					true	"Algorithm name"
+//	@Param			requestId		path		string					true	"Request identifier"
+//	@Param			newTag			body		models.TagUpdateRequest	true	"New client tag to assign"
+//	@Success		200	{string}    string
 //	@Failure		400	{string}	string
 //	@Failure		401	{string}	string
 //	@Router			/algorithm/v1/metadata/tags/{algorithmName}/requests/{requestId} [post]
@@ -57,6 +56,6 @@ func UpdateRunTag(buffer request.Buffer, logger klog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, gin.H{})
+		ctx.String(http.StatusOK, "")
 	}
 }

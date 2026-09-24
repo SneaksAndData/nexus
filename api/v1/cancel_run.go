@@ -16,12 +16,11 @@ import (
 //	@Description	Interrupts the provided run id and cancels the execution tree if it exists
 //	@Tags			cancellation
 //	@Accept			json
-//	@Produce		json
 //	@Produce		plain
 //	@Produce		html
-//	@Param			algorithmName	path		string	true	"Algorithm name"
-//	@Param			requestId	path		string	true	"Request identifier"
-//	@Param			payload	body		schedulermodels.CancellationRequest	true	"Cancellation configuration"
+//	@Param			algorithmName		path		string								true	"Algorithm name"
+//	@Param			requestId			path		string								true	"Request identifier"
+//	@Param			payload				body		schedulermodels.CancellationRequest	true	"Cancellation configuration"
 //	@Success		200	{string}	string
 //	@Failure		400	{string}	string
 //	@Failure		500	{string}	string

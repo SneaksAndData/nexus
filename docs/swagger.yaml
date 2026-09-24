@@ -84,6 +84,11 @@ definitions:
       status:
         type: string
     type: object
+  models.TagUpdateRequest:
+    properties:
+      newTag:
+        type: string
+    type: object
   models.TaggedRequestResult:
     properties:
       algorithmName:
@@ -654,7 +659,6 @@ paths:
         schema:
           $ref: '#/definitions/models.CancellationRequest'
       produces:
-      - application/json
       - text/plain
       - text/html
       responses:
@@ -741,18 +745,15 @@ paths:
         name: newTag
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.TagUpdateRequest'
       produces:
-      - application/json
       - text/plain
       - text/html
       responses:
         "200":
           description: OK
           schema:
-            items:
-              type: string
-            type: array
+            type: string
         "400":
           description: Bad Request
           schema:
