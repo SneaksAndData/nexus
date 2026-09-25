@@ -23,7 +23,7 @@ NEXUS_CLUSTER_NAME := "nexus-controller-0"
 fresh: stop up
 
 # Start CI environment
-up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind minio-kind crd apply-manifests build-image load-image dbschema deploy-chart
+up: start-kind-cluster install-ingress-controller create-namespace create-ingress scylla-kind s2 crd apply-manifests build-image load-image dbschema deploy-chart
 
 start-kind-cluster:
     kind create cluster --config=test-resources/kind.yaml --name {{NEXUS_CLUSTER_NAME}}
@@ -136,8 +136,8 @@ scylla-kind:
     kubectl apply -f {{MANIFESTS}}/scylladb.yaml
     kubectl -n nexus rollout status deployment/scylla --timeout=180s
 
-minio-kind:
-    kubectl apply -f {{MANIFESTS}}/minio.yaml
+s2:
+    kubectl apply -f {{MANIFESTS}}/s2.yaml
     kubectl -n nexus rollout status deployment/minio --timeout=180s
 
 crd:
