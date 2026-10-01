@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   build:
-    name: Validate commit
+    name: Validate code
     runs-on: ubuntu-latest
     permissions:
       id-token: write      # required for dependabot PRs
