@@ -7,17 +7,23 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions: {}
 
 jobs:
   build:
     name: Validate code
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write      # required for dependabot PRs
+      pull-requests: write # required for dependabot PRs; coverage PR comment
+      contents: write      # coverage badge is pushed to the badges branch on main
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Setup Go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.26.*'
           
@@ -37,12 +43,12 @@ jobs:
         run: go build -v ./...
         
       - name: Lint
-        uses: golangci/golangci-lint-action@v9
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
           version: v2.12.2
 
       - name: Setup just
-        uses: extractions/setup-just@v3
+        uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b # v3.1.0
 
       - name: Setup integration tests
         run: just up
@@ -54,7 +60,7 @@ jobs:
 
       - name: Check Coverage
         id: coverage
-        uses: vladopajic/go-test-coverage@v2
+        uses: vladopajic/go-test-coverage@f94bcf0d6b9fa5fb8b783830b22648f6c17475e2 # v2.19.0
         continue-on-error: true # Should fail after coverage comment is posted
         with:
           config: ./.testcoverage.yml
@@ -65,7 +71,7 @@ jobs:
           git-branch: badges
 
       - name: Post coverage report
-        uses: thollander/actions-comment-pull-request@v3
+        uses: thollander/actions-comment-pull-request@65f9e5c9a1f2cd378bd74b2e057c9736982a8e74 # v3
         if: ${{ github.ref_name != 'main' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
