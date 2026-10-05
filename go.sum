@@ -13,6 +13,8 @@ github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbt
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/SneaksAndData/nexus-core v1.5.4 h1:5VX5+Oxz5kK8z+Jio25lI/4Hkxuzh8Oave5Q3l9kIs0=
 github.com/SneaksAndData/nexus-core v1.5.4/go.mod h1:oFDHU0I+m/OK19CGEs7Mh6kjUGokXUsZElg7QHQjXcI=
+github.com/SneaksAndData/nexus-core v1.5.5-0.20261005122528-af681dc35bda h1:hllpV0kJaU+i0AgIay6W4oNE9So3MxRLJ4wZf71E3+w=
+github.com/SneaksAndData/nexus-core v1.5.5-0.20261005122528-af681dc35bda/go.mod h1:oFDHU0I+m/OK19CGEs7Mh6kjUGokXUsZElg7QHQjXcI=
 github.com/aws/aws-sdk-go v1.49.12/go.mod h1:LF8svs817+Nz+DmiMQKTO3ubZ/6IaTpq3TjupRn3Eqk=
 github.com/aws/aws-sdk-go v1.55.8 h1:JRmEUbU52aJQZ2AjX4q4Wu7t4uZjOu71uyNmaWlUkJQ=
 github.com/aws/aws-sdk-go v1.55.8/go.mod h1:ZkViS9AqA6otK+JBBNH2++sx1sgxrPKcSzPPvQkUtXk=
