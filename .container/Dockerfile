@@ -10,7 +10,7 @@ WORKDIR /app
 COPY . ./
 
 # puts deps into a cached layer
-RUN go install github.com/DataDog/orchestrion@v1.11.0 \
+RUN go install github.com/DataDog/orchestrion@v1.13.0 \
     && orchestrion pin \
     && go mod tidy \
     && go mod verify \
