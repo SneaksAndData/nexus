@@ -41,11 +41,13 @@ type requestResultResponse struct {
 }
 
 type runMetadataResponse struct {
-	Id             string `json:"id"`
-	Algorithm      string `json:"algorithm"`
-	LifecycleStage string `json:"lifecycle_stage"`
-	Tag            string `json:"tag"`
-	PayloadUri     string `json:"payload_uri"`
+	Id                     string                 `json:"id"`
+	Algorithm              string                 `json:"algorithm"`
+	LifecycleStage         string                 `json:"lifecycle_stage"`
+	Tag                    string                 `json:"tag"`
+	PayloadUri             string                 `json:"payload_uri"`
+	AppliedConfiguration   map[string]interface{} `json:"applied_configuration"`
+	ConfigurationOverrides map[string]interface{} `json:"configuration_overrides"`
 }
 
 type taggedResultResponse struct {
@@ -455,5 +457,144 @@ func Test_Smoke_UpdateRunTag(t *testing.T) {
 
 	if taggedResults[0].AlgorithmName != algorithmName {
 		t.Fatalf("expected algorithmName %s, got %s", algorithmName, taggedResults[0].AlgorithmName)
+	}
+}
+
+func createTestRunWithCustomConfig(client *http.Client, tag string, customConfig map[string]interface{}) (string, error) {
+	postURL := fmt.Sprintf(createRunURLTemplate, baseURL, algorithmName)
+
+	payload := map[string]interface{}{
+		"algorithmParameters": map[string]interface{}{
+			"hello_text":   "hello world",
+			"hello_author": "unit-test",
+		},
+		"tag":                 tag,
+		"customConfiguration": customConfig,
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, postURL, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		return "", fmt.Errorf("failed to create HTTP request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute POST request to %s: %w", postURL, err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusAccepted {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("expected status %d (Accepted), got %d: %s", http.StatusAccepted, resp.StatusCode, string(body))
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var runResp createRunResponse
+	if err := json.Unmarshal(bodyBytes, &runResp); err != nil {
+		return "", fmt.Errorf("failed to unmarshal response JSON: %w, body: %s", err, string(bodyBytes))
+	}
+
+	return runResp.RequestId, nil
+}
+
+func Test_Smoke_CreateRun_WorkgroupOverride(t *testing.T) {
+	client := getHTTPClient()
+	tag := fmt.Sprintf("smoke-wg-override-%s", uuid.New().String()[:8])
+	targetWorkgroup := "test-workgroup"
+
+	customConfig := map[string]interface{}{
+		"workgroupRef": map[string]interface{}{
+			"name": targetWorkgroup,
+		},
+	}
+
+	requestId, err := createTestRunWithCustomConfig(client, tag, customConfig)
+	if err != nil {
+		t.Fatalf("failed to create run with workgroup override: %v", err)
+	}
+
+	if requestId == "" {
+		t.Fatal("expected non-empty requestId in response, got empty string")
+	}
+
+	getURL := fmt.Sprintf(getRunMetadataURLTemplate, baseURL, algorithmName, requestId)
+	var meta runMetadataResponse
+
+	err = waitFor20x(client, getURL, &meta, func() bool {
+		return meta.AppliedConfiguration != nil
+	}, defaultTimeout)
+	if err != nil {
+		t.Fatalf("timed out waiting for run metadata for %s: %v", requestId, err)
+	}
+
+	wgRef, ok := meta.AppliedConfiguration["workgroupRef"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected applied_configuration to contain workgroupRef object, got: %v", meta.AppliedConfiguration["workgroupRef"])
+	}
+
+	if wgRef["name"] != targetWorkgroup {
+		t.Fatalf("expected applied workgroupRef.name to be %s, got %s", targetWorkgroup, wgRef["name"])
+	}
+
+	overrideWgRef, ok := meta.ConfigurationOverrides["workgroupRef"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected configuration_overrides to contain workgroupRef object, got: %v", meta.ConfigurationOverrides["workgroupRef"])
+	}
+
+	if overrideWgRef["name"] != targetWorkgroup {
+		t.Fatalf("expected override workgroupRef.name to be %s, got %s", targetWorkgroup, overrideWgRef["name"])
+	}
+}
+
+func Test_Smoke_CreateRun_InvalidWorkgroupOverride(t *testing.T) {
+	client := getHTTPClient()
+	tag := fmt.Sprintf("smoke-wg-invalid-%s", uuid.New().String()[:8])
+
+	customConfig := map[string]interface{}{
+		"workgroupRef": map[string]interface{}{
+			"name": "non-existent-workgroup",
+		},
+	}
+
+	postURL := fmt.Sprintf(createRunURLTemplate, baseURL, algorithmName)
+	payload := map[string]interface{}{
+		"algorithmParameters": map[string]interface{}{
+			"hello_text":   "hello world",
+			"hello_author": "unit-test",
+		},
+		"tag":                 tag,
+		"customConfiguration": customConfig,
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatalf("failed to marshal payload: %v", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, postURL, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		t.Fatalf("failed to create HTTP request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("failed to execute POST request: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusBadRequest {
+		body, _ := io.ReadAll(resp.Body)
+		t.Fatalf("expected status %d (Bad Request) for non-existent workgroup override, got %d: %s", http.StatusBadRequest, resp.StatusCode, string(body))
 	}
 }
