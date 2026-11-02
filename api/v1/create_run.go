@@ -1,15 +1,17 @@
 package v1
 
 import (
+	"net/http"
+
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/models"
 	"github.com/SneaksAndData/nexus-core/pkg/checkpoint/request"
+	"github.com/SneaksAndData/nexus-core/pkg/util"
 	"github.com/SneaksAndData/nexus/services"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
-	"net/http"
 )
 
 // CreateRun godoc
@@ -56,7 +58,11 @@ func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, 
 			return
 		}
 
-		workgroup, err := configCache.GetWorkgroupConfiguration(config.Spec.WorkgroupRef.Name)
+		resolvedWorkgroupName := config.Spec.WorkgroupRef.Name
+		if payload.CustomConfiguration != nil && payload.CustomConfiguration.WorkgroupRef != nil {
+			resolvedWorkgroupName = util.CoalesceString(payload.CustomConfiguration.WorkgroupRef.Name, config.Spec.WorkgroupRef.Name)
+		}
+		workgroup, err := configCache.GetWorkgroupConfiguration(resolvedWorkgroupName)
 
 		if err != nil {
 			ctx.String(http.StatusInternalServerError, `Internal error occurred when processing your request.`, algorithmName)
