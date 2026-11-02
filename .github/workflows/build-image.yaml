@@ -22,14 +22,14 @@ jobs:
           persist-credentials: false
 
       - name: Log in to the Container registry
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get project version
-        uses: SneaksAndData/github-actions/generate_version@e3f4ea513c548adf4e774364872966d0d4a3d2fe # v0.1.12
+        uses: SneaksAndData/github-actions/generate_version@42d1e71a9297cc52e824d9405604073a1da7a5cf # v0.1.13
         id: version
 
       - name: Get build number
@@ -81,7 +81,7 @@ jobs:
           platforms: linux/arm64,linux/amd64
 
       - name: Build and Push Chart
-        uses: SneaksAndData/github-actions/build_helm_chart@e3f4ea513c548adf4e774364872966d0d4a3d2fe # v0.1.12
+        uses: SneaksAndData/github-actions/build_helm_chart@42d1e71a9297cc52e824d9405604073a1da7a5cf # v0.1.13
         with:
           application: nexus
           app_version: ${{ steps.meta.outputs.version }}
