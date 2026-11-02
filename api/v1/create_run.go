@@ -71,7 +71,7 @@ func CreateRun(buffer request.Buffer, configCache *services.NexusResourceCache, 
 		}
 
 		if workgroup == nil {
-			ctx.String(http.StatusBadRequest, `Cannot assign requested workgroup %s to the algorithm %s. Please check the deployed configuration.`, workgroup, algorithmName)
+			ctx.String(http.StatusBadRequest, `Cannot assign requested workgroup %s to the algorithm %s. Please check the deployed configuration and the provided override.`, workgroup, algorithmName)
 			return
 		}
 
