@@ -146,6 +146,7 @@ crd:
 apply-manifests:
     kubectl apply -n nexus -f {{MANIFESTS}}/nexus-algorithm-sa.yaml
     kubectl apply -n nexus -f {{MANIFESTS}}/hello-world-workgroup.yaml
+    kubectl apply -n nexus -f {{MANIFESTS}}/test-workgroup.yaml
     kubectl apply -n nexus -f {{MANIFESTS}}/hello-world-algorithm.yaml
 
 dbschema:

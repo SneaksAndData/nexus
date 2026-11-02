@@ -1,0 +1,10 @@
+apiVersion: science.sneaksanddata.com/v1
+kind: NexusAlgorithmWorkgroup
+metadata:
+  name: test-workgroup
+  namespace: nexus
+spec:
+  affinity: {}
+  cluster: standalone
+  description: Test workgroup for overrides
+  tolerations: []
